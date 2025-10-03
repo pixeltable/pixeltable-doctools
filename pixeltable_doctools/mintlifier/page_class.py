@@ -262,8 +262,8 @@ icon: "square-c"
             else:
                 label = "attribute"
 
-            # Format: `attr_name` <sub>type</sub> for consistency with UDFs
-            content += f"### `{attr_name}` <sub>{label}</sub>\n\n"
+            # Format: `attr_name` with pill-style badge for consistency with UDFs
+            content += f'### `{attr_name}` <span style="background: #f3f4f6; padding: 2px 6px; border-radius: 3px; font-size: 0.75em; color: #6b7280; font-weight: normal;">{label}</span>\n\n'
 
             # Add documentation or warning
             if doc:
