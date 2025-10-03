@@ -4,7 +4,7 @@ import inspect
 import importlib
 from pathlib import Path
 from typing import Optional, List
-from page_base import PageBase
+from .page_base import PageBase
 from docstring_parser import parse as parse_docstring
 
 

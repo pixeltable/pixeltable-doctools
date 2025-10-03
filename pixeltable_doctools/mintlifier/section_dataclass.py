@@ -2,7 +2,7 @@
 
 import dataclasses
 from typing import Any
-from section_base import SectionBase
+from .section_base import SectionBase
 
 
 class DataclassSection(SectionBase):

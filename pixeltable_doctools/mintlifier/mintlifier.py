@@ -10,11 +10,11 @@ import sys
 from pathlib import Path
 from typing import Dict
 
-from opml_reader import OPMLReader
-from page_module import ModulePageGenerator
-from page_class import ClassPageGenerator
-from page_type import TypePageGenerator
-from docsjson_updater import DocsJsonUpdater
+from .opml_reader import OPMLReader
+from .page_module import ModulePageGenerator
+from .page_class import ClassPageGenerator
+from .page_type import TypePageGenerator
+from .docsjson_updater import DocsJsonUpdater
 
 
 class Mintlifier:

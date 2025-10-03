@@ -10,8 +10,8 @@ Creates 3 files in llm_output/:
 
 from pathlib import Path
 from datetime import datetime
-from llm_dev_pattern_gen import NotebookPatternExtractor
-from llm_api_map_gen import LLMApiMapGenerator
+from .llm_dev_pattern_gen import NotebookPatternExtractor
+from .llm_api_map_gen import LLMApiMapGenerator
 
 
 def generate_quick_reference(output_dir: Path):

@@ -1,7 +1,7 @@
 """TypedDict field documentation section generator."""
 
 from typing import Any
-from section_base import SectionBase
+from .section_base import SectionBase
 
 
 class TypedDictSection(SectionBase):

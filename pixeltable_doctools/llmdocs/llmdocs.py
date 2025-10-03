@@ -14,11 +14,11 @@ Usage:
 import sys
 from pathlib import Path
 
-from config import config
-from llm_api_map_gen import LLMApiMapGenerator
-from llm_dev_pattern_gen import NotebookPatternExtractor
-from llm_quick_ref_gen import generate_quick_reference
-from opml_reader import OPMLReader
+from .config import config
+from .llm_api_map_gen import LLMApiMapGenerator
+from .llm_dev_pattern_gen import NotebookPatternExtractor
+from .llm_quick_ref_gen import generate_quick_reference
+from .opml_reader import OPMLReader
 
 
 def get_project_root():

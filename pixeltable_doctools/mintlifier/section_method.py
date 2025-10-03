@@ -3,7 +3,7 @@
 import inspect
 from typing import Any, List, Optional
 from docstring_parser import parse as parse_docstring
-from page_base import PageBase
+from .page_base import PageBase
 
 
 class MethodSectionGenerator(PageBase):

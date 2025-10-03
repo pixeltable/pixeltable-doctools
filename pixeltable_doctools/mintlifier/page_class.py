@@ -3,13 +3,13 @@
 import inspect
 from pathlib import Path
 from typing import Optional, List, Any
-from page_base import PageBase
+from .page_base import PageBase
 from docstring_parser import parse as parse_docstring
-from section_method import MethodSectionGenerator
-from section_typeddict import TypedDictSection
-from section_dataclass import DataclassSection
-from section_namedtuple import NamedTupleSection
-from section_attributes import AttributesSection
+from .section_method import MethodSectionGenerator
+from .section_typeddict import TypedDictSection
+from .section_dataclass import DataclassSection
+from .section_namedtuple import NamedTupleSection
+from .section_attributes import AttributesSection
 
 
 class ClassPageGenerator(PageBase):

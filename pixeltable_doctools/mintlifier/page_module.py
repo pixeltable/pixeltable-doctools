@@ -4,10 +4,10 @@ import inspect
 import importlib
 from pathlib import Path
 from typing import Optional, List, Any
-from page_base import PageBase
+from .page_base import PageBase
 from docstring_parser import parse as parse_docstring
-from section_function import FunctionSectionGenerator
-from page_class import ClassPageGenerator
+from .section_function import FunctionSectionGenerator
+from .page_class import ClassPageGenerator
 
 
 class ModulePageGenerator(PageBase):

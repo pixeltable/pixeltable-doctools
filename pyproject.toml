@@ -1,0 +1,33 @@
+[project]
+name = "pixeltable-doctools"
+version = "0.1.0"
+description = "Documentation generation tools for Pixeltable SDK and LLM-optimized docs"
+authors = [{ name = "Pixeltable, Inc.", email = "contact@pixeltable.com" }]
+requires-python = ">=3.10"
+readme = "README.md"
+license = "Apache-2.0"
+dependencies = [
+    "docstring-parser>=0.11",
+    "pypandoc>=1.15",
+    "nbformat>=5.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "ruff>=0.9.3",
+]
+
+[project.scripts]
+mintlifier = "pixeltable_doctools.mintlifier.mintlifier:main"
+llmdocs = "pixeltable_doctools.llmdocs.llmdocs:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.ruff]
+line-length = 120
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "B", "C", "SIM"]
+ignore = ["E501"]  # Line length handled by formatter

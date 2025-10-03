@@ -1,0 +1,1 @@
+"""Mintlify SDK documentation generator."""

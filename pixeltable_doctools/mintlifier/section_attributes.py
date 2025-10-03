@@ -2,7 +2,7 @@
 
 import inspect
 from typing import Any
-from section_base import SectionBase
+from .section_base import SectionBase
 
 
 class AttributesSection(SectionBase):

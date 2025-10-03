@@ -1,0 +1,1 @@
+"""LLM-optimized documentation generator."""
