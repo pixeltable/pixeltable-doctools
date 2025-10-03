@@ -33,13 +33,13 @@ class Mintlifier:
         # self.llm_map_gen = None  # LLM map generation decoupled
 
     def _find_project_root(self) -> Path:
-        """Find the project root by looking for .git directory."""
-        current = Path(__file__).parent
+        """Find the project root by looking for .git directory from current working directory."""
+        current = Path.cwd()
         while current != current.parent:
             if (current / ".git").exists():
                 return current
             current = current.parent
-        raise RuntimeError("Could not find project root (.git directory)")
+        raise RuntimeError("Could not find project root (.git directory). Run this command from within the pixeltable repository.")
 
     def _resolve_path(self, path_str: str) -> Path:
         """Resolve a project-relative path to an absolute path."""
