@@ -480,8 +480,10 @@ Documentation for `{name}` is not available.
         for line in lines:
             # Check if this is an indented code block line (starts with 4+ spaces)
             if line.startswith('    ') and not in_code_block:
-                # This is indented code - preserve angle brackets as-is
-                result_lines.append(line)
+                # This is indented code - need to escape angle brackets for MDX
+                # MDX doesn't handle indented code blocks well with XML/JSX-like content
+                escaped_line = line.replace('<', '\\<').replace('>', '\\>')
+                result_lines.append(escaped_line)
                 continue
 
             # Process line character by character for fence code blocks and inline code
