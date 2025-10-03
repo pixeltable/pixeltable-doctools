@@ -179,7 +179,7 @@ class ModulePageGenerator(PageBase):
 
         # Document functions inline
         if functions_to_generate:
-            content += '## Functions\n\n'
+            content += '## UDFs\n\n'
 
             for name, obj in sorted(functions_to_generate):
                 func_section = self.function_gen.generate_section(obj, name, module_path)
@@ -241,7 +241,7 @@ class ModulePageGenerator(PageBase):
 
         # Document functions inline (no separate pages)
         if functions_to_generate:
-            content += '## Functions\n\n'
+            content += '## UDFs\n\n'
 
             for name, obj in sorted(functions_to_generate):
                 # Generate inline documentation
@@ -343,7 +343,7 @@ class ModulePageGenerator(PageBase):
 
         # Document functions inline (no separate pages)
         if functions:
-            content += '## Functions\n\n'
+            content += '## UDFs\n\n'
 
             for name, obj in sorted(functions):
                 # Generate inline documentation
