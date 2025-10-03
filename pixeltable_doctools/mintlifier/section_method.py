@@ -53,7 +53,7 @@ class MethodSectionGenerator(PageBase):
         if doc:
             parsed = parse_docstring(doc)
             if parsed and parsed.returns:
-                content += self._document_returns(parsed)
+                content += self._document_returns(parsed, method)
 
         # Add examples using docstring_parser meta
         if doc:

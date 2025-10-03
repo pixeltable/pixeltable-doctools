@@ -46,6 +46,70 @@ class PageBase:
         # Now manually format with line breaks after commas
         return self._format_signature_manual(sig_str)
 
+    def _format_nested_description(self, desc: str) -> str:
+        """Format a description that may contain nested bullet points.
+
+        When a description contains bullet points, they need to be indented
+        to nest properly under the parent bullet in Markdown.
+
+        Args:
+            desc: The description text, possibly with bullet points
+
+        Returns:
+            Formatted description with proper indentation for nested lists
+        """
+        if not desc:
+            return desc
+
+        # Escape MDX first
+        desc = self._escape_mdx(desc)
+
+        lines = desc.split('\n')
+        if len(lines) == 1:
+            # Single line, no special formatting needed
+            return desc
+
+        # Multi-line description - format with proper indentation
+        formatted_lines = []
+        for i, line in enumerate(lines):
+            stripped = line.strip()
+            if i == 0:
+                # First line goes on same line as parameter name
+                formatted_lines.append(stripped)
+            elif stripped.startswith(('-', '*', '+')):
+                # Bullet point - indent with 2 spaces to nest under parent bullet
+                formatted_lines.append(f'  {stripped}')
+            elif stripped:
+                # Regular continuation line - indent to align with description
+                formatted_lines.append(f'  {stripped}')
+            # Skip empty lines
+
+        return '\n'.join(formatted_lines)
+
+    def _find_matching_paren(self, s: str, open_pos: int) -> int:
+        """Find the position of the closing paren that matches the opening paren at open_pos.
+
+        Args:
+            s: The string to search
+            open_pos: Position of the opening paren
+
+        Returns:
+            Position of matching closing paren, or -1 if not found
+        """
+        if open_pos >= len(s) or s[open_pos] != '(':
+            return -1
+
+        depth = 0
+        for i in range(open_pos, len(s)):
+            if s[i] == '(':
+                depth += 1
+            elif s[i] == ')':
+                depth -= 1
+                if depth == 0:
+                    return i
+
+        return -1
+
     def _format_signature_manual(self, sig_str: str) -> str:
         """Format signature with line breaks after commas at the top level."""
         if '(' not in sig_str:
@@ -53,7 +117,13 @@ class PageBase:
 
         # Split into parts: before params, params, return type
         open_paren = sig_str.index('(')
-        close_paren = sig_str.rindex(')')
+
+        # Find the MATCHING closing paren, not just the last one
+        # (to handle return types with parens like Array[(None,), Float])
+        close_paren = self._find_matching_paren(sig_str, open_paren)
+        if close_paren == -1:
+            # Fallback to old behavior if we can't find a match
+            close_paren = sig_str.rindex(')')
 
         params_str = sig_str[open_paren + 1 : close_paren].strip()
         after_close = sig_str[close_paren + 1 :].strip()
@@ -336,6 +406,54 @@ Documentation for `{name}` is not available.
 
         return params
 
+    def _escape_braces_outside_code(self, text: str) -> str:
+        """Escape curly braces in text, but preserve them inside code blocks and inline code.
+
+        Args:
+            text: Markdown text that may contain code blocks
+
+        Returns:
+            Text with braces escaped except inside code
+        """
+        if not text:
+            return text
+
+        # Split by code blocks (```...```) and inline code (`...`)
+        # We'll process text outside these blocks
+        parts = []
+        in_code_block = False
+        in_inline_code = False
+        i = 0
+
+        while i < len(text):
+            # Check for code block delimiter
+            if i + 2 < len(text) and text[i:i+3] == '```':
+                in_code_block = not in_code_block
+                parts.append(text[i:i+3])
+                i += 3
+            # Check for inline code delimiter (but not if we're in a code block)
+            elif not in_code_block and text[i] == '`':
+                in_inline_code = not in_inline_code
+                parts.append(text[i])
+                i += 1
+            # Regular character - escape braces if not in code
+            else:
+                if not in_code_block and not in_inline_code:
+                    if text[i] == '{':
+                        parts.append('\\{')
+                        i += 1
+                    elif text[i] == '}':
+                        parts.append('\\}')
+                        i += 1
+                    else:
+                        parts.append(text[i])
+                        i += 1
+                else:
+                    parts.append(text[i])
+                    i += 1
+
+        return ''.join(parts)
+
     def _escape_mdx(self, text: str) -> str:
         """Escape text for MDX format."""
         if not text:
@@ -346,8 +464,8 @@ Documentation for `{name}` is not available.
                 # Use pypandoc for conversion
                 escaped = pypandoc.convert_text(text, 'gfm', format='commonmark', extra_args=['--wrap=none'])
 
-                # MDX-specific escaping
-                escaped = escaped.replace('{', '\\{').replace('}', '\\}')
+                # MDX-specific escaping - but NOT inside code blocks
+                escaped = self._escape_braces_outside_code(escaped)
 
                 # Convert URLs in angle brackets to markdown links
                 escaped = re.sub(r'<(https?://[^>]+)>', r'[\1](\1)', escaped)
@@ -425,15 +543,60 @@ Documentation for `{name}` is not available.
         # No function name, just format the signature
         return self._format_signature_with_ruff(sig_str, default_name)
 
-    def _document_returns(self, parsed) -> str:
-        """Document return value - common to both methods and functions."""
+    def _document_returns(self, parsed, func=None) -> str:
+        """Document return value - common to both methods and functions.
+
+        Args:
+            parsed: Parsed docstring
+            func: Optional function object to extract return type from signature
+        """
         if not parsed.returns:
             return ''
 
         content = '**Returns:**\n\n'
 
-        return_type = parsed.returns.type_name or 'Any'
+        # Try to extract return type from function signature first
+        return_type = None
+        if func:
+            return_type = self._extract_return_type_from_signature(func)
+
+        # Fall back to docstring type, then 'Any'
+        if not return_type:
+            return_type = parsed.returns.type_name or 'Any'
+
         return_desc = parsed.returns.description or 'Return value'
 
         content += f'- *{return_type}*: {self._escape_mdx(return_desc)}\n\n'
         return content
+
+    def _extract_return_type_from_signature(self, func) -> Optional[str]:
+        """Extract return type from function signature.
+
+        Args:
+            func: Function object (either Pixeltable UDF or standard function)
+
+        Returns:
+            Return type string, or None if not found
+        """
+        try:
+            # For polymorphic functions, extract from first signature
+            if hasattr(func, 'is_polymorphic') and func.is_polymorphic:
+                if hasattr(func, 'signatures') and func.signatures:
+                    sig = func.signatures[0]
+                    sig_str = str(sig)
+                    if '->' in sig_str:
+                        return sig_str.split('->')[-1].strip()
+            # For Pixeltable CallableFunction with signature string
+            elif hasattr(func, 'signature') and func.signature:
+                sig_str = str(func.signature)
+                if '->' in sig_str:
+                    return sig_str.split('->')[-1].strip()
+            # For standard Python functions
+            else:
+                sig = inspect.signature(func)
+                if sig.return_annotation != inspect.Signature.empty:
+                    return str(sig.return_annotation)
+        except (ValueError, TypeError, AttributeError):
+            pass
+
+        return None

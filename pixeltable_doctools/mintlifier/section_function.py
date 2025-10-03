@@ -30,7 +30,12 @@ class FunctionSectionGenerator(PageBase):
 
         # Build section content with elegant visual separation
         content = '\n---\n\n'  # Beautiful horizontal divider
-        content += f'### `{func_name}()`\n\n'
+
+        # Check if this is a UDF (Pixeltable user-defined function)
+        is_udf = hasattr(func, 'signature') or (hasattr(func, 'is_polymorphic') and func.is_polymorphic)
+        func_display_name = f'udf {func_name}()' if is_udf else f'{func_name}()'
+
+        content += f'### `{func_display_name}`\n\n'
 
         # Add description
         doc = inspect.getdoc(func) or ''
@@ -52,7 +57,7 @@ class FunctionSectionGenerator(PageBase):
         if doc:
             parsed = parse_docstring(doc)
             if parsed and parsed.returns:
-                content += self._document_returns(parsed)
+                content += self._document_returns(parsed, func)
 
         # Add examples using docstring_parser
         if doc:
@@ -79,6 +84,7 @@ class FunctionSectionGenerator(PageBase):
                         sig_str = str(sig) if sig else '(...)'
                         formatted_sig = self._format_signature(sig_str)
                         content += f'{func_name}{formatted_sig}\n'
+                        # Add blank line between signatures for better readability
                         if i < len(func.signatures):
                             content += '\n'
                 else:
@@ -169,7 +175,11 @@ class FunctionSectionGenerator(PageBase):
                 content += f'(*{type_str}*)'
             if default is not None:
                 content += f' = `{default}`'
-            content += f': {self._escape_mdx(param.description) if param.description else "No description"}\n'
+
+            # Format description with proper nesting for bullet points
+            desc = param.description if param.description else "No description"
+            formatted_desc = self._format_nested_description(desc)
+            content += f': {formatted_desc}\n'
 
         content += '\n'
         return content
