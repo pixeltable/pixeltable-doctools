@@ -46,8 +46,7 @@ class DataclassSection(SectionBase):
                 content += f"**Metadata:** {field.metadata}\n\n"
 
             # Check if field is required (no default)
-            is_required = (field.default is dataclasses.MISSING and
-                          field.default_factory is dataclasses.MISSING)
+            is_required = field.default is dataclasses.MISSING and field.default_factory is dataclasses.MISSING
             if is_required:
                 content += "**Required:** This field must be provided at initialization\n\n"
 
@@ -76,14 +75,15 @@ class DataclassSection(SectionBase):
 
         # Look for field documentation in various formats
         import re
+
         # Try "Attributes:" section format
-        pattern = rf'^\s*{re.escape(field_name)}\s*:\s*(.+?)(?=^\s*\w+\s*:|^\s*$)'
+        pattern = rf"^\s*{re.escape(field_name)}\s*:\s*(.+?)(?=^\s*\w+\s*:|^\s*$)"
         match = re.search(pattern, doc, re.MULTILINE | re.DOTALL)
 
         if match:
             field_doc = match.group(1).strip()
             # Clean up multiple spaces and newlines
-            field_doc = ' '.join(field_doc.split())
+            field_doc = " ".join(field_doc.split())
             return field_doc
 
         return None

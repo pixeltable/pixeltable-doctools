@@ -18,13 +18,13 @@ class PageItem:
 
     module_path: str  # e.g., "pixeltable.create_table"
     parent_groups: List[str]  # Hierarchy of parent groups
-    item_type: str = 'page'  # "page" or "module"
+    item_type: str = "page"  # "page" or "module"
     children: Optional[List[str]] = None  # For modules/classes, list of specific children to document
 
     @property
     def name(self) -> str:
         """Get the last part of the module path."""
-        return self.module_path.split('.')[-1]
+        return self.module_path.split(".")[-1]
 
 
 @dataclass
@@ -33,7 +33,7 @@ class GroupItem:
 
     name: str
     pages: List[PageItem]
-    subgroups: List['GroupItem']
+    subgroups: List["GroupItem"]
 
 
 @dataclass
@@ -50,7 +50,7 @@ class OPMLReader:
     def __init__(self, opml_path: Path, backup_dir: Path = None):
         """Initialize with path to OPML file."""
         self.opml_path = opml_path
-        self.backup_dir = backup_dir or (Path(__file__).parent / 'opml_bak')
+        self.backup_dir = backup_dir or (Path(__file__).parent / "opml_bak")
         self.tree = None
         self.root = None
         self.structure = None
@@ -72,19 +72,19 @@ class OPMLReader:
         """Create timestamped backup of OPML file."""
         self.backup_dir.mkdir(exist_ok=True, parents=True)
 
-        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-        backup_name = f'public_api_{timestamp}.opml'
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        backup_name = f"public_api_{timestamp}.opml"
         backup_path = self.backup_dir / backup_name
 
         shutil.copy2(self.opml_path, backup_path)
-        print(f'📋 Created OPML backup: {backup_path}')
+        print(f"📋 Created OPML backup: {backup_path}")
 
     def _process_root(self) -> Optional[TabItem]:
         """Process the root OPML structure to find SDK tab."""
-        for outline in self.root.iter('outline'):
-            text = outline.get('text', '')
-            if text.startswith('tab|'):
-                _, tab_name = text.split('|', 1)
+        for outline in self.root.iter("outline"):
+            text = outline.get("text", "")
+            if text.startswith("tab|"):
+                _, tab_name = text.split("|", 1)
                 groups = self._process_groups(outline, [])
                 return TabItem(name=tab_name, groups=groups)
         return None
@@ -94,10 +94,10 @@ class OPMLReader:
         groups = []
 
         for child in parent_element:
-            text = child.get('text', '')
+            text = child.get("text", "")
 
-            if text.startswith('group|'):
-                _, group_name = text.split('|', 1)
+            if text.startswith("group|"):
+                _, group_name = text.split("|", 1)
                 new_hierarchy = parent_hierarchy + [group_name]
 
                 # Process pages and subgroups
@@ -105,35 +105,35 @@ class OPMLReader:
                 subgroups = []
 
                 for subchild in child:
-                    subtext = subchild.get('text', '')
+                    subtext = subchild.get("text", "")
 
                     # Check for any item type (page, module, func, class, method)
-                    if '|' in subtext and not subtext.startswith('group|'):
-                        item_type, module_path = subtext.split('|', 1)
+                    if "|" in subtext and not subtext.startswith("group|"):
+                        item_type, module_path = subtext.split("|", 1)
 
                         # Map old 'page' to the actual type if needed
-                        if item_type == 'page':
+                        if item_type == "page":
                             # Default to 'func' for backwards compatibility
-                            item_type = 'func'
+                            item_type = "func"
 
                         # For modules, collect direct function children and process class children separately
                         children = None
                         class_pages = []  # Store class pages to add after module
-                        if item_type == 'module':
+                        if item_type == "module":
                             children = []
                             for grandchild in subchild:
-                                grandtext = grandchild.get('text', '')
-                                if '|' in grandtext:
-                                    child_type, child_path = grandtext.split('|', 1)
+                                grandtext = grandchild.get("text", "")
+                                if "|" in grandtext:
+                                    child_type, child_path = grandtext.split("|", 1)
 
-                                    if child_type == 'class':
+                                    if child_type == "class":
                                         # Process class as a separate page with its methods
                                         class_children = []
                                         for class_child in grandchild:
-                                            class_child_text = class_child.get('text', '')
-                                            if '|' in class_child_text:
-                                                _, method_path = class_child_text.split('|', 1)
-                                                method_name = method_path.split('.')[-1]
+                                            class_child_text = class_child.get("text", "")
+                                            if "|" in class_child_text:
+                                                _, method_path = class_child_text.split("|", 1)
+                                                method_name = method_path.split(".")[-1]
                                                 class_children.append(method_name)
 
                                         # Store class pages to add after module
@@ -141,23 +141,23 @@ class OPMLReader:
                                             PageItem(
                                                 module_path=child_path,
                                                 parent_groups=new_hierarchy,
-                                                item_type='class',
+                                                item_type="class",
                                                 children=class_children,
                                             )
                                         )
-                                    elif child_type == 'func':
+                                    elif child_type == "func":
                                         # Add function name to module's children list
-                                        child_name = child_path.split('.')[-1]
+                                        child_name = child_path.split(".")[-1]
                                         children.append(child_name)
-                        elif item_type == 'class':
+                        elif item_type == "class":
                             # For standalone classes, collect their method children
                             children = []
                             for grandchild in subchild:
-                                grandtext = grandchild.get('text', '')
-                                if '|' in grandtext:
-                                    _, child_path = grandtext.split('|', 1)
+                                grandtext = grandchild.get("text", "")
+                                if "|" in grandtext:
+                                    _, child_path = grandtext.split("|", 1)
                                     # Extract just the method name, not the full path
-                                    child_name = child_path.split('.')[-1]
+                                    child_name = child_path.split(".")[-1]
                                     children.append(child_name)
 
                         # Add module page first
@@ -171,13 +171,13 @@ class OPMLReader:
                         )
 
                         # Then add any class pages that were found
-                        if item_type == 'module' and class_pages:
+                        if item_type == "module" and class_pages:
                             pages.extend(class_pages)
-                    elif subtext.startswith('group|'):
+                    elif subtext.startswith("group|"):
                         # Process nested group directly
                         # We need to process this single group element, not pass it to _process_groups
                         # which expects to iterate over multiple elements
-                        _, subgroup_name = subtext.split('|', 1)
+                        _, subgroup_name = subtext.split("|", 1)
                         subgroup_hierarchy = new_hierarchy + [subgroup_name]
 
                         # Process the subgroup's children
@@ -185,26 +185,26 @@ class OPMLReader:
                         nested_subgroups = []
 
                         for nested_child in subchild:
-                            nested_text = nested_child.get('text', '')
+                            nested_text = nested_child.get("text", "")
 
                             # Check for any item type (page, module, func, class, method)
-                            if '|' in nested_text and not nested_text.startswith('group|'):
-                                item_type, module_path = nested_text.split('|', 1)
+                            if "|" in nested_text and not nested_text.startswith("group|"):
+                                item_type, module_path = nested_text.split("|", 1)
 
                                 # Map old 'page' to the actual type if needed
-                                if item_type == 'page':
-                                    item_type = 'func'
+                                if item_type == "page":
+                                    item_type = "func"
 
                                 # For modules and classes, collect their children
                                 children = None
-                                if item_type in ['module', 'class']:
+                                if item_type in ["module", "class"]:
                                     children = []
                                     for grandchild in nested_child:
-                                        grandtext = grandchild.get('text', '')
-                                        if '|' in grandtext:
-                                            _, child_path = grandtext.split('|', 1)
+                                        grandtext = grandchild.get("text", "")
+                                        if "|" in grandtext:
+                                            _, child_path = grandtext.split("|", 1)
                                             # Extract just the item name, not the full path
-                                            child_name = child_path.split('.')[-1]
+                                            child_name = child_path.split(".")[-1]
                                             children.append(child_name)
 
                                 subgroup_pages.append(
@@ -215,7 +215,7 @@ class OPMLReader:
                                         children=children,
                                     )
                                 )
-                            elif nested_text.startswith('group|'):
+                            elif nested_text.startswith("group|"):
                                 # For deeper nesting, we would need to recurse
                                 # For now, this handles 2 levels which is what we have
                                 pass
@@ -251,21 +251,21 @@ class OPMLReader:
 
         def process_group(group: GroupItem, base_path: str) -> Dict:
             group_path = self._sanitize_path(group.name)
-            full_path = f'{base_path}/{group_path}' if base_path else group_path
+            full_path = f"{base_path}/{group_path}" if base_path else group_path
 
             result = {
-                'group': group.name,
-                'pages': [f'docs/sdk/latest/{full_path}/{page.name}' for page in group.pages],
+                "group": group.name,
+                "pages": [f"docs/sdk/latest/{full_path}/{page.name}" for page in group.pages],
             }
 
             # Add subgroups if they exist
             if group.subgroups:
-                result['groups'] = [process_group(subgroup, full_path) for subgroup in group.subgroups]
+                result["groups"] = [process_group(subgroup, full_path) for subgroup in group.subgroups]
 
             return result
 
-        return {'tab': self.structure.name, 'groups': [process_group(group, '') for group in self.structure.groups]}
+        return {"tab": self.structure.name, "groups": [process_group(group, "") for group in self.structure.groups]}
 
     def _sanitize_path(self, text: str) -> str:
         """Convert text to valid file path."""
-        return text.lower().replace(' ', '-').replace('/', '-')
+        return text.lower().replace(" ", "-").replace("/", "-")

@@ -9,17 +9,13 @@ config = {
     "sdk_output_dir": "/docs/mintlify/docs/sdk/latest",
     "opml_backup_dir": "/docs/mintlify/backups_from_generation/opml",
     "docs_json_backup_dir": "/docs/mintlify/backups_from_generation/docsjson",
-
     # GitHub repository information for source links
     "github_repo": "pixeltable/pixeltable",
     "github_package_path": "pixeltable",
-
     # Mintlify SDK tab name
     "sdk_tab": "Pixeltable SDK",
-
     # Display errors in generated docs (can be overridden with --no-errors flag)
     "show_errors": True,
-
     # Internal/runtime classes injected into modules that should never be documented
     "internal_blacklist": [
         "Env",
@@ -41,6 +37,6 @@ config = {
         "Dir",
         "TableVersion",
         "ColumnVersion",
-        "FunctionVersion"
-    ]
+        "FunctionVersion",
+    ],
 }

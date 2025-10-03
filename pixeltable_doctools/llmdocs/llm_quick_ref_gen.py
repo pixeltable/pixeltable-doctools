@@ -194,67 +194,67 @@ Pixeltable includes integrations with:
 - Examples: See llm_dev_patterns.jsonld for 27 working notebooks
 """
 
-    output_path = output_dir / 'llm_quick_reference.md'
-    with open(output_path, 'w') as f:
+    output_path = output_dir / "llm_quick_reference.md"
+    with open(output_path, "w") as f:
         f.write(guide_content)
 
-    print(f'Generated LLM quick reference at {output_path}')
+    print(f"Generated LLM quick reference at {output_path}")
 
 
 def main():
     """Generate complete LLM documentation suite."""
 
-    print('=== Pixeltable LLM Documentation Generator ===\n')
+    print("=== Pixeltable LLM Documentation Generator ===\n")
 
     # Ensure output directory exists
-    output_dir = Path(__file__).parent / 'llm_output'
+    output_dir = Path(__file__).parent / "llm_output"
     output_dir.mkdir(exist_ok=True)
 
     # Step 1: Generate LLM map from OPML
-    print('1. Generating llm_map.jsonld from OPML...')
+    print("1. Generating llm_map.jsonld from OPML...")
     from opml_reader import OPMLReader
 
     mintlifier_dir = Path(__file__).parent
-    llm_map_gen = LLMApiMapGenerator(mintlifier_dir, version='main')
+    llm_map_gen = LLMApiMapGenerator(mintlifier_dir, version="main")
 
     # Load and process OPML to build the map
-    opml_path = mintlifier_dir.parent / 'public_api.opml'
+    opml_path = mintlifier_dir.parent / "public_api.opml"
     opml_reader = OPMLReader(opml_path)
     tab_structure = opml_reader.load()
     all_pages = opml_reader.get_all_pages()
 
     # Process each page through the LLM map generator
     for page in all_pages:
-        if page.item_type == 'module':
+        if page.item_type == "module":
             llm_map_gen.add_module(page.module_path, page.children)
-        elif page.item_type == 'class':
+        elif page.item_type == "class":
             llm_map_gen.add_class(page.module_path, page.children)
-        elif page.item_type == 'func':
+        elif page.item_type == "func":
             llm_map_gen.add_function(page.module_path)
-        elif page.item_type == 'type':
+        elif page.item_type == "type":
             llm_map_gen.add_type(page.module_path)
 
     # Save the map to llm_output with correct name
-    llm_map_gen.save(output_dir / 'llm_map.jsonld', flatten=False)
+    llm_map_gen.save(output_dir / "llm_map.jsonld", flatten=False)
 
     # Step 2: Extract patterns from notebooks
-    print('2. Generating llm_dev_patterns.jsonld from notebooks...')
+    print("2. Generating llm_dev_patterns.jsonld from notebooks...")
     extractor = NotebookPatternExtractor(
-        opml_path=str(opml_path), notebooks_dir=str(Path(__file__).parent.parent.parent / 'notebooks')
+        opml_path=str(opml_path), notebooks_dir=str(Path(__file__).parent.parent.parent / "notebooks")
     )
-    extractor.save_patterns(str(output_dir / 'llm_dev_patterns.jsonld'))
+    extractor.save_patterns(str(output_dir / "llm_dev_patterns.jsonld"))
 
     # Step 3: Generate quick reference
-    print('3. Generating llm_quick_reference.md...')
+    print("3. Generating llm_quick_reference.md...")
     generate_quick_reference(output_dir)
 
-    print(f'\n✅ Complete! LLM docs generated in {output_dir}')
-    print('\nFiles created:')
-    print('  - llm_map.jsonld          # Public API reference')
-    print('  - llm_dev_patterns.jsonld # Developer patterns from notebooks')
-    print('  - llm_quick_reference.md  # Guide to using the files')
-    print('\nLLMs can now use these files to understand Pixeltable completely.')
+    print(f"\n✅ Complete! LLM docs generated in {output_dir}")
+    print("\nFiles created:")
+    print("  - llm_map.jsonld          # Public API reference")
+    print("  - llm_dev_patterns.jsonld # Developer patterns from notebooks")
+    print("  - llm_quick_reference.md  # Guide to using the files")
+    print("\nLLMs can now use these files to understand Pixeltable completely.")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

@@ -10,7 +10,7 @@ class NamedTupleSection(SectionBase):
     def can_handle(self, obj: Any) -> bool:
         """Check if the object is a NamedTuple."""
         # NamedTuples have a _fields attribute
-        return hasattr(obj, '_fields') and hasattr(obj, '_field_defaults')
+        return hasattr(obj, "_fields") and hasattr(obj, "_field_defaults")
 
     def generate_section(self, obj: Any, name: str) -> str:
         """Generate NamedTuple fields documentation section.
@@ -22,15 +22,15 @@ class NamedTupleSection(SectionBase):
         Returns:
             Markdown string for the fields section
         """
-        if not hasattr(obj, '_fields'):
+        if not hasattr(obj, "_fields"):
             return ""
 
         content = "## Attributes\n\n"
 
         # Get field information
         fields = obj._fields
-        defaults = getattr(obj, '_field_defaults', {})
-        types = getattr(obj, '__annotations__', {})
+        defaults = getattr(obj, "_field_defaults", {})
+        types = getattr(obj, "__annotations__", {})
 
         # Document each field
         for field_name in fields:
@@ -81,13 +81,14 @@ class NamedTupleSection(SectionBase):
 
         # Look for field documentation
         import re
-        pattern = rf'^\s*{re.escape(field_name)}\s*:\s*(.+?)(?=^\s*\w+\s*:|^\s*$)'
+
+        pattern = rf"^\s*{re.escape(field_name)}\s*:\s*(.+?)(?=^\s*\w+\s*:|^\s*$)"
         match = re.search(pattern, doc, re.MULTILINE | re.DOTALL)
 
         if match:
             field_doc = match.group(1).strip()
             # Clean up multiple spaces and newlines
-            field_doc = ' '.join(field_doc.split())
+            field_doc = " ".join(field_doc.split())
             return field_doc
 
         return None

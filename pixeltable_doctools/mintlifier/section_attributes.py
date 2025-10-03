@@ -15,7 +15,7 @@ class AttributesSection(SectionBase):
         import dataclasses
 
         # Don't handle TypedDict
-        if hasattr(obj, '__annotations__') and type(obj).__name__ == '_TypedDictMeta':
+        if hasattr(obj, "__annotations__") and type(obj).__name__ == "_TypedDictMeta":
             return False
 
         # Don't handle dataclass
@@ -23,7 +23,7 @@ class AttributesSection(SectionBase):
             return False
 
         # Don't handle NamedTuple
-        return not (hasattr(obj, '_fields') and hasattr(obj, '_field_defaults'))
+        return not (hasattr(obj, "_fields") and hasattr(obj, "_field_defaults"))
 
     def generate_section(self, obj: Any, name: str) -> str:
         """Generate class attributes documentation section.
@@ -39,14 +39,18 @@ class AttributesSection(SectionBase):
         attributes = []
 
         for attr_name in dir(obj):
-            if attr_name.startswith('_'):
+            if attr_name.startswith("_"):
                 continue
 
             try:
                 attr_value = getattr(obj, attr_name)
                 # Check if it's a class attribute (not instance method or property)
-                if (not callable(attr_value) and not isinstance(attr_value, property) and
-                        hasattr(obj, attr_name) and not hasattr(obj.__init__, attr_name)):
+                if (
+                    not callable(attr_value)
+                    and not isinstance(attr_value, property)
+                    and hasattr(obj, attr_name)
+                    and not hasattr(obj.__init__, attr_name)
+                ):
                     attributes.append((attr_name, attr_value))
             except AttributeError:
                 continue
@@ -60,7 +64,7 @@ class AttributesSection(SectionBase):
             content += f"### `{attr_name}`\n\n"
 
             # Try to get type from annotations
-            if hasattr(obj, '__annotations__') and attr_name in obj.__annotations__:
+            if hasattr(obj, "__annotations__") and attr_name in obj.__annotations__:
                 type_str = self._format_type(obj.__annotations__[attr_name])
                 content += f"**Type:** `{type_str}`\n\n"
 
@@ -90,12 +94,13 @@ class AttributesSection(SectionBase):
 
         # Look for attribute documentation in docstring
         import re
+
         # Try various documentation patterns
         patterns = [
             # "Attributes:" section format
-            rf'Attributes:.*?^\s*{re.escape(attr_name)}\s*:\s*(.+?)(?=^\s*\w+\s*:|^\s*$)',
+            rf"Attributes:.*?^\s*{re.escape(attr_name)}\s*:\s*(.+?)(?=^\s*\w+\s*:|^\s*$)",
             # Direct "attr_name:" format
-            rf'^\s*{re.escape(attr_name)}\s*:\s*(.+?)(?=^\s*\w+\s*:|^\s*$)',
+            rf"^\s*{re.escape(attr_name)}\s*:\s*(.+?)(?=^\s*\w+\s*:|^\s*$)",
         ]
 
         for pattern in patterns:
@@ -103,7 +108,7 @@ class AttributesSection(SectionBase):
             if match:
                 attr_doc = match.group(1).strip()
                 # Clean up multiple spaces and newlines
-                attr_doc = ' '.join(attr_doc.split())
+                attr_doc = " ".join(attr_doc.split())
                 return attr_doc
 
         return None

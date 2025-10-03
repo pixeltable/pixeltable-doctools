@@ -44,16 +44,16 @@ class SectionBase(ABC):
     def _escape_mdx(self, text: str) -> str:
         """Escape text for MDX format."""
         if not text:
-            return ''
+            return ""
 
         # Escape braces for MDX
-        text = text.replace('{', '\\{').replace('}', '\\}')
+        text = text.replace("{", "\\{").replace("}", "\\}")
 
         # Convert URLs in angle brackets to markdown links
-        text = re.sub(r'<(https?://[^>]+)>', r'[\1](\1)', text)
+        text = re.sub(r"<(https?://[^>]+)>", r"[\1](\1)", text)
 
         # Handle other angle brackets
-        text = re.sub(r'<([^>]+)>', r'`\1`', text)
+        text = re.sub(r"<([^>]+)>", r"`\1`", text)
 
         return text
 
@@ -74,9 +74,9 @@ class SectionBase(ABC):
             return type_annotation
 
         # Handle class types (like <class 'str'>)
-        if hasattr(type_annotation, '__module__') and hasattr(type_annotation, '__name__'):
+        if hasattr(type_annotation, "__module__") and hasattr(type_annotation, "__name__"):
             # For built-in types, just use the name
-            if type_annotation.__module__ == 'builtins':
+            if type_annotation.__module__ == "builtins":
                 return type_annotation.__name__
             # For other types, include the module
             return f"{type_annotation.__module__}.{type_annotation.__name__}"
@@ -87,10 +87,11 @@ class SectionBase(ABC):
         # Clean up common patterns that break MDX
         # Remove <class '...'> format
         import re
+
         type_str = re.sub(r"<class '([^']+)'>", r"\1", type_str)
 
         # Clean up typing module references
-        type_str = type_str.replace('typing.', '')
-        type_str = type_str.replace('NoneType', 'None')
+        type_str = type_str.replace("typing.", "")
+        type_str = type_str.replace("NoneType", "None")
 
         return type_str

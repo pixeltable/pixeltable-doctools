@@ -10,8 +10,7 @@ class TypedDictSection(SectionBase):
     def can_handle(self, obj: Any) -> bool:
         """Check if the object is a TypedDict."""
         # TypedDicts have a special metaclass
-        return (hasattr(obj, '__annotations__') and
-                type(obj).__name__ == '_TypedDictMeta')
+        return hasattr(obj, "__annotations__") and type(obj).__name__ == "_TypedDictMeta"
 
     def generate_section(self, obj: Any, name: str) -> str:
         """Generate TypedDict fields documentation section.
@@ -23,7 +22,7 @@ class TypedDictSection(SectionBase):
         Returns:
             Markdown string for the fields section
         """
-        if not hasattr(obj, '__annotations__'):
+        if not hasattr(obj, "__annotations__"):
             return ""
 
         content = "## Attributes\n\n"
@@ -32,8 +31,8 @@ class TypedDictSection(SectionBase):
         annotations = obj.__annotations__
 
         # Get required and optional keys
-        required_keys = getattr(obj, '__required_keys__', set())
-        optional_keys = getattr(obj, '__optional_keys__', set())
+        required_keys = getattr(obj, "__required_keys__", set())
+        optional_keys = getattr(obj, "__optional_keys__", set())
 
         # If we don't have explicit required/optional, assume all are required
         if not required_keys and not optional_keys:
@@ -92,13 +91,14 @@ class TypedDictSection(SectionBase):
         # Simple pattern matching for field documentation
         # Look for "field_name:" or "field_name :" patterns
         import re
-        pattern = rf'^\s*{re.escape(field_name)}\s*:\s*(.+?)(?=^\s*\w+\s*:|$)'
+
+        pattern = rf"^\s*{re.escape(field_name)}\s*:\s*(.+?)(?=^\s*\w+\s*:|$)"
         match = re.search(pattern, doc, re.MULTILINE | re.DOTALL)
 
         if match:
             field_doc = match.group(1).strip()
             # Clean up multiple spaces and newlines
-            field_doc = ' '.join(field_doc.split())
+            field_doc = " ".join(field_doc.split())
             return field_doc
 
         return None
