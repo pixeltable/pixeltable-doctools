@@ -2,6 +2,7 @@
 
 ## Git Commits
 
+We love Claude!!! ... but:
 **Do NOT include Claude co-authoring credits in commit messages.**
 
 Standard commit format:
