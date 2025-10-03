@@ -453,6 +453,95 @@ Documentation for `{name}` is not available.
 
         return "".join(parts)
 
+    def _escape_angle_brackets_outside_code(self, text: str) -> str:
+        """Handle angle brackets in text, preserving them inside code blocks and indented code.
+
+        Converts URLs in angle brackets to markdown links, and wraps other angle brackets
+        in backticks (but only when outside code blocks).
+
+        Args:
+            text: Markdown text that may contain code blocks and indented code
+
+        Returns:
+            Text with angle brackets properly handled
+        """
+        if not text:
+            return text
+
+        parts = []
+        in_code_block = False
+        in_inline_code = False
+        in_indented_code = False
+        i = 0
+
+        lines = text.split('\n')
+        result_lines = []
+
+        for line in lines:
+            # Check if this is an indented code block line (starts with 4+ spaces)
+            if line.startswith('    ') and not in_code_block:
+                # This is indented code - preserve angle brackets as-is
+                result_lines.append(line)
+                continue
+
+            # Process line character by character for fence code blocks and inline code
+            parts = []
+            in_inline_code = False
+            i = 0
+
+            while i < len(line):
+                # Check for code block delimiter
+                if i + 2 < len(line) and line[i:i+3] == '```':
+                    in_code_block = not in_code_block
+                    parts.append(line[i:i+3])
+                    i += 3
+                # Check for inline code delimiter (but not if we're in a code block)
+                elif not in_code_block and line[i] == '`':
+                    in_inline_code = not in_inline_code
+                    parts.append(line[i])
+                    i += 1
+                # Check for angle brackets when NOT in code
+                elif not in_code_block and not in_inline_code and line[i] == '<':
+                    # Look ahead to see if this is a URL
+                    rest = line[i:]
+                    url_match = re.match(r'<(https?://[^>]+)>', rest)
+                    ftp_match = re.match(r'<(ftp://[^>]+)>', rest)
+                    mailto_match = re.match(r'<(mailto:[^>]+)>', rest)
+
+                    if url_match:
+                        # Convert URL to markdown link
+                        url = url_match.group(1)
+                        parts.append(f'[{url}]({url})')
+                        i += len(url_match.group(0))
+                    elif ftp_match:
+                        url = ftp_match.group(1)
+                        parts.append(f'[{url}]({url})')
+                        i += len(ftp_match.group(0))
+                    elif mailto_match:
+                        url = mailto_match.group(1)
+                        parts.append(f'[{url}]({url})')
+                        i += len(mailto_match.group(0))
+                    else:
+                        # Look for closing >
+                        close_pos = line.find('>', i)
+                        if close_pos != -1:
+                            # Wrap content in backticks
+                            content = line[i+1:close_pos]
+                            parts.append(f'`{content}`')
+                            i = close_pos + 1
+                        else:
+                            # No closing bracket, just keep the <
+                            parts.append(line[i])
+                            i += 1
+                else:
+                    # Regular character
+                    parts.append(line[i])
+                    i += 1
+
+            result_lines.append(''.join(parts))
+
+        return '\n'.join(result_lines)
+
     def _escape_mdx(self, text: str) -> str:
         """Escape text for MDX format."""
         if not text:
@@ -466,13 +555,8 @@ Documentation for `{name}` is not available.
                 # MDX-specific escaping - but NOT inside code blocks
                 escaped = self._escape_braces_outside_code(escaped)
 
-                # Convert URLs in angle brackets to markdown links
-                escaped = re.sub(r"<(https?://[^>]+)>", r"[\1](\1)", escaped)
-                escaped = re.sub(r"<(ftp://[^>]+)>", r"[\1](\1)", escaped)
-                escaped = re.sub(r"<(mailto:[^>]+)>", r"[\1](\1)", escaped)
-
-                # Handle non-URL angle brackets
-                escaped = re.sub(r"<(?!https?://|ftp://|mailto:)([^>]+)>", r"`\1`", escaped)
+                # Convert URLs in angle brackets to markdown links, but preserve angle brackets in code
+                escaped = self._escape_angle_brackets_outside_code(escaped)
 
                 # Handle Sphinx/RST directives like :data:`Quantize.MEDIANCUT`
                 escaped = re.sub(r":data:`([^`]+)`", r"`\1`", escaped)
