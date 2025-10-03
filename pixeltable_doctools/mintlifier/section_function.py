@@ -31,9 +31,8 @@ class FunctionSectionGenerator(PageBase):
         content = "\n---\n\n"  # Beautiful horizontal divider
 
         # All functions in Pixeltable function modules are UDFs
-        func_display_name = f"udf {func_name}()"
-
-        content += f"### `{func_display_name}`\n\n"
+        # Format: `function_name()` <sub>udf</sub>
+        content += f"### `{func_name}()` <sub>udf</sub>\n\n"
 
         # Add description
         doc = inspect.getdoc(func) or ""

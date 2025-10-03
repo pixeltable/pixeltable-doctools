@@ -262,7 +262,8 @@ icon: "square-c"
             else:
                 label = "attribute"
 
-            content += f"### `{attr_name}` *{label}*\n\n"
+            # Format: `attr_name` <sub>type</sub> for consistency with UDFs
+            content += f"### `{attr_name}` <sub>{label}</sub>\n\n"
 
             # Add documentation or warning
             if doc:
