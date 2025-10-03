@@ -649,6 +649,12 @@ Documentation for `{name}` is not available.
         if not return_type:
             return_type = parsed.returns.type_name or "Any"
 
+        # Clean up type strings (remove <class '...'> format)
+        if return_type:
+            import re
+            return_type = str(return_type)
+            return_type = re.sub(r"<class '([^']+)'>", r"\1", return_type)
+
         return_desc = parsed.returns.description or "Return value"
 
         content += f"- *{return_type}*: {self._escape_mdx(return_desc)}\n\n"
