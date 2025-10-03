@@ -32,7 +32,8 @@ class FunctionSectionGenerator(PageBase):
         content = '\n---\n\n'  # Beautiful horizontal divider
 
         # Check if this is a UDF (Pixeltable user-defined function)
-        is_udf = hasattr(func, 'signature') or (hasattr(func, 'is_polymorphic') and func.is_polymorphic)
+        # Check is_polymorphic FIRST to avoid calling .signature property which asserts for polymorphic funcs
+        is_udf = (hasattr(func, 'is_polymorphic') and func.is_polymorphic) or hasattr(func, 'signature')
         func_display_name = f'udf {func_name}()' if is_udf else f'{func_name}()'
 
         content += f'### `{func_display_name}`\n\n'
