@@ -150,7 +150,11 @@ def generate_docs(venv_dir: Path, pixeltable_dir: Path, output_dir: Path, major_
     # Copy mintlify-src to output
     mintlify_src = pixeltable_dir / 'docs' / 'mintlify-src'
     if not mintlify_src.exists():
-        raise RuntimeError(f"mintlify-src not found in {pixeltable_dir}")
+        raise RuntimeError(
+            f"mintlify-src not found in {pixeltable_dir}\n"
+            f"This version of Pixeltable doesn't support the Mintlify documentation structure.\n"
+            f"Only versions with docs/mintlify-src/ can be deployed (typically v0.4.17+)"
+        )
 
     print(f"   Copying base documentation...")
     for item in mintlify_src.iterdir():
