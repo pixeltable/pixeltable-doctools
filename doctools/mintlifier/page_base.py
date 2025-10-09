@@ -21,7 +21,7 @@ class PageBase:
     def __init__(
         self,
         output_dir: Path,
-        version: str = "main",
+        version: str = "latest",
         show_errors: bool = True,
         github_repo: str = "pixeltable/pixeltable",
         github_package_path: str = "pixeltable",
@@ -243,8 +243,8 @@ class PageBase:
         return self._build_docs_json_path(parent_groups, name)
 
     def _build_docs_json_path(self, parent_groups: List[str], name: str) -> str:
-        """Build the path for docs.json (includes sdk/latest prefix)."""
-        base_path = "sdk/latest"
+        """Build the path for docs.json (includes sdk/{version} prefix)."""
+        base_path = f"sdk/{self.version}"
         # Always return flat structure path (no subdirectories)
         return f"{base_path}/{self._sanitize_path(name)}"
 
