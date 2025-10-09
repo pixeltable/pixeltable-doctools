@@ -255,7 +255,7 @@ class OPMLReader:
 
             result = {
                 "group": group.name,
-                "pages": [f"docs/sdk/latest/{full_path}/{page.name}" for page in group.pages],
+                "pages": [f"sdk/latest/{full_path}/{page.name}" for page in group.pages],
             }
 
             # Add subgroups if they exist

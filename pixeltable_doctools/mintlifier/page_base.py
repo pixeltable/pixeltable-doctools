@@ -243,8 +243,8 @@ class PageBase:
         return self._build_docs_json_path(parent_groups, name)
 
     def _build_docs_json_path(self, parent_groups: List[str], name: str) -> str:
-        """Build the path for docs.json (includes docs/sdk/latest prefix)."""
-        base_path = "docs/sdk/latest"
+        """Build the path for docs.json (includes sdk/latest prefix)."""
+        base_path = "sdk/latest"
         # Always return flat structure path (no subdirectories)
         return f"{base_path}/{self._sanitize_path(name)}"
 

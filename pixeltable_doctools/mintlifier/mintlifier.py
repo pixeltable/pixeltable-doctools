@@ -129,9 +129,8 @@ class Mintlifier:
 
         print(f"\n📖 Loading OPML structure from: {opml_path}")
 
-        # Resolve OPML backup directory from config
-        opml_backup_dir = self._resolve_path(self.config.get("opml_backup_dir", "opml_bak"))
-        self.opml_reader = OPMLReader(opml_path, backup_dir=opml_backup_dir)
+        # Create OPML reader (no backups needed - we build to clean target dir)
+        self.opml_reader = OPMLReader(opml_path, backup_dir=None)
 
         print(f"📁 Output directory: {sdk_output_dir}")
         # Determine version from output path (e.g., "latest" or "v0.4.9")
@@ -181,9 +180,8 @@ class Mintlifier:
 
         print(f"📝 Docs.json path: {docs_json_path}")
 
-        # Resolve backup directories from config
-        docs_json_backup_dir = self._resolve_path(self.config.get("docs_json_backup_dir", "docsjson_bak"))
-        self.docs_updater = DocsJsonUpdater(docs_json_path, sdk_tab, backup_dir=docs_json_backup_dir)
+        # Create docs updater (no backups needed - we build to clean target dir)
+        self.docs_updater = DocsJsonUpdater(docs_json_path, sdk_tab, backup_dir=None)
 
         # Load OPML structure
         print("\n" + "=" * 60)
@@ -343,8 +341,6 @@ class Mintlifier:
             "tab": tab_structure.name,
             "dropdowns": [
                 {"dropdown": "latest", "icon": "rocket", "groups": [{"group": "SDK Reference", "pages": all_pages}]},
-                {"dropdown": "v0.4.9", "icon": "tag", "pages": ["docs/sdk/v0.4.9/index"]},
-                {"dropdown": "v0.4.8", "icon": "tag", "pages": ["docs/sdk/v0.4.8/index"]},
             ],
         }
 

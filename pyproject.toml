@@ -20,6 +20,9 @@ dev = [
 [project.scripts]
 mintlifier = "pixeltable_doctools.mintlifier.mintlifier:main"
 llmdocs = "pixeltable_doctools.llmdocs.llmdocs:main"
+build-mintlify = "pixeltable_doctools.build_mintlify.build_mintlify:main"
+deploy-mintlify = "pixeltable_doctools.build_mintlify.build_mintlify:main"
+convert-notebooks = "pixeltable_doctools.convert_notebooks.convert_notebooks:main"
 
 [build-system]
 requires = ["hatchling"]
