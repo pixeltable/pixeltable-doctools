@@ -26,7 +26,7 @@ def deploy_docs(target_dir: Path, target: str) -> None:
     # Map target to branch name
     branch_map = {
         'dev': 'dev',
-        'stage': 'staging',
+        'stage': 'stage',
         'prod': 'main'
     }
     branch = branch_map[target]
