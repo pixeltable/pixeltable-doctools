@@ -205,6 +205,16 @@ def generate_docs(venv_dir: Path, pixeltable_dir: Path, output_dir: Path, major_
         shutil.rmtree(dest_mintlify)
     shutil.copytree(mintlify_src, dest_mintlify)
 
+    # Create docs/target directory and copy docs.json for mintlifier
+    target_dir_in_clone = pixeltable_dir / 'docs' / 'target'
+    target_dir_in_clone.mkdir(parents=True, exist_ok=True)
+
+    docs_json_src = mintlify_src / 'docs.json'
+    if docs_json_src.exists():
+        shutil.copy2(docs_json_src, target_dir_in_clone / 'docs.json')
+    else:
+        raise RuntimeError(f"docs.json not found in {mintlify_src}")
+
     # Also copy to final output
     print(f"   Copying base documentation to output...")
     for item in mintlify_src.iterdir():
