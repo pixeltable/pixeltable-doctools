@@ -205,15 +205,39 @@ def generate_docs(venv_dir: Path, pixeltable_dir: Path, output_dir: Path, major_
         shutil.rmtree(dest_mintlify)
     shutil.copytree(mintlify_src, dest_mintlify)
 
-    # Create docs/target directory and copy docs.json for mintlifier
+    # Create docs/target directory
     target_dir_in_clone = pixeltable_dir / 'docs' / 'target'
     target_dir_in_clone.mkdir(parents=True, exist_ok=True)
 
-    docs_json_src = mintlify_src / 'docs.json'
-    if docs_json_src.exists():
-        shutil.copy2(docs_json_src, target_dir_in_clone / 'docs.json')
-    else:
-        raise RuntimeError(f"docs.json not found in {mintlify_src}")
+    # Fetch current deployed docs from pixeltable-docs-www/main
+    print(f"   Fetching current deployed docs from pixeltable-docs-www...")
+    with tempfile.TemporaryDirectory() as temp_dir:
+        docs_repo_dir = Path(temp_dir) / 'pixeltable-docs-www'
+
+        result = subprocess.run(
+            ['git', 'clone', '--depth=1', 'https://github.com/pixeltable/pixeltable-docs-www.git', str(docs_repo_dir)],
+            capture_output=True,
+            text=True
+        )
+
+        if result.returncode != 0:
+            print(f"   Warning: Could not fetch deployed docs, using base docs.json")
+            docs_json_src = mintlify_src / 'docs.json'
+            if docs_json_src.exists():
+                shutil.copy2(docs_json_src, target_dir_in_clone / 'docs.json')
+        else:
+            # Copy all files from deployed docs to target
+            for item in docs_repo_dir.iterdir():
+                if item.name == '.git':
+                    continue
+                dest = target_dir_in_clone / item.name
+                if item.is_dir():
+                    if dest.exists():
+                        shutil.rmtree(dest)
+                    shutil.copytree(item, dest)
+                else:
+                    shutil.copy2(item, dest)
+            print(f"   ✓ Fetched deployed docs")
 
     # Also copy to final output
     print(f"   Copying base documentation to output...")
@@ -230,9 +254,9 @@ def generate_docs(venv_dir: Path, pixeltable_dir: Path, output_dir: Path, major_
     python_path = venv_dir / 'bin' / 'python'
     mintlifier_path = venv_dir / 'bin' / 'mintlifier'
 
-    print(f"   Running mintlifier...")
+    print(f"   Running mintlifier for {major_version}...")
     result = subprocess.run(
-        [str(mintlifier_path), '--no-errors'],
+        [str(mintlifier_path), '--no-errors', '--version', major_version],
         cwd=str(pixeltable_dir),
         capture_output=True,
         text=True
@@ -241,11 +265,17 @@ def generate_docs(venv_dir: Path, pixeltable_dir: Path, output_dir: Path, major_
     if result.returncode != 0:
         raise RuntimeError(f"Mintlifier failed: {result.stderr}")
 
-    # Copy generated SDK docs to versioned output
+    # Copy generated SDK docs and updated docs.json to output
+    # Mintlifier generates to sdk/latest, so we copy that to our versioned output
     src_sdk = pixeltable_dir / 'docs' / 'target' / 'sdk' / 'latest'
     if src_sdk.exists():
         print(f"   Copying SDK docs to {major_version}...")
         shutil.copytree(src_sdk, sdk_output, dirs_exist_ok=True)
+
+    # Copy updated docs.json to output
+    docs_json_in_clone = pixeltable_dir / 'docs' / 'target' / 'docs.json'
+    if docs_json_in_clone.exists():
+        shutil.copy2(docs_json_in_clone, output_dir / 'docs.json')
 
     print(f"   ✓ Documentation generated")
 
@@ -288,15 +318,7 @@ def deploy_to_stage(output_dir: Path, major_version: str):
                 check=True
             )
 
-        # Detect existing major versions
-        existing_versions = []
-        sdk_dir = docs_repo_dir / 'sdk'
-        if sdk_dir.exists():
-            existing_versions = [d.name for d in sdk_dir.iterdir() if d.is_dir() and d.name.startswith('v')]
-
-        print(f"   Existing versions: {existing_versions if existing_versions else 'none'}")
-
-        # Copy all base docs from output
+        # Copy all docs from output (mintlifier already merged docs.json)
         print(f"   Copying documentation files...")
         for item in output_dir.iterdir():
             dest = docs_repo_dir / item.name
@@ -306,39 +328,6 @@ def deploy_to_stage(output_dir: Path, major_version: str):
                 shutil.copytree(item, dest)
             else:
                 shutil.copy2(item, dest)
-
-        # Update docs.json to include all versions
-        import json
-        docs_json_path = docs_repo_dir / 'docs.json'
-        with open(docs_json_path) as f:
-            docs_config = json.load(f)
-
-        # Find all versions now present
-        sdk_dir = docs_repo_dir / 'sdk'
-        all_versions = sorted([d.name for d in sdk_dir.iterdir() if d.is_dir() and d.name.startswith('v')], reverse=True)
-
-        # Update SDK tab with dropdowns for each major version
-        for tab in docs_config['navigation']['tabs']:
-            if tab.get('tab') == 'Pixeltable SDK':
-                # Build dropdowns for each version
-                tab['dropdowns'] = []
-                for version in all_versions:
-                    tab['dropdowns'].append({
-                        'dropdown': version,
-                        'icon': 'rocket' if version == all_versions[0] else 'archive',
-                        'groups': [{
-                            'group': 'SDK Reference',
-                            'pages': [
-                                # TODO: Generate proper page structure
-                                # For now, this will need to be refined
-                            ]
-                        }]
-                    })
-                break
-
-        # Save updated docs.json
-        with open(docs_json_path, 'w') as f:
-            json.dump(docs_config, f, indent=2)
 
         # Commit and push
         print(f"   Committing changes...")

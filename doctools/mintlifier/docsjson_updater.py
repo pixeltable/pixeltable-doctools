@@ -54,8 +54,34 @@ class DocsJsonUpdater:
 
         # Update or add SDK tab
         if sdk_tab_index is not None:
-            print(f"📝 Replacing tab at index {sdk_tab_index}: {tabs[sdk_tab_index].get('tab', 'Unknown')}")
-            tabs[sdk_tab_index] = navigation_structure
+            existing_tab = tabs[sdk_tab_index]
+
+            # If existing tab has dropdowns, merge them
+            if "dropdowns" in existing_tab and "dropdowns" in navigation_structure:
+                new_dropdown = navigation_structure["dropdowns"][0]  # The new version dropdown
+                new_version = new_dropdown["dropdown"]
+
+                # Find if this version already exists
+                version_exists = False
+                for i, dropdown in enumerate(existing_tab["dropdowns"]):
+                    if dropdown.get("dropdown") == new_version:
+                        # Replace existing version dropdown
+                        existing_tab["dropdowns"][i] = new_dropdown
+                        version_exists = True
+                        print(f"📝 Updated dropdown: {new_version}")
+                        break
+
+                # Add new version if it doesn't exist
+                if not version_exists:
+                    existing_tab["dropdowns"].append(new_dropdown)
+                    print(f"📝 Added new dropdown: {new_version}")
+
+                # Preserve other fields from new structure (like tab name)
+                existing_tab["tab"] = navigation_structure["tab"]
+            else:
+                # No dropdowns, replace entire tab
+                print(f"📝 Replacing tab at index {sdk_tab_index}: {tabs[sdk_tab_index].get('tab', 'Unknown')}")
+                tabs[sdk_tab_index] = navigation_structure
         else:
             print(f"📝 Adding new tab: {self.sdk_tab_name}")
             tabs.append(navigation_structure)

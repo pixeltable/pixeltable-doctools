@@ -30,6 +30,7 @@ class Mintlifier:
         self.class_gen = None
         self.docs_updater = None
         self.show_errors_override = False  # Set by command-line flag
+        self.version = "latest"  # Default version, can be overridden
         # self.llm_map_gen = None  # LLM map generation decoupled
 
     def _find_project_root(self) -> Path:
@@ -336,12 +337,16 @@ class Mintlifier:
             processed_group = process_group(group)
             all_pages.append(processed_group)
 
-        # Create version dropdowns structure
+        # Create version dropdown structure for current version
+        new_dropdown = {
+            "dropdown": self.version,
+            "icon": "rocket" if self.version == "latest" else "archive",
+            "groups": [{"group": "SDK Reference", "pages": all_pages}]
+        }
+
         return {
             "tab": tab_structure.name,
-            "dropdowns": [
-                {"dropdown": "latest", "icon": "rocket", "groups": [{"group": "SDK Reference", "pages": all_pages}]},
-            ],
+            "dropdowns": [new_dropdown],
         }
 
     def _sanitize_path(self, text: str) -> str:
@@ -353,6 +358,7 @@ def main():
     """Main entry point."""
     parser = argparse.ArgumentParser(add_help=False)
     parser.add_argument("--no-errors", action="store_true")
+    parser.add_argument("--version", type=str, help="Version to generate docs for (e.g., v0.4)")
     args = parser.parse_args()
 
     generator = Mintlifier()
@@ -360,6 +366,10 @@ def main():
     # Override show_errors from config if command-line flag is set
     if args.no_errors:
         generator.show_errors_override = True
+
+    # Set version if provided
+    if args.version:
+        generator.version = args.version
 
     try:
         generator.run()
