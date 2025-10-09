@@ -131,13 +131,37 @@ def create_venv_and_install(temp_dir: Path, pixeltable_dir: Path) -> Path:
     return venv_dir
 
 
+def find_current_pixeltable_repo() -> Path:
+    """
+    Find the current pixeltable repository (not the cloned version).
+
+    This is used to get the latest docs structure from the working directory.
+    """
+    # Start from current working directory
+    cwd = Path.cwd()
+
+    # Check if we're in pixeltable repo
+    if (cwd / 'docs' / 'mintlify-src').exists():
+        return cwd
+
+    # Walk up to find it
+    current = cwd
+    for _ in range(5):
+        if (current / 'docs' / 'mintlify-src').exists():
+            return current
+        current = current.parent
+
+    # Not found - user should run from pixeltable repo or we use main branch
+    return None
+
+
 def generate_docs(venv_dir: Path, pixeltable_dir: Path, output_dir: Path, major_version: str):
     """
     Generate SDK documentation for the specified version.
 
     Args:
         venv_dir: Path to virtual environment
-        pixeltable_dir: Path to pixeltable repository
+        pixeltable_dir: Path to cloned pixeltable repository (versioned)
         output_dir: Where to output generated docs
         major_version: Major version string (e.g., 'v0.4')
     """
@@ -147,16 +171,42 @@ def generate_docs(venv_dir: Path, pixeltable_dir: Path, output_dir: Path, major_
     sdk_output = output_dir / 'sdk' / major_version
     sdk_output.mkdir(parents=True)
 
-    # Copy mintlify-src to output
-    mintlify_src = pixeltable_dir / 'docs' / 'mintlify-src'
+    # Get docs structure from current working directory (if available)
+    # This allows us to use the latest doc structure for old code versions
+    current_repo = find_current_pixeltable_repo()
+
+    if current_repo:
+        print(f"   Using documentation structure from: {current_repo}")
+        mintlify_src = current_repo / 'docs' / 'mintlify-src'
+        opml_path = current_repo / 'docs' / 'public_api.opml'
+    else:
+        print(f"   Using documentation structure from cloned repo")
+        mintlify_src = pixeltable_dir / 'docs' / 'mintlify-src'
+        opml_path = pixeltable_dir / 'docs' / 'public_api.opml'
+
     if not mintlify_src.exists():
         raise RuntimeError(
-            f"mintlify-src not found in {pixeltable_dir}\n"
-            f"This version of Pixeltable doesn't support the Mintlify documentation structure.\n"
-            f"Only versions with docs/mintlify-src/ can be deployed (typically v0.4.17+)"
+            f"mintlify-src not found at {mintlify_src}\n"
+            f"Please run this command from the pixeltable repository, or ensure docs/mintlify-src/ exists."
         )
 
-    print(f"   Copying base documentation...")
+    # Copy OPML to cloned repo so mintlifier can find it
+    if opml_path.exists():
+        dest_opml = pixeltable_dir / 'docs' / 'public_api.opml'
+        dest_opml.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(opml_path, dest_opml)
+        print(f"   Using API structure from: {opml_path}")
+    else:
+        print(f"   Warning: OPML not found at {opml_path}, using version from cloned repo")
+
+    # Copy mintlify-src to cloned repo
+    dest_mintlify = pixeltable_dir / 'docs' / 'mintlify-src'
+    if dest_mintlify.exists():
+        shutil.rmtree(dest_mintlify)
+    shutil.copytree(mintlify_src, dest_mintlify)
+
+    # Also copy to final output
+    print(f"   Copying base documentation to output...")
     for item in mintlify_src.iterdir():
         if item.name.startswith('.'):
             continue
