@@ -134,17 +134,9 @@ class Mintlifier:
         self.opml_reader = OPMLReader(opml_path)
 
         print(f"📁 Output directory: {sdk_output_dir}")
-        # Determine version from output path (e.g., "latest" or "v0.4.9")
-        version = "main"  # Default to main for latest
-        if "latest" in str(sdk_output_dir):
-            version = "main"
-        elif "v" in str(sdk_output_dir):
-            # Extract version from path like /sdk/v0.4.9/
-            path_parts = str(sdk_output_dir).split("/")
-            for part in path_parts:
-                if part.startswith("v") and "." in part:
-                    version = part  # Use the version tag like "v0.4.9"
-                    break
+        # Use version from command-line argument (default is "latest")
+        version = self.version
+        print(f"📌 Documentation version: {version}")
 
         # Initialize page generators with error display setting and GitHub config
         # Command-line flag overrides config setting
