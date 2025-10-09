@@ -108,7 +108,17 @@ def deploy_docs(target_dir: Path, target: str) -> None:
                 check=True
             )
 
+            # Map target to preview URL
+            preview_urls = {
+                'dev': 'https://pixeltable-dev.mintlify.app/',
+                'stage': 'https://pixeltable-stage.mintlify.app/',
+                'prod': 'https://docs.pixeltable.com'
+            }
+            preview_url = preview_urls.get(target, '')
+
             print(f"\n✅ Documentation deployed successfully to {target}!")
+            if preview_url:
+                print(f"   View preview at: {preview_url}")
         else:
             print(f"\n   No changes to deploy.")
 
