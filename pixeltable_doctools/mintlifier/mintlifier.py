@@ -129,8 +129,8 @@ class Mintlifier:
 
         print(f"\n📖 Loading OPML structure from: {opml_path}")
 
-        # Create OPML reader (no backups needed - we build to clean target dir)
-        self.opml_reader = OPMLReader(opml_path, backup_dir=None)
+        # Create OPML reader
+        self.opml_reader = OPMLReader(opml_path)
 
         print(f"📁 Output directory: {sdk_output_dir}")
         # Determine version from output path (e.g., "latest" or "v0.4.9")
@@ -180,8 +180,8 @@ class Mintlifier:
 
         print(f"📝 Docs.json path: {docs_json_path}")
 
-        # Create docs updater (no backups needed - we build to clean target dir)
-        self.docs_updater = DocsJsonUpdater(docs_json_path, sdk_tab, backup_dir=None)
+        # Create docs updater
+        self.docs_updater = DocsJsonUpdater(docs_json_path, sdk_tab)
 
         # Load OPML structure
         print("\n" + "=" * 60)

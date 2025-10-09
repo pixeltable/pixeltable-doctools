@@ -14,34 +14,19 @@ import shutil
 class DocsJsonUpdater:
     """Updates docs.json with SDK navigation structure."""
 
-    def __init__(self, docs_json_path: Path, sdk_tab_name: str, backup_dir: Path = None):
+    def __init__(self, docs_json_path: Path, sdk_tab_name: str):
         """Initialize with path to docs.json and SDK tab name."""
         self.docs_json_path = docs_json_path
         self.sdk_tab_name = sdk_tab_name
-        self.backup_dir = backup_dir or (Path(__file__).parent / "docsjson_bak")
         self.docs_config = None
 
     def load(self):
-        """Load and backup docs.json."""
-        # Create timestamped backup
-        self._backup_file()
-
+        """Load docs.json."""
         # Load docs.json
         with open(self.docs_json_path) as f:
             self.docs_config = json.load(f)
 
         print(f"📋 Loaded docs.json with {len(self.docs_config.get('navigation', {}).get('tabs', []))} tabs")
-
-    def _backup_file(self):
-        """Create timestamped backup of docs.json."""
-        self.backup_dir.mkdir(exist_ok=True, parents=True)
-
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        backup_name = f"docs_{timestamp}.json"
-        backup_path = self.backup_dir / backup_name
-
-        shutil.copy2(self.docs_json_path, backup_path)
-        print(f"📋 Created docs.json backup: {backup_path}")
 
     def update_navigation(self, navigation_structure: Dict):
         """Update navigation with SDK documentation structure."""

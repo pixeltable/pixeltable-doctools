@@ -47,19 +47,15 @@ class TabItem:
 class OPMLReader:
     """Reads and parses OPML documentation structure."""
 
-    def __init__(self, opml_path: Path, backup_dir: Path = None):
+    def __init__(self, opml_path: Path):
         """Initialize with path to OPML file."""
         self.opml_path = opml_path
-        self.backup_dir = backup_dir or (Path(__file__).parent / "opml_bak")
         self.tree = None
         self.root = None
         self.structure = None
 
     def load(self) -> TabItem:
         """Load and parse the OPML file."""
-        # Create timestamped backup
-        self._backup_file()
-
         # Parse OPML
         self.tree = ET.parse(self.opml_path)
         self.root = self.tree.getroot()
@@ -67,17 +63,6 @@ class OPMLReader:
         # Process structure
         self.structure = self._process_root()
         return self.structure
-
-    def _backup_file(self):
-        """Create timestamped backup of OPML file."""
-        self.backup_dir.mkdir(exist_ok=True, parents=True)
-
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        backup_name = f"public_api_{timestamp}.opml"
-        backup_path = self.backup_dir / backup_name
-
-        shutil.copy2(self.opml_path, backup_path)
-        print(f"📋 Created OPML backup: {backup_path}")
 
     def _process_root(self) -> Optional[TabItem]:
         """Process the root OPML structure to find SDK tab."""
