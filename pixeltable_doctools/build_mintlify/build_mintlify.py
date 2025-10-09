@@ -190,8 +190,13 @@ def build_mintlify(target: str) -> None:
 
     try:
         # Run mintlifier - it writes directly to target
+        # For stage/prod targets, hide errors from generated docs
+        mintlifier_cmd = ['mintlifier']
+        if target in ['stage', 'prod']:
+            mintlifier_cmd.append('--no-errors')
+
         result = subprocess.run(
-            ['mintlifier'],
+            mintlifier_cmd,
             cwd=str(repo_root),  # Run from repo root
             capture_output=True,
             text=True,
