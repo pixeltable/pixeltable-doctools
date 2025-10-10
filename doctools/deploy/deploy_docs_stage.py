@@ -237,6 +237,14 @@ def generate_docs(venv_dir: Path, pixeltable_dir: Path, output_dir: Path, major_
                     shutil.copytree(item, dest)
                 else:
                     shutil.copy2(item, dest)
+
+            # Also preserve existing SDK docs to final output (before mintlifier overwrites target/sdk/)
+            # This preserves sdk/latest/ and any other existing versions
+            existing_sdk = docs_repo_dir / 'sdk'
+            if existing_sdk.exists():
+                print(f"   Copying existing SDK versions to output...")
+                shutil.copytree(existing_sdk, output_dir / 'sdk', dirs_exist_ok=True)
+
             print(f"   ✓ Fetched deployed docs")
 
     # Also copy to final output
@@ -265,11 +273,11 @@ def generate_docs(venv_dir: Path, pixeltable_dir: Path, output_dir: Path, major_
     if result.returncode != 0:
         raise RuntimeError(f"Mintlifier failed: {result.stderr}")
 
-    # Copy generated SDK docs and updated docs.json to output
-    # Mintlifier generates to sdk/latest, so we copy that to our versioned output
+    # Copy newly generated SDK docs for this version
+    # Mintlifier generates to target/sdk/latest, copy that to our versioned output
     src_sdk = pixeltable_dir / 'docs' / 'target' / 'sdk' / 'latest'
     if src_sdk.exists():
-        print(f"   Copying SDK docs to {major_version}...")
+        print(f"   Copying newly generated docs to sdk/{major_version}/...")
         shutil.copytree(src_sdk, sdk_output, dirs_exist_ok=True)
 
     # Copy updated docs.json to output
