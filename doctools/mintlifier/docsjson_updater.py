@@ -76,6 +76,9 @@ class DocsJsonUpdater:
                     existing_tab["dropdowns"].append(new_dropdown)
                     print(f"📝 Added new dropdown: {new_version}")
 
+                # Sort dropdowns by version (newest first)
+                existing_tab["dropdowns"] = self._sort_dropdowns(existing_tab["dropdowns"])
+
                 # Preserve other fields from new structure (like tab name)
                 existing_tab["tab"] = navigation_structure["tab"]
             else:
@@ -96,6 +99,38 @@ class DocsJsonUpdater:
             json.dump(self.docs_config, f, indent=2)
 
         print(f"✅ Updated {self.docs_json_path}")
+
+    def _sort_dropdowns(self, dropdowns: List[Dict]) -> List[Dict]:
+        """Sort dropdowns by version number in descending order (newest first).
+
+        Args:
+            dropdowns: List of dropdown dictionaries
+
+        Returns:
+            Sorted list with newest versions first
+        """
+        def parse_version(dropdown: Dict) -> tuple:
+            """Parse version string to tuple for sorting."""
+            version_str = dropdown.get("dropdown", "")
+
+            # Handle "latest" specially - always put it first
+            if version_str == "latest":
+                return (float('inf'),)
+
+            # Parse version like "v0.4" -> (0, 4)
+            # Strip 'v' prefix and split by '.'
+            if version_str.startswith("v"):
+                version_str = version_str[1:]
+
+            try:
+                parts = [int(x) for x in version_str.split('.')]
+                return tuple(parts)
+            except (ValueError, AttributeError):
+                # If parsing fails, return (0,) so it sorts last
+                return (0,)
+
+        # Sort by version in descending order (reverse=True for newest first)
+        return sorted(dropdowns, key=parse_version, reverse=True)
 
     def validate_structure(self, navigation_structure: Dict) -> List[str]:
         """Validate navigation structure and return any warnings."""
