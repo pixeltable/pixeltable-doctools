@@ -209,23 +209,34 @@ def generate_docs(venv_dir: Path, pixeltable_dir: Path, output_dir: Path, major_
     target_dir_in_clone = pixeltable_dir / 'docs' / 'target'
     target_dir_in_clone.mkdir(parents=True, exist_ok=True)
 
-    # Fetch current deployed docs from pixeltable-docs-www/main
-    print(f"   Fetching current deployed docs from pixeltable-docs-www...")
+    # Fetch current deployed docs from pixeltable-docs-www/stage
+    print(f"   Fetching current deployed docs from pixeltable-docs-www/stage...")
     with tempfile.TemporaryDirectory() as temp_dir:
         docs_repo_dir = Path(temp_dir) / 'pixeltable-docs-www'
 
         result = subprocess.run(
-            ['git', 'clone', '--depth=1', 'https://github.com/pixeltable/pixeltable-docs-www.git', str(docs_repo_dir)],
+            ['git', 'clone', '-b', 'stage', '--depth=1', 'https://github.com/pixeltable/pixeltable-docs-www.git', str(docs_repo_dir)],
             capture_output=True,
             text=True
         )
 
         if result.returncode != 0:
+            # Stage branch doesn't exist yet, try fetching from main as fallback
+            print(f"   Stage branch not found, fetching from main branch...")
+            result = subprocess.run(
+                ['git', 'clone', '--depth=1', 'https://github.com/pixeltable/pixeltable-docs-www.git', str(docs_repo_dir)],
+                capture_output=True,
+                text=True
+            )
+
+        if result.returncode != 0:
+            # Both stage and main failed
             print(f"   Warning: Could not fetch deployed docs, using base docs.json")
             docs_json_src = mintlify_src / 'docs.json'
             if docs_json_src.exists():
                 shutil.copy2(docs_json_src, target_dir_in_clone / 'docs.json')
         else:
+            # Successfully fetched from either stage or main
             # Copy all files from deployed docs to target
             for item in docs_repo_dir.iterdir():
                 if item.name == '.git':
