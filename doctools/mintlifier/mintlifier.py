@@ -204,9 +204,9 @@ class Mintlifier:
             # LLM map generation has been decoupled from main flow
 
             if page.item_type == "module":
-                # Pass children list if specified for this module
+                # Pass children list and types if specified for this module
                 result = self.module_gen.generate_page(
-                    page.module_path, page.parent_groups, page.item_type, page.children
+                    page.module_path, page.parent_groups, page.item_type, page.children, page.children_types
                 )
             elif page.item_type == "class":
                 # Pass children list if specified for this class

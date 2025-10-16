@@ -52,13 +52,14 @@ class FunctionSectionGenerator(PageBase):
             # If we can't get source (built-in, etc.), assume it's not a UDF
             return False
 
-    def generate_section(self, func: Any, func_name: str, module_path: str) -> str:
+    def generate_section(self, func: Any, func_name: str, module_path: str, is_udf: bool = None) -> str:
         """Generate function documentation section for inline use.
 
         Args:
             func: The function object to document
             func_name: Name of the function
             module_path: Full module path (e.g., 'pixeltable.functions.image')
+            is_udf: If True, add UDF label; if False, no label; if None, auto-detect (deprecated)
 
         Returns:
             Markdown string for the function documentation
@@ -68,8 +69,10 @@ class FunctionSectionGenerator(PageBase):
         # Build section content with elegant visual separation
         content = "\n---\n\n"  # Beautiful horizontal divider
 
-        # Check if this function is a UDF and add label accordingly
-        is_udf = self._is_udf(func)
+        # Use explicit is_udf if provided, otherwise fall back to detection (deprecated)
+        if is_udf is None:
+            is_udf = self._is_udf(func)
+
         if is_udf:
             content += f"### `{func_name}()` <sub>udf</sub>\n\n"
         else:

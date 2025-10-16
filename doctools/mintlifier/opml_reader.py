@@ -20,6 +20,7 @@ class PageItem:
     parent_groups: List[str]  # Hierarchy of parent groups
     item_type: str = "page"  # "page" or "module"
     children: Optional[List[str]] = None  # For modules/classes, list of specific children to document
+    children_types: Optional[Dict[str, str]] = None  # Maps child name to type ('func' or 'udf')
 
     @property
     def name(self) -> str:
@@ -103,9 +104,11 @@ class OPMLReader:
 
                         # For modules, collect direct function children and process class children separately
                         children = None
+                        children_types = None
                         class_pages = []  # Store class pages to add after module
                         if item_type == "module":
                             children = []
+                            children_types = {}
                             for grandchild in subchild:
                                 grandtext = grandchild.get("text", "")
                                 if "|" in grandtext:
@@ -130,10 +133,11 @@ class OPMLReader:
                                                 children=class_children,
                                             )
                                         )
-                                    elif child_type == "func":
-                                        # Add function name to module's children list
+                                    elif child_type in ("func", "udf"):
+                                        # Add function name and type to module's children
                                         child_name = child_path.split(".")[-1]
                                         children.append(child_name)
+                                        children_types[child_name] = child_type
                         elif item_type == "class":
                             # For standalone classes, collect their method children
                             children = []
@@ -152,6 +156,7 @@ class OPMLReader:
                                 parent_groups=new_hierarchy,
                                 item_type=item_type,
                                 children=children,
+                                children_types=children_types,
                             )
                         )
 

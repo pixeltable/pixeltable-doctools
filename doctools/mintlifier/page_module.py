@@ -31,7 +31,12 @@ class ModulePageGenerator(PageBase):
         self.internal_blacklist = set(internal_blacklist) if internal_blacklist else set()
 
     def generate_page(
-        self, module_path: str, parent_groups: List[str], item_type: str, opml_children: List[str] = None
+        self,
+        module_path: str,
+        parent_groups: List[str],
+        item_type: str,
+        opml_children: List[str] = None,
+        opml_children_types: dict = None,
     ) -> Optional[dict]:
         """Generate module documentation page.
 
@@ -40,6 +45,7 @@ class ModulePageGenerator(PageBase):
             parent_groups: Parent group hierarchy
             item_type: Type of item (module)
             opml_children: If specified, only document these children
+            opml_children_types: Maps child name to type ('func' or 'udf')
         """
         try:
             module = importlib.import_module(module_path)
@@ -74,7 +80,7 @@ class ModulePageGenerator(PageBase):
         self.current_parent_groups = parent_groups
 
         # Add module contents - use explicit classes but auto-discover functions
-        content += self._document_module_contents(module, explicit_classes, module_path)
+        content += self._document_module_contents(module, explicit_classes, module_path, opml_children, opml_children_types)
 
         # Write file and build navigation structure
         module_page = self._write_mdx_file(module_name, parent_groups, content)
@@ -105,13 +111,22 @@ class ModulePageGenerator(PageBase):
             return module.__children__
         return None
 
-    def _document_module_contents(self, module: Any, explicit_classes: Optional[List[str]], module_path: str) -> str:
-        """Document module contents: explicit classes + auto-discovered functions.
+    def _document_module_contents(
+        self,
+        module: Any,
+        explicit_classes: Optional[List[str]],
+        module_path: str,
+        opml_children: List[str] = None,
+        opml_children_types: dict = None,
+    ) -> str:
+        """Document module contents: explicit classes + explicitly listed functions.
 
         Args:
             module: The module to document
             explicit_classes: List of class names to document (from OPML), or None to auto-discover
             module_path: Full path to module
+            opml_children: List of function names from OPML
+            opml_children_types: Maps function name to type ('func' or 'udf')
         """
         content = ""
 
@@ -148,44 +163,78 @@ class ModulePageGenerator(PageBase):
                     content += f"- [{name}](./{name.lower()})\n"
                 content += "\n"
 
-        # Auto-discover all public functions
-        functions_to_generate = []
-        for name in dir(module):
-            if name.startswith("_"):
-                continue
+        # Document functions from OPML if available, otherwise auto-discover
+        if opml_children and opml_children_types:
+            # Use explicit list from OPML
+            functions = []
+            udfs = []
 
-            try:
+            for name in opml_children:
+                if not hasattr(module, name):
+                    continue
+
                 obj = getattr(module, name)
-                obj_module = getattr(obj, "__module__", None)
+                func_type = opml_children_types.get(name, "func")
 
-                # Include if from this module or submodule
-                if obj_module:
-                    is_from_this_module = obj_module == module.__name__
-                    is_from_submodule = obj_module.startswith(module.__name__ + ".")
-                    is_pixeltable_udf = (
-                        "functions" in module_path
-                        and "pixeltable" in obj_module
-                        and hasattr(obj, "__class__")
-                        and "CallableFunction" in obj.__class__.__name__
-                    )
+                if func_type == "udf":
+                    udfs.append((name, obj))
+                else:
+                    functions.append((name, obj))
 
-                    if is_from_this_module or is_from_submodule or is_pixeltable_udf:
-                        if inspect.isfunction(obj) or (
-                            hasattr(obj, "__class__") and "CallableFunction" in obj.__class__.__name__
-                        ):
-                            functions_to_generate.append((name, obj))
-            except AttributeError:
-                continue
+            # Document functions first
+            if functions:
+                content += "## Functions\n\n"
+                for name, obj in sorted(functions):
+                    func_section = self.function_gen.generate_section(obj, name, module_path, is_udf=False)
+                    content += func_section
 
-        # Document functions inline
-        if functions_to_generate:
-            content += "## UDFs\n\n"
-
-            for name, obj in sorted(functions_to_generate):
-                func_section = self.function_gen.generate_section(obj, name, module_path)
-                content += func_section
+            # Document UDFs second
+            if udfs:
+                content += "## UDFs\n\n"
+                for name, obj in sorted(udfs):
+                    func_section = self.function_gen.generate_section(obj, name, module_path, is_udf=True)
+                    content += func_section
 
             self._generated_functions = []
+        else:
+            # Fallback: Auto-discover all public functions (deprecated path)
+            functions_to_generate = []
+            for name in dir(module):
+                if name.startswith("_"):
+                    continue
+
+                try:
+                    obj = getattr(module, name)
+                    obj_module = getattr(obj, "__module__", None)
+
+                    # Include if from this module or submodule
+                    if obj_module:
+                        is_from_this_module = obj_module == module.__name__
+                        is_from_submodule = obj_module.startswith(module.__name__ + ".")
+                        is_pixeltable_udf = (
+                            "functions" in module_path
+                            and "pixeltable" in obj_module
+                            and hasattr(obj, "__class__")
+                            and "CallableFunction" in obj.__class__.__name__
+                        )
+
+                        if is_from_this_module or is_from_submodule or is_pixeltable_udf:
+                            if inspect.isfunction(obj) or (
+                                hasattr(obj, "__class__") and "CallableFunction" in obj.__class__.__name__
+                            ):
+                                functions_to_generate.append((name, obj))
+                except AttributeError:
+                    continue
+
+            # Document functions inline
+            if functions_to_generate:
+                content += "## UDFs\n\n"
+
+                for name, obj in sorted(functions_to_generate):
+                    func_section = self.function_gen.generate_section(obj, name, module_path, is_udf=None)
+                    content += func_section
+
+                self._generated_functions = []
 
         return content
 
