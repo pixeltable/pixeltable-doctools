@@ -125,7 +125,7 @@ def create_venv_and_install(temp_dir: Path, pixeltable_dir: Path) -> Path:
 
     print(f"   Installing pixeltable-doctools...")
     result = subprocess.run(
-        [str(pip_path), 'install', '-q', 'git+https://github.com/pixeltable/pixeltable-doctools.git'],
+        [str(pip_path), 'install', '-q', '--no-cache-dir', 'git+https://github.com/pixeltable/pixeltable-doctools.git'],
         capture_output=True,
         text=True
     )
