@@ -22,6 +22,7 @@ mintlifier = "doctools.mintlifier.mintlifier:main"
 llmdocs = "doctools.llmdocs.llmdocs:main"
 deploy-docs-local = "doctools.build_mintlify.build_mintlify:main"
 deploy-docs-stage = "doctools.deploy.deploy_docs_stage:main"
+deploy-docs-prod = "doctools.deploy.deploy_docs_prod:main"
 convert-notebooks = "doctools.convert_notebooks.convert_notebooks:main"
 
 [build-system]
