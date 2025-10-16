@@ -4,11 +4,17 @@ Deploy versioned documentation to staging environment.
 
 This script:
 1. Takes a version tag (e.g., v0.4.17)
-2. Extracts major version (e.g., v0.4)
-3. Clones pixeltable repo and checks out the tag
+2. Extracts major.minor prefix (e.g., v0.4) for version management
+3. Clones pixeltable repo and checks out the full version tag
 4. Creates temporary environment and installs that version
-5. Generates SDK and LLM documentation
-6. Deploys to pixeltable-docs-www/stage branch
+5. Generates SDK documentation using the full version
+6. Removes any existing docs with the same major.minor prefix (keeps other major versions)
+7. Deploys to pixeltable-docs-www/stage branch
+
+Version Strategy:
+- Full version (v0.4.17) is used for all paths, GitHub links, and dropdowns
+- When deploying v0.4.17, any existing v0.4.x versions are removed
+- Other major.minor versions (e.g., v0.3.14) are preserved
 """
 
 import argparse
@@ -22,24 +28,24 @@ from pathlib import Path
 
 def parse_version(version: str) -> tuple[str, str]:
     """
-    Parse version string to extract major version.
+    Parse version string to extract major.minor prefix.
 
     Args:
         version: Full version like 'v0.4.17'
 
     Returns:
-        Tuple of (full_version, major_version) like ('v0.4.17', 'v0.4')
+        Tuple of (full_version, major_minor_prefix) like ('v0.4.17', 'v0.4')
     """
     if not version.startswith('v'):
         version = f'v{version}'
 
-    # Extract major.minor from v0.4.17 -> v0.4
+    # Extract major.minor prefix from v0.4.17 -> v0.4
     match = re.match(r'(v\d+\.\d+)', version)
     if not match:
         raise ValueError(f"Invalid version format: {version}. Expected format: v0.4.17")
 
-    major_version = match.group(1)
-    return version, major_version
+    major_minor_prefix = match.group(1)
+    return version, major_minor_prefix
 
 
 def clone_pixeltable(temp_dir: Path, version: str) -> Path:
@@ -155,7 +161,7 @@ def find_current_pixeltable_repo() -> Path:
     return None
 
 
-def generate_docs(venv_dir: Path, pixeltable_dir: Path, output_dir: Path, major_version: str):
+def generate_docs(venv_dir: Path, pixeltable_dir: Path, output_dir: Path, full_version: str, major_minor_prefix: str):
     """
     Generate SDK documentation for the specified version.
 
@@ -163,12 +169,13 @@ def generate_docs(venv_dir: Path, pixeltable_dir: Path, output_dir: Path, major_
         venv_dir: Path to virtual environment
         pixeltable_dir: Path to cloned pixeltable repository (versioned)
         output_dir: Where to output generated docs
-        major_version: Major version string (e.g., 'v0.4')
+        full_version: Full version string (e.g., 'v0.4.17')
+        major_minor_prefix: Major.minor prefix (e.g., 'v0.4') - used to find old versions to delete
     """
-    print(f"\n📝 Generating documentation for {major_version}...")
+    print(f"\n📝 Generating documentation for {full_version}...")
 
-    # Create output structure
-    sdk_output = output_dir / 'sdk' / major_version
+    # Create output structure using full version
+    sdk_output = output_dir / 'sdk' / full_version
     sdk_output.mkdir(parents=True)
 
     # Get docs structure from current working directory (if available)
@@ -250,11 +257,22 @@ def generate_docs(venv_dir: Path, pixeltable_dir: Path, output_dir: Path, major_
                     shutil.copy2(item, dest)
 
             # Also preserve existing SDK docs to final output (before mintlifier overwrites target/sdk/)
-            # This preserves sdk/latest/ and any other existing versions
+            # But remove any previous versions with the same major.minor prefix
             existing_sdk = docs_repo_dir / 'sdk'
             if existing_sdk.exists():
                 print(f"   Copying existing SDK versions to output...")
+                # Copy all versions first
                 shutil.copytree(existing_sdk, output_dir / 'sdk', dirs_exist_ok=True)
+
+                # Then remove any existing versions with the same major.minor prefix
+                output_sdk = output_dir / 'sdk'
+                if output_sdk.exists():
+                    for version_dir in output_sdk.iterdir():
+                        if version_dir.is_dir() and version_dir.name.startswith(major_minor_prefix):
+                            # Don't delete the version we're about to create
+                            if version_dir.name != full_version:
+                                print(f"   Removing old version: {version_dir.name}")
+                                shutil.rmtree(version_dir)
 
             print(f"   ✓ Fetched deployed docs")
 
@@ -273,9 +291,9 @@ def generate_docs(venv_dir: Path, pixeltable_dir: Path, output_dir: Path, major_
     python_path = venv_dir / 'bin' / 'python'
     mintlifier_path = venv_dir / 'bin' / 'mintlifier'
 
-    print(f"   Running mintlifier for {major_version}...")
+    print(f"   Running mintlifier for {full_version}...")
     result = subprocess.run(
-        [str(mintlifier_path), '--no-errors', '--version', major_version],
+        [str(mintlifier_path), '--no-errors', '--version', full_version],
         cwd=str(pixeltable_dir),
         capture_output=True,
         text=True
@@ -288,7 +306,7 @@ def generate_docs(venv_dir: Path, pixeltable_dir: Path, output_dir: Path, major_
     # Mintlifier generates to target/sdk/latest, copy that to our versioned output
     src_sdk = pixeltable_dir / 'docs' / 'target' / 'sdk' / 'latest'
     if src_sdk.exists():
-        print(f"   Copying newly generated docs to sdk/{major_version}/...")
+        print(f"   Copying newly generated docs to sdk/{full_version}/...")
         shutil.copytree(src_sdk, sdk_output, dirs_exist_ok=True)
 
     # Copy updated docs.json to output
@@ -299,13 +317,13 @@ def generate_docs(venv_dir: Path, pixeltable_dir: Path, output_dir: Path, major_
     print(f"   ✓ Documentation generated")
 
 
-def deploy_to_stage(output_dir: Path, major_version: str):
+def deploy_to_stage(output_dir: Path, full_version: str):
     """
     Deploy generated docs to pixeltable-docs-www/stage branch.
 
     Args:
         output_dir: Directory containing generated docs
-        major_version: Major version string (e.g., 'v0.4')
+        full_version: Full version string (e.g., 'v0.4.17')
     """
     print(f"\n📤 Deploying to stage branch...")
 
@@ -359,7 +377,7 @@ def deploy_to_stage(output_dir: Path, major_version: str):
 
         if result.returncode != 0:  # There are changes
             subprocess.run(
-                ['git', 'commit', '-m', f'Deploy documentation for {major_version}'],
+                ['git', 'commit', '-m', f'Deploy documentation for {full_version}'],
                 cwd=str(docs_repo_dir),
                 check=True
             )
@@ -391,8 +409,8 @@ def main():
 
     try:
         # Parse version
-        full_version, major_version = parse_version(args.version)
-        print(f"🚀 Deploying documentation for {full_version} (major: {major_version})")
+        full_version, major_minor_prefix = parse_version(args.version)
+        print(f"🚀 Deploying documentation for {full_version} (major.minor: {major_minor_prefix})")
 
         # Create temporary workspace
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -407,10 +425,10 @@ def main():
             # Generate documentation
             output_dir = temp_path / 'docs_output'
             output_dir.mkdir()
-            generate_docs(venv_dir, pixeltable_dir, output_dir, major_version)
+            generate_docs(venv_dir, pixeltable_dir, output_dir, full_version, major_minor_prefix)
 
             # Deploy to stage
-            deploy_to_stage(output_dir, major_version)
+            deploy_to_stage(output_dir, full_version)
 
         print(f"\n✅ Documentation deployed successfully!")
         print(f"   View at: https://pixeltable-stage.mintlify.app/")
