@@ -26,10 +26,13 @@ class FunctionSectionGenerator(PageBase):
         try:
             # Get the wrapped function if it exists (for decorated functions)
             actual_func = func
-            if hasattr(func, 'py_fn'):
+
+            # Check for polymorphic functions first (py_fn property has assertion)
+            if hasattr(func, 'is_polymorphic') and func.is_polymorphic:
+                if hasattr(func, 'py_fns') and func.py_fns:
+                    actual_func = func.py_fns[0]
+            elif hasattr(func, 'py_fn'):
                 actual_func = func.py_fn
-            elif hasattr(func, 'py_fns') and func.py_fns:
-                actual_func = func.py_fns[0]
 
             # Get source code
             source = inspect.getsource(actual_func)
