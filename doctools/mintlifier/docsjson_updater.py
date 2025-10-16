@@ -61,20 +61,25 @@ class DocsJsonUpdater:
                 new_dropdown = navigation_structure["dropdowns"][0]  # The new version dropdown
                 new_version = new_dropdown["dropdown"]
 
-                # Find if this version already exists
-                version_exists = False
-                for i, dropdown in enumerate(existing_tab["dropdowns"]):
-                    if dropdown.get("dropdown") == new_version:
-                        # Replace existing version dropdown
-                        existing_tab["dropdowns"][i] = new_dropdown
-                        version_exists = True
-                        print(f"📝 Updated dropdown: {new_version}")
-                        break
+                # Extract major.minor prefix from new version (e.g., v0.4.17 -> v0.4)
+                import re
+                match = re.match(r'(v\d+\.\d+)', new_version)
+                major_minor_prefix = match.group(1) if match else None
 
-                # Add new version if it doesn't exist
-                if not version_exists:
-                    existing_tab["dropdowns"].append(new_dropdown)
-                    print(f"📝 Added new dropdown: {new_version}")
+                # Remove any existing dropdowns with the same major.minor prefix
+                if major_minor_prefix:
+                    original_count = len(existing_tab["dropdowns"])
+                    existing_tab["dropdowns"] = [
+                        d for d in existing_tab["dropdowns"]
+                        if not d.get("dropdown", "").startswith(major_minor_prefix)
+                    ]
+                    removed_count = original_count - len(existing_tab["dropdowns"])
+                    if removed_count > 0:
+                        print(f"📝 Removed {removed_count} old version(s) with prefix {major_minor_prefix}")
+
+                # Add the new version dropdown
+                existing_tab["dropdowns"].append(new_dropdown)
+                print(f"📝 Added new dropdown: {new_version}")
 
                 # Sort dropdowns by version (newest first)
                 existing_tab["dropdowns"] = self._sort_dropdowns(existing_tab["dropdowns"])
