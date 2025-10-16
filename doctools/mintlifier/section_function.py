@@ -14,6 +14,41 @@ class FunctionSectionGenerator(PageBase):
         # Don't initialize PageBase with output_dir since we're not writing files
         self.show_errors = show_errors
 
+    def _is_udf(self, func: Any) -> bool:
+        """Check if a function has the @udf decorator by examining its source code.
+
+        Args:
+            func: The function to check
+
+        Returns:
+            True if the function has @udf decorator, False otherwise
+        """
+        try:
+            # Get the wrapped function if it exists (for decorated functions)
+            actual_func = func
+            if hasattr(func, 'py_fn'):
+                actual_func = func.py_fn
+            elif hasattr(func, 'py_fns') and func.py_fns:
+                actual_func = func.py_fns[0]
+
+            # Get source code
+            source = inspect.getsource(actual_func)
+
+            # Check for @udf decorator in the source
+            # Look for @udf or @pxt.udf
+            lines = source.split('\n')
+            for line in lines:
+                stripped = line.strip()
+                if stripped.startswith('@udf') or stripped.startswith('@pxt.udf'):
+                    return True
+                # Stop checking once we hit the def line
+                if stripped.startswith('def '):
+                    break
+            return False
+        except (OSError, TypeError):
+            # If we can't get source (built-in, etc.), assume it's not a UDF
+            return False
+
     def generate_section(self, func: Any, func_name: str, module_path: str) -> str:
         """Generate function documentation section for inline use.
 
@@ -30,9 +65,12 @@ class FunctionSectionGenerator(PageBase):
         # Build section content with elegant visual separation
         content = "\n---\n\n"  # Beautiful horizontal divider
 
-        # All functions in Pixeltable function modules are UDFs
-        # Format: `function_name()` <sub>udf</sub>
-        content += f"### `{func_name}()` <sub>udf</sub>\n\n"
+        # Check if this function is a UDF and add label accordingly
+        is_udf = self._is_udf(func)
+        if is_udf:
+            content += f"### `{func_name}()` <sub>udf</sub>\n\n"
+        else:
+            content += f"### `{func_name}()`\n\n"
 
         # Add description
         doc = inspect.getdoc(func) or ""
