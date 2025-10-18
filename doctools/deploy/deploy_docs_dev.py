@@ -65,7 +65,7 @@ def create_venv_and_install(temp_dir: Path, pixeltable_dir: Path) -> Path:
     Returns:
         Path to venv directory
     """
-    print(f"\n🔧 Creating virtual environment...")
+    print(f"\n⚡ Creating virtual environment...")
     venv_dir = temp_dir / 'venv'
 
     result = subprocess.run(
@@ -100,7 +100,7 @@ def create_venv_and_install(temp_dir: Path, pixeltable_dir: Path) -> Path:
     if result.returncode != 0:
         raise RuntimeError(f"Failed to install pixeltable-doctools: {result.stderr}")
 
-    print(f"   ✓ Environment ready")
+    print(f"   💯 Environment ready")
     return venv_dir
 
 
@@ -113,7 +113,7 @@ def generate_docs(venv_dir: Path, pixeltable_dir: Path, output_dir: Path):
         pixeltable_dir: Path to current pixeltable repository
         output_dir: Where to output generated docs
     """
-    print(f"\n📝 Generating documentation from current working directory...")
+    print(f"\n🔥 Generating documentation from current working directory...")
 
     # Create output structure - use 'dev' as version
     sdk_output = output_dir / 'sdk' / 'dev'
@@ -172,7 +172,7 @@ def generate_docs(venv_dir: Path, pixeltable_dir: Path, output_dir: Path):
     if docs_json.exists():
         shutil.copy2(docs_json, output_dir / 'docs.json')
 
-    print(f"   ✓ Documentation generated")
+    print(f"   💪 Documentation generated")
 
 
 def deploy_to_dev(output_dir: Path):
@@ -182,7 +182,7 @@ def deploy_to_dev(output_dir: Path):
     Args:
         output_dir: Directory containing generated docs
     """
-    print(f"\n📤 Deploying to dev branch...")
+    print(f"\n🚀 Deploying to dev branch...")
 
     with tempfile.TemporaryDirectory() as temp_dir:
         docs_repo_dir = Path(temp_dir) / 'pixeltable-docs-www'
@@ -252,7 +252,7 @@ def deploy_to_dev(output_dir: Path):
                 check=True
             )
 
-            print(f"   ✓ Deployed successfully")
+            print(f"   ✨ Deployed successfully")
         else:
             print(f"   No changes to deploy")
 
@@ -281,13 +281,13 @@ def main():
             # Deploy to dev
             deploy_to_dev(output_dir)
 
-        print(f"\n✅ Documentation deployed successfully!")
+        print(f"\n🎉 Documentation deployed successfully!")
         print(f"   View at: https://pixeltable-dev.mintlify.app/sdk/dev/")
         print(f"   Note: This deployment shows ALL MDX errors for review")
         print(f"   Fix any errors in docstrings before creating a release tag")
 
     except Exception as e:
-        print(f"\n❌ Deployment failed: {e}", file=sys.stderr)
+        print(f"\n💀 Deployment failed: {e}", file=sys.stderr)
         import traceback
         traceback.print_exc()
         sys.exit(1)
