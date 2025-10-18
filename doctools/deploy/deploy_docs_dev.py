@@ -104,7 +104,7 @@ def create_venv_and_install(temp_dir: Path, pixeltable_dir: Path) -> Path:
     return venv_dir
 
 
-def generate_docs(venv_dir: Path, pixeltable_dir: Path, output_dir: Path):
+def generate_docs(venv_dir: Path, pixeltable_dir: Path, output_dir: Path) -> str:
     """
     Generate SDK documentation from current working directory.
 
@@ -112,11 +112,24 @@ def generate_docs(venv_dir: Path, pixeltable_dir: Path, output_dir: Path):
         venv_dir: Path to virtual environment
         pixeltable_dir: Path to current pixeltable repository
         output_dir: Where to output generated docs
+
+    Returns:
+        commit_hash: Short commit hash used as version
     """
     print(f"\n🔥 Generating documentation from current working directory...")
 
-    # Create output structure - use 'latest' so navigation works
-    sdk_output = output_dir / 'sdk' / 'latest'
+    # Get current commit hash as version
+    result = subprocess.run(
+        ['git', 'rev-parse', '--short', 'HEAD'],
+        cwd=str(pixeltable_dir),
+        capture_output=True,
+        text=True
+    )
+    commit_hash = result.stdout.strip()
+    print(f"   Using commit hash as version: {commit_hash}")
+
+    # Create output structure - use commit hash as version
+    sdk_output = output_dir / 'sdk' / commit_hash
     sdk_output.mkdir(parents=True)
 
     # Use docs structure from current repo
@@ -161,10 +174,10 @@ def generate_docs(venv_dir: Path, pixeltable_dir: Path, output_dir: Path):
         print(f"   {result.stderr}")
 
     # Copy newly generated SDK docs
-    # Mintlifier generates to target/sdk/latest, copy that to our latest output
+    # Mintlifier generates to target/sdk/latest, copy that to our commit hash output
     src_sdk = pixeltable_dir / 'docs' / 'target' / 'sdk' / 'latest'
     if src_sdk.exists():
-        print(f"   Copying newly generated docs to sdk/latest/...")
+        print(f"   Copying newly generated docs to sdk/{commit_hash}/...")
         shutil.copytree(src_sdk, sdk_output, dirs_exist_ok=True)
 
     # Copy docs.json to output
@@ -173,6 +186,7 @@ def generate_docs(venv_dir: Path, pixeltable_dir: Path, output_dir: Path):
         shutil.copy2(docs_json, output_dir / 'docs.json')
 
     print(f"   💪 Documentation generated")
+    return commit_hash
 
 
 def deploy_to_dev(output_dir: Path):
@@ -273,16 +287,17 @@ def main():
             # Create venv and install pixeltable from current directory
             venv_dir = create_venv_and_install(temp_path, pixeltable_dir)
 
-            # Generate documentation
+            # Generate documentation (returns commit hash)
             output_dir = temp_path / 'docs_output'
             output_dir.mkdir()
-            generate_docs(venv_dir, pixeltable_dir, output_dir)
+            commit_hash = generate_docs(venv_dir, pixeltable_dir, output_dir)
 
             # Deploy to dev
             deploy_to_dev(output_dir)
 
         print(f"\n🎉 Documentation deployed successfully!")
-        print(f"   View at: https://pixeltable-dev.mintlify.app/")
+        print(f"   View at: https://pixeltable-dev.mintlify.app/sdk/{commit_hash}/")
+        print(f"   Commit: {commit_hash}")
         print(f"   Note: This deployment shows ALL MDX errors for review")
         print(f"   Fix any errors in docstrings before creating a release tag")
 
