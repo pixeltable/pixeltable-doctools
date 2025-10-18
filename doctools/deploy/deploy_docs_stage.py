@@ -216,65 +216,45 @@ def generate_docs(venv_dir: Path, pixeltable_dir: Path, output_dir: Path, full_v
     target_dir_in_clone = pixeltable_dir / 'docs' / 'target'
     target_dir_in_clone.mkdir(parents=True, exist_ok=True)
 
-    # Fetch current deployed docs from pixeltable-docs-www/stage
-    print(f"   Fetching current deployed docs from pixeltable-docs-www/stage...")
+    # Fetch docs.json and existing SDK versions from production (main branch)
+    # This preserves version dropdown and other minor versions (e.g., v0.3.14)
+    print(f"   Fetching docs.json and SDK versions from production (main branch)...")
     with tempfile.TemporaryDirectory() as temp_dir:
         docs_repo_dir = Path(temp_dir) / 'pixeltable-docs-www'
 
         result = subprocess.run(
-            ['git', 'clone', '-b', 'stage', '--depth=1', 'https://github.com/pixeltable/pixeltable-docs-www.git', str(docs_repo_dir)],
+            ['git', 'clone', '--depth=1', 'https://github.com/pixeltable/pixeltable-docs-www.git', str(docs_repo_dir)],
             capture_output=True,
             text=True
         )
 
         if result.returncode != 0:
-            # Stage branch doesn't exist yet, try fetching from main as fallback
-            print(f"   Stage branch not found, fetching from main branch...")
-            result = subprocess.run(
-                ['git', 'clone', '--depth=1', 'https://github.com/pixeltable/pixeltable-docs-www.git', str(docs_repo_dir)],
-                capture_output=True,
-                text=True
-            )
+            raise RuntimeError(f"Failed to fetch production docs from main branch: {result.stderr}")
 
-        if result.returncode != 0:
-            # Both stage and main failed
-            print(f"   Warning: Could not fetch deployed docs, using base docs.json")
-            docs_json_src = mintlify_src / 'docs.json'
-            if docs_json_src.exists():
-                shutil.copy2(docs_json_src, target_dir_in_clone / 'docs.json')
-        else:
-            # Successfully fetched from either stage or main
-            # Copy all files from deployed docs to target
-            for item in docs_repo_dir.iterdir():
-                if item.name == '.git':
-                    continue
-                dest = target_dir_in_clone / item.name
-                if item.is_dir():
-                    if dest.exists():
-                        shutil.rmtree(dest)
-                    shutil.copytree(item, dest)
-                else:
-                    shutil.copy2(item, dest)
+        # Copy ONLY docs.json to preserve version dropdown
+        docs_json = docs_repo_dir / 'docs.json'
+        if docs_json.exists():
+            shutil.copy2(docs_json, target_dir_in_clone / 'docs.json')
 
-            # Also preserve existing SDK docs to final output (before mintlifier overwrites target/sdk/)
-            # But remove any previous versions with the same major.minor prefix
-            existing_sdk = docs_repo_dir / 'sdk'
-            if existing_sdk.exists():
-                print(f"   Copying existing SDK versions to output...")
-                # Copy all versions first
-                shutil.copytree(existing_sdk, output_dir / 'sdk', dirs_exist_ok=True)
+        # Preserve existing SDK versions to final output
+        # But remove any previous versions with the same major.minor prefix
+        existing_sdk = docs_repo_dir / 'sdk'
+        if existing_sdk.exists():
+            print(f"   Copying existing SDK versions to output...")
+            # Copy all versions first
+            shutil.copytree(existing_sdk, output_dir / 'sdk', dirs_exist_ok=True)
 
-                # Then remove any existing versions with the same major.minor prefix
-                output_sdk = output_dir / 'sdk'
-                if output_sdk.exists():
-                    for version_dir in output_sdk.iterdir():
-                        if version_dir.is_dir() and version_dir.name.startswith(major_minor_prefix):
-                            # Don't delete the version we're about to create
-                            if version_dir.name != full_version:
-                                print(f"   Removing old version: {version_dir.name}")
-                                shutil.rmtree(version_dir)
+            # Then remove any existing versions with the same major.minor prefix
+            output_sdk = output_dir / 'sdk'
+            if output_sdk.exists():
+                for version_dir in output_sdk.iterdir():
+                    if version_dir.is_dir() and version_dir.name.startswith(major_minor_prefix):
+                        # Don't delete the version we're about to create
+                        if version_dir.name != full_version:
+                            print(f"   Removing old version: {version_dir.name}")
+                            shutil.rmtree(version_dir)
 
-            print(f"   ✓ Fetched deployed docs")
+        print(f"   ✓ Fetched production docs.json and SDK versions")
 
     # Also copy to final output
     print(f"   Copying base documentation to output...")
