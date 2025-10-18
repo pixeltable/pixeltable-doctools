@@ -115,8 +115,8 @@ def generate_docs(venv_dir: Path, pixeltable_dir: Path, output_dir: Path):
     """
     print(f"\n🔥 Generating documentation from current working directory...")
 
-    # Create output structure - use 'dev' as version
-    sdk_output = output_dir / 'sdk' / 'dev'
+    # Create output structure - use 'latest' so navigation works
+    sdk_output = output_dir / 'sdk' / 'latest'
     sdk_output.mkdir(parents=True)
 
     # Use docs structure from current repo
@@ -161,10 +161,10 @@ def generate_docs(venv_dir: Path, pixeltable_dir: Path, output_dir: Path):
         print(f"   {result.stderr}")
 
     # Copy newly generated SDK docs
-    # Mintlifier generates to target/sdk/latest, copy that to our dev output
+    # Mintlifier generates to target/sdk/latest, copy that to our latest output
     src_sdk = pixeltable_dir / 'docs' / 'target' / 'sdk' / 'latest'
     if src_sdk.exists():
-        print(f"   Copying newly generated docs to sdk/dev/...")
+        print(f"   Copying newly generated docs to sdk/latest/...")
         shutil.copytree(src_sdk, sdk_output, dirs_exist_ok=True)
 
     # Copy docs.json to output
@@ -282,7 +282,7 @@ def main():
             deploy_to_dev(output_dir)
 
         print(f"\n🎉 Documentation deployed successfully!")
-        print(f"   View at: https://pixeltable-dev.mintlify.app/sdk/dev/")
+        print(f"   View at: https://pixeltable-dev.mintlify.app/")
         print(f"   Note: This deployment shows ALL MDX errors for review")
         print(f"   Fix any errors in docstrings before creating a release tag")
 
