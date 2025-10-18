@@ -148,19 +148,21 @@ Uses [CLIP embedding][pixeltable.functions.huggingface.clip] for indexing.
 
 ---
 
-### 6. Python REPL Syntax
+### 6. All Code Must Be in Fenced Code Blocks
 
-**❌ WRONG - Broken REPL prompts:**
+**CRITICAL**: All Python code, including REPL examples, **MUST** be enclosed in fenced code blocks.
+
+**❌ WRONG - Code outside blocks:**
 ```python
 """
 Example:
 
-> > > from module import func
+>>> from module import func
 ... result = func()
 """
 ```
 
-**✅ CORRECT - Proper REPL syntax:**
+**✅ CORRECT - Code inside ```python blocks:**
 ```python
 """
 Example:
@@ -172,7 +174,13 @@ Example:
 """
 ```
 
-**Why**: REPL examples should be in code blocks with proper `>>>` and `...` continuation marks.
+**Why**: Code outside fenced blocks is interpreted as prose markdown. Curly braces `{}`, brackets `[]`, and other syntax trigger MDX/JSX parsing errors.
+
+**Important**:
+- Use `python` language tag for Python code blocks (including REPL examples)
+- Do NOT use `bash` for Python REPL examples
+- Use `>>>` for primary REPL prompts
+- Use `...` for continuation lines in multiline statements
 
 ---
 
@@ -268,15 +276,16 @@ tbl.update(
 
 ### Example 4: add_embedding_index() (Fixed 2025-10-18)
 
-**Problem**: Escaped brackets and broken REPL syntax.
+**Problem**: Code examples outside fenced blocks caused MDX to interpret them as prose, triggering acorn errors on curly braces.
 
 **Before**:
 ```python
 """
-Uses \[CLIP embedding\]\[pixeltable.functions.huggingface.clip\]:
+Uses [CLIP embedding][pixeltable.functions.huggingface.clip]:
 
-> > > from pixeltable.functions.huggingface import clip
+>>> from pixeltable.functions.huggingface import clip
 ... embedding_fn = clip.using(model_id='openai/clip-vit-base-patch32')
+... tbl.add_embedding_index(tbl.img, embedding=embedding_fn)
 """
 ```
 
@@ -287,12 +296,15 @@ Uses [CLIP embedding][pixeltable.functions.huggingface.clip]:
 
 ```python
 >>> from pixeltable.functions.huggingface import clip
-... embedding_fn = clip.using(model_id='openai/clip-vit-base-patch32')
+>>> embedding_fn = clip.using(model_id='openai/clip-vit-base-patch32')
+>>> tbl.add_embedding_index(tbl.img, embedding=embedding_fn)
 ```
 """
 ```
 
-**Impact**: Multiple acorn parsing errors prevented page rendering.
+**Impact**: Code outside blocks was rendered as blockquotes with escaped `>>>`, and curly braces in function calls triggered "Could not parse expression with acorn" errors.
+
+**Key Lesson**: ALL code must be in fenced code blocks, even simple REPL examples in prose descriptions.
 
 ---
 
