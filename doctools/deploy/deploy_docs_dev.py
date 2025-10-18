@@ -180,10 +180,20 @@ def generate_docs(venv_dir: Path, pixeltable_dir: Path, output_dir: Path) -> str
         print(f"   Copying newly generated docs to sdk/{commit_hash}/...")
         shutil.copytree(src_sdk, sdk_output, dirs_exist_ok=True)
 
-    # Copy docs.json to output
+    # Copy docs.json to output and update SDK paths to use commit hash
     docs_json = pixeltable_dir / 'docs' / 'target' / 'docs.json'
     if docs_json.exists():
-        shutil.copy2(docs_json, output_dir / 'docs.json')
+        import json
+        with open(docs_json, 'r') as f:
+            docs_config = json.load(f)
+
+        # Update all SDK paths from sdk/latest/ to sdk/{commit_hash}/
+        docs_str = json.dumps(docs_config)
+        docs_str = docs_str.replace('sdk/latest/', f'sdk/{commit_hash}/')
+        docs_config = json.loads(docs_str)
+
+        with open(output_dir / 'docs.json', 'w') as f:
+            json.dump(docs_config, f, indent=2)
 
     print(f"   💪 Documentation generated")
     return commit_hash
