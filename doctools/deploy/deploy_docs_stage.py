@@ -335,6 +335,12 @@ def deploy_to_stage(output_dir: Path, full_version: str):
                 check=True
             )
 
+        # Remove sdk/latest before deploying (it's only for local preview)
+        latest_sdk = output_dir / 'sdk' / 'latest'
+        if latest_sdk.exists():
+            print(f"   Removing sdk/latest (local preview only)...")
+            shutil.rmtree(latest_sdk)
+
         # Copy all docs from output (mintlifier already merged docs.json)
         print(f"   Copying documentation files...")
         for item in output_dir.iterdir():
