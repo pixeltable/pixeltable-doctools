@@ -115,6 +115,48 @@ def generate_changelog_to_dir(output_dir: Path, repo: str = "pixeltable/pixeltab
         shutil.rmtree(output_dir)
     output_dir.mkdir(parents=True)
 
+    # Create index page
+    print(f"\n📝 Creating changelog index...")
+    index_content = """---
+title: "Changelog"
+description: "Release history and updates for Pixeltable"
+---
+
+# Changelog
+
+View the complete release history for Pixeltable below. Each release includes detailed information about new features, bug fixes, and improvements.
+
+For the latest release information, visit our [GitHub Releases page](https://github.com/pixeltable/pixeltable/releases).
+
+---
+"""
+
+    # Add links to all releases in the index
+    for release in releases[:10]:  # Show latest 10 in index
+        tag_name = release.get('tag_name', 'unknown')
+        name = release.get('name', tag_name)
+        published_at = release.get('published_at', '')
+
+        # Parse date
+        if published_at:
+            try:
+                from datetime import datetime
+                date_obj = datetime.fromisoformat(published_at.replace('Z', '+00:00'))
+                formatted_date = date_obj.strftime('%B %d, %Y')
+            except Exception:
+                formatted_date = published_at
+        else:
+            formatted_date = 'Unknown date'
+
+        # Link to individual release page
+        filename = tag_name.lstrip('v').replace('/', '-')
+        index_content += f"\n## [{name}](./{filename})\n"
+        index_content += f"**Released:** {formatted_date}\n\n"
+
+    index_path = output_dir / 'changelog.mdx'
+    index_path.write_text(index_content)
+    print(f"   ✅ changelog.mdx (index)")
+
     # Convert each release to MDX
     print(f"\n🔨 Converting releases to MDX...")
 
