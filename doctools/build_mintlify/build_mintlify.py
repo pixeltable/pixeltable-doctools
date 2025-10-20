@@ -3,7 +3,7 @@
 Build complete Mintlify documentation site.
 
 This script:
-1. Copies docs/mintlify-src/* to docs/target/
+1. Copies docs/mintlify/* to docs/target/
 2. Runs mintlifier to generate SDK documentation into docs/target/
 3. Results in a complete, deployable documentation site
 """
@@ -13,6 +13,8 @@ import shutil
 import subprocess
 import sys
 from pathlib import Path
+
+from doctools.config import get_mintlify_source_path, get_mintlify_target_path
 
 
 def deploy_docs(target_dir: Path, target: str) -> None:
@@ -129,20 +131,20 @@ def find_pixeltable_repo() -> Path:
     cwd = Path.cwd()
 
     # Check if we're already in pixeltable repo
-    if (cwd / 'docs' / 'mintlify-src').exists():
+    if get_mintlify_source_path(cwd).exists():
         return cwd
 
     # Walk up to find it
     current = cwd
     for _ in range(5):  # Don't go up more than 5 levels
-        if (current / 'docs' / 'mintlify-src').exists():
+        if get_mintlify_source_path(current).exists():
             return current
         current = current.parent
 
     raise FileNotFoundError(
         "Could not find pixeltable repository. "
         "Make sure you're running this from within the pixeltable repo, "
-        "or that docs/mintlify-src/ exists."
+        "or that docs/mintlify/ exists."
     )
 
 
@@ -159,8 +161,8 @@ def build_mintlify(target: str) -> None:
     repo_root = find_pixeltable_repo()
     print(f"Found pixeltable repository at: {repo_root}")
 
-    source_dir = repo_root / 'docs' / 'mintlify-src'
-    target_dir = repo_root / 'docs' / 'target'
+    source_dir = get_mintlify_source_path(repo_root)
+    target_dir = get_mintlify_target_path(repo_root)
     opml_file = repo_root / 'docs' / 'public_api.opml'
 
     # Verify source exists
@@ -176,10 +178,10 @@ def build_mintlify(target: str) -> None:
         shutil.rmtree(target_dir)
     target_dir.mkdir(parents=True)
 
-    # Step 2: Copy mintlify-src to target
+    # Step 2: Copy mintlify source to target
     print(f"\n📋 Copying source files from {source_dir} to {target_dir}")
 
-    # Copy all contents of mintlify-src to target
+    # Copy all contents of mintlify to target
     for item in source_dir.iterdir():
         if item.name.startswith('.'):
             continue  # Skip hidden files

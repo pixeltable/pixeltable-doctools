@@ -24,6 +24,8 @@ import sys
 import tempfile
 from pathlib import Path
 
+from doctools.config import get_mintlify_source_path
+
 
 def find_pixeltable_repo() -> Path:
     """
@@ -133,12 +135,12 @@ def generate_docs(venv_dir: Path, pixeltable_dir: Path, output_dir: Path) -> str
     sdk_output.mkdir(parents=True)
 
     # Use docs structure from current repo
-    mintlify_src = pixeltable_dir / 'docs' / 'mintlify-src'
+    mintlify_src = get_mintlify_source_path(pixeltable_dir)
     opml_path = pixeltable_dir / 'docs' / 'public_api.opml'
 
     if not mintlify_src.exists():
         raise RuntimeError(
-            f"mintlify-src not found at {mintlify_src}\n"
+            f"Mintlify source not found at {mintlify_src}\n"
             f"Please run this command from the pixeltable repository."
         )
 

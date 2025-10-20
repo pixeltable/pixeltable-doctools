@@ -25,6 +25,8 @@ import sys
 import tempfile
 from pathlib import Path
 
+from doctools.config import get_mintlify_source_path
+
 
 def parse_version(version: str) -> tuple[str, str]:
     """
@@ -147,13 +149,13 @@ def find_current_pixeltable_repo() -> Path:
     cwd = Path.cwd()
 
     # Check if we're in pixeltable repo
-    if (cwd / 'docs' / 'mintlify-src').exists():
+    if get_mintlify_source_path(cwd).exists():
         return cwd
 
     # Walk up to find it
     current = cwd
     for _ in range(5):
-        if (current / 'docs' / 'mintlify-src').exists():
+        if get_mintlify_source_path(current).exists():
             return current
         current = current.parent
 
@@ -184,17 +186,17 @@ def generate_docs(venv_dir: Path, pixeltable_dir: Path, output_dir: Path, full_v
 
     if current_repo:
         print(f"   Using documentation structure from: {current_repo}")
-        mintlify_src = current_repo / 'docs' / 'mintlify-src'
+        mintlify_src = get_mintlify_source_path(current_repo)
         opml_path = current_repo / 'docs' / 'public_api.opml'
     else:
         print(f"   Using documentation structure from cloned repo")
-        mintlify_src = pixeltable_dir / 'docs' / 'mintlify-src'
+        mintlify_src = get_mintlify_source_path(pixeltable_dir)
         opml_path = pixeltable_dir / 'docs' / 'public_api.opml'
 
     if not mintlify_src.exists():
         raise RuntimeError(
-            f"mintlify-src not found at {mintlify_src}\n"
-            f"Please run this command from the pixeltable repository, or ensure docs/mintlify-src/ exists."
+            f"Mintlify source not found at {mintlify_src}\n"
+            f"Please run this command from the pixeltable repository, or ensure docs/mintlify/ exists."
         )
 
     # Copy OPML to cloned repo so mintlifier can find it
@@ -206,8 +208,8 @@ def generate_docs(venv_dir: Path, pixeltable_dir: Path, output_dir: Path, full_v
     else:
         print(f"   Warning: OPML not found at {opml_path}, using version from cloned repo")
 
-    # Copy mintlify-src to cloned repo
-    dest_mintlify = pixeltable_dir / 'docs' / 'mintlify-src'
+    # Copy mintlify source to cloned repo
+    dest_mintlify = get_mintlify_source_path(pixeltable_dir)
     if dest_mintlify.exists():
         shutil.rmtree(dest_mintlify)
     shutil.copytree(mintlify_src, dest_mintlify)

@@ -6,7 +6,7 @@ This script:
 1. Finds all .ipynb files in docs/notebooks/
 2. Creates a temporary _quarto.yml config file
 3. Runs quarto render to convert to MDX
-4. Outputs to docs/mintlify-src/notebooks/ preserving directory structure
+4. Outputs to docs/mintlify/notebooks/ preserving directory structure
 """
 
 import argparse
@@ -15,6 +15,8 @@ import subprocess
 import sys
 import tempfile
 from pathlib import Path
+
+from doctools.config import get_mintlify_source_path
 
 
 # Quarto configuration template
@@ -81,7 +83,7 @@ def convert_notebooks() -> None:
     print(f"Found pixeltable repository at: {repo_root}")
 
     notebooks_dir = repo_root / 'docs' / 'notebooks'
-    output_dir = repo_root / 'docs' / 'mintlify-src' / 'notebooks'
+    output_dir = get_mintlify_source_path(repo_root) / 'notebooks'
 
     # Verify source exists
     if not notebooks_dir.exists():
@@ -158,8 +160,8 @@ def convert_notebooks() -> None:
 
         print(f"\n💡 Next steps:")
         print(f"   1. Review converted files in: {output_dir}")
-        print(f"   2. Add notebook pages to docs/mintlify-src/docs.json")
-        print(f"   3. Preview with: cd {repo_root / 'docs' / 'mintlify-src'} && mintlify dev")
+        print(f"   2. Add notebook pages to {get_mintlify_source_path(repo_root)}/docs.json")
+        print(f"   3. Preview with: cd {get_mintlify_source_path(repo_root)} && mintlify dev")
 
     except subprocess.TimeoutExpired:
         print("\n❌ Quarto conversion timed out after 5 minutes", file=sys.stderr)
