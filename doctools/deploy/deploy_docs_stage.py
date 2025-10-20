@@ -26,6 +26,7 @@ import tempfile
 from pathlib import Path
 
 from doctools.config import get_mintlify_source_path
+from doctools.convert_notebooks.convert_notebooks import convert_notebooks_to_dir
 
 
 def merge_docs_json(production_docs: dict, local_docs: dict, generated_docs: dict) -> dict:
@@ -331,6 +332,16 @@ def generate_docs(venv_dir: Path, pixeltable_dir: Path, output_dir: Path, full_v
                             shutil.rmtree(version_dir)
 
         print(f"   ✓ Fetched production docs.json and SDK versions")
+
+    # Generate notebooks to docs/mintlify/notebooks/
+    print(f"   Generating notebooks...")
+    try:
+        notebooks_output = mintlify_src / 'notebooks'
+        convert_notebooks_to_dir(pixeltable_dir, notebooks_output)
+        print(f"   ✅ Notebooks generated")
+    except Exception as e:
+        print(f"   ⚠️  Notebook generation failed: {e}")
+        print(f"   Continuing without notebooks...")
 
     # Also copy to final output
     print(f"   Copying base documentation to output...")

@@ -25,6 +25,7 @@ import tempfile
 from pathlib import Path
 
 from doctools.config import get_mintlify_source_path
+from doctools.convert_notebooks.convert_notebooks import convert_notebooks_to_dir
 
 
 def find_pixeltable_repo() -> Path:
@@ -147,6 +148,16 @@ def generate_docs(venv_dir: Path, pixeltable_dir: Path, output_dir: Path) -> str
     # Create docs/target directory
     target_dir = pixeltable_dir / 'docs' / 'target'
     target_dir.mkdir(parents=True, exist_ok=True)
+
+    # Generate notebooks to docs/mintlify/notebooks/
+    print(f"   Generating notebooks...")
+    try:
+        notebooks_output = mintlify_src / 'notebooks'
+        convert_notebooks_to_dir(pixeltable_dir, notebooks_output)
+        print(f"   ✅ Notebooks generated")
+    except Exception as e:
+        print(f"   ⚠️  Notebook generation failed: {e}")
+        print(f"   Continuing without notebooks...")
 
     # Copy base documentation to output
     print(f"   Copying base documentation to output...")
