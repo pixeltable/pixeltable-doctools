@@ -53,6 +53,13 @@ format:
 """
 
 
+def convert_notebooks() -> None:
+    """Convert all notebooks to MDX format (convenience function for CLI)."""
+    repo_root = find_pixeltable_repo()
+    output_dir = get_mintlify_source_path(repo_root) / 'notebooks'
+    convert_notebooks_to_dir(repo_root, output_dir)
+
+
 def find_pixeltable_repo() -> Path:
     """Find the pixeltable repository root."""
     cwd = Path.cwd()
@@ -74,16 +81,19 @@ def find_pixeltable_repo() -> Path:
     )
 
 
-def convert_notebooks() -> None:
-    """Convert all notebooks to MDX format."""
-    print("🔄 Converting Jupyter notebooks to Mintlify MDX format...")
+def convert_notebooks_to_dir(repo_root: Path, output_dir: Path) -> None:
+    """
+    Convert all notebooks in repo_root/docs/notebooks to MDX format.
 
-    # Find pixeltable repo
-    repo_root = find_pixeltable_repo()
-    print(f"Found pixeltable repository at: {repo_root}")
+    Args:
+        repo_root: Path to pixeltable repository root
+        output_dir: Where to output the converted .mdx files
+    """
+    print("🔄 Converting Jupyter notebooks to Mintlify MDX format...")
+    print(f"   Repository: {repo_root}")
+    print(f"   Output: {output_dir}")
 
     notebooks_dir = repo_root / 'docs' / 'notebooks'
-    output_dir = get_mintlify_source_path(repo_root) / 'notebooks'
 
     # Verify source exists
     if not notebooks_dir.exists():

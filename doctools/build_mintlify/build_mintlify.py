@@ -15,6 +15,7 @@ import sys
 from pathlib import Path
 
 from doctools.config import get_mintlify_source_path, get_mintlify_target_path
+from doctools.convert_notebooks.convert_notebooks import convert_notebooks_to_dir
 
 
 def deploy_docs(target_dir: Path, target: str) -> None:
@@ -172,16 +173,26 @@ def build_mintlify(target: str) -> None:
     if not opml_file.exists():
         raise FileNotFoundError(f"OPML file not found: {opml_file}")
 
-    # Step 1: Clean and create target directory
+    # Step 1: Generate notebooks to docs/mintlify/notebooks/
+    print(f"\n📓 Generating notebooks...")
+    try:
+        notebooks_output = source_dir / 'notebooks'
+        convert_notebooks_to_dir(repo_root, notebooks_output)
+        print(f"   ✅ Notebooks generated to {notebooks_output}")
+    except Exception as e:
+        print(f"   ⚠️  Notebook generation failed: {e}")
+        print(f"   Continuing without notebooks...")
+
+    # Step 2: Clean and create target directory
     print(f"\n📁 Preparing target directory: {target_dir}")
     if target_dir.exists():
         shutil.rmtree(target_dir)
     target_dir.mkdir(parents=True)
 
-    # Step 2: Copy mintlify source to target
+    # Step 3: Copy mintlify source to target
     print(f"\n📋 Copying source files from {source_dir} to {target_dir}")
 
-    # Copy all contents of mintlify to target
+    # Copy all contents of mintlify to target (including generated notebooks)
     for item in source_dir.iterdir():
         if item.name.startswith('.'):
             continue  # Skip hidden files
@@ -194,7 +205,7 @@ def build_mintlify(target: str) -> None:
             shutil.copy2(item, dest)
             print(f"   Copied file: {item.name}")
 
-    # Step 3: Run mintlifier to generate SDK docs
+    # Step 4: Run mintlifier to generate SDK docs
     # Mintlifier now writes directly to docs/target/sdk/latest and updates docs/target/docs.json
     print(f"\n🔨 Running mintlifier to generate SDK documentation...")
     print(f"   OPML: {opml_file}")
