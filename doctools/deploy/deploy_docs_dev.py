@@ -190,8 +190,10 @@ def generate_docs(venv_dir: Path, pixeltable_dir: Path, output_dir: Path) -> str
             docs_config = json.load(f)
 
         # Update all SDK paths from sdk/latest/ to sdk/{commit_hash}/
+        # Also update dropdown label from "latest" to commit hash
         docs_str = json.dumps(docs_config)
         docs_str = docs_str.replace('sdk/latest/', f'sdk/{commit_hash}/')
+        docs_str = docs_str.replace('"dropdown": "latest"', f'"dropdown": "{commit_hash[:8]}"')
         docs_config = json.loads(docs_str)
 
         with open(output_dir / 'docs.json', 'w') as f:
