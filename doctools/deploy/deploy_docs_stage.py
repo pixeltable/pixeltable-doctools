@@ -25,6 +25,7 @@ import sys
 import tempfile
 from pathlib import Path
 
+from doctools.changelog.fetch_releases import generate_changelog_to_dir
 from doctools.config import get_mintlify_source_path
 from doctools.convert_notebooks.convert_notebooks import convert_notebooks_to_dir
 
@@ -342,6 +343,16 @@ def generate_docs(venv_dir: Path, pixeltable_dir: Path, output_dir: Path, full_v
     except Exception as e:
         print(f"   ⚠️  Notebook generation failed: {e}")
         print(f"   Continuing without notebooks...")
+
+    # Generate changelog to docs/mintlify/changelog/
+    print(f"   Generating changelog from GitHub releases...")
+    try:
+        changelog_output = mintlify_src / 'changelog'
+        generate_changelog_to_dir(changelog_output)
+        print(f"   ✅ Changelog generated")
+    except Exception as e:
+        print(f"   ⚠️  Changelog generation failed: {e}")
+        print(f"   Continuing without changelog...")
 
     # Also copy to final output
     print(f"   Copying base documentation to output...")

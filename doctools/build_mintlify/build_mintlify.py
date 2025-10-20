@@ -14,6 +14,7 @@ import subprocess
 import sys
 from pathlib import Path
 
+from doctools.changelog.fetch_releases import generate_changelog_to_dir
 from doctools.config import get_mintlify_source_path, get_mintlify_target_path
 from doctools.convert_notebooks.convert_notebooks import convert_notebooks_to_dir
 
@@ -182,6 +183,16 @@ def build_mintlify(target: str) -> None:
     except Exception as e:
         print(f"   ⚠️  Notebook generation failed: {e}")
         print(f"   Continuing without notebooks...")
+
+    # Step 1b: Generate changelog to docs/mintlify/changelog/
+    print(f"\n📰 Generating changelog from GitHub releases...")
+    try:
+        changelog_output = source_dir / 'changelog'
+        generate_changelog_to_dir(changelog_output)
+        print(f"   ✅ Changelog generated to {changelog_output}")
+    except Exception as e:
+        print(f"   ⚠️  Changelog generation failed: {e}")
+        print(f"   Continuing without changelog...")
 
     # Step 2: Clean and create target directory
     print(f"\n📁 Preparing target directory: {target_dir}")
