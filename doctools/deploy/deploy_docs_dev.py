@@ -308,7 +308,7 @@ def main():
             deploy_to_dev(output_dir)
 
         print(f"\n🎉 Documentation deployed successfully!")
-        print(f"   View at: https://pixeltable-dev.mintlify.app/sdk/{commit_hash}/")
+        print(f"   View at: https://pixeltable-dev.mintlify.app/sdk/{commit_hash}")
         print(f"   Commit: {commit_hash}")
         print(f"   Note: This deployment shows ALL MDX errors for review")
         print(f"   Fix any errors in docstrings before creating a release tag")
