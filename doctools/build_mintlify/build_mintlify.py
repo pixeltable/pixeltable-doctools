@@ -176,23 +176,15 @@ def build_mintlify(target: str) -> None:
 
     # Step 1: Generate notebooks to docs/mintlify/notebooks/
     print(f"\n📓 Generating notebooks...")
-    try:
-        notebooks_output = source_dir / 'notebooks'
-        convert_notebooks_to_dir(repo_root, notebooks_output)
-        print(f"   ✅ Notebooks generated to {notebooks_output}")
-    except Exception as e:
-        print(f"   ⚠️  Notebook generation failed: {e}")
-        print(f"   Continuing without notebooks...")
+    notebooks_output = source_dir / 'notebooks'
+    convert_notebooks_to_dir(repo_root, notebooks_output)
+    print(f"   ✅ Notebooks generated to {notebooks_output}")
 
     # Step 1b: Generate changelog to docs/mintlify/changelog/
     print(f"\n📰 Generating changelog from GitHub releases...")
-    try:
-        changelog_output = source_dir / 'changelog'
-        generate_changelog_to_dir(changelog_output)
-        print(f"   ✅ Changelog generated to {changelog_output}")
-    except Exception as e:
-        print(f"   ⚠️  Changelog generation failed: {e}")
-        print(f"   Continuing without changelog...")
+    changelog_output = source_dir / 'changelog'
+    generate_changelog_to_dir(changelog_output)
+    print(f"   ✅ Changelog generated to {changelog_output}")
 
     # Step 2: Clean and create target directory
     print(f"\n📁 Preparing target directory: {target_dir}")

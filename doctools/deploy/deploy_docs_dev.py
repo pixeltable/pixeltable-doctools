@@ -163,23 +163,15 @@ def generate_docs(venv_dir: Path, pixeltable_dir: Path, output_dir: Path) -> str
 
     # Generate notebooks to docs/mintlify/notebooks/
     print(f"   Generating notebooks...")
-    try:
-        notebooks_output = mintlify_src / 'notebooks'
-        convert_notebooks_to_dir(pixeltable_dir, notebooks_output)
-        print(f"   ✅ Notebooks generated")
-    except Exception as e:
-        print(f"   ⚠️  Notebook generation failed: {e}")
-        print(f"   Continuing without notebooks...")
+    notebooks_output = mintlify_src / 'notebooks'
+    convert_notebooks_to_dir(pixeltable_dir, notebooks_output)
+    print(f"   ✅ Notebooks generated")
 
     # Generate changelog to docs/mintlify/changelog/
     print(f"   Generating changelog from GitHub releases...")
-    try:
-        changelog_output = mintlify_src / 'changelog'
-        generate_changelog_to_dir(changelog_output)
-        print(f"   ✅ Changelog generated")
-    except Exception as e:
-        print(f"   ⚠️  Changelog generation failed: {e}")
-        print(f"   Continuing without changelog...")
+    changelog_output = mintlify_src / 'changelog'
+    generate_changelog_to_dir(changelog_output)
+    print(f"   ✅ Changelog generated")
 
     # Copy base documentation to output
     print(f"   Copying base documentation to output...")
