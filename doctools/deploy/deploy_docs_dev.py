@@ -196,12 +196,50 @@ def generate_docs(venv_dir: Path, pixeltable_dir: Path, output_dir: Path) -> str
         print(f"   Copying newly generated docs to sdk/{commit_hash}/...")
         shutil.copytree(src_sdk, sdk_output, dirs_exist_ok=True)
 
-    # Copy docs.json to output and update SDK paths to use commit hash
-    docs_json = pixeltable_dir / 'docs' / 'target' / 'docs.json'
-    if docs_json.exists():
-        import json
-        with open(docs_json, 'r') as f:
+    # Merge SDK section from mintlifier output into our source docs.json
+    import json
+
+    # Load the source docs.json that was copied to output_dir (has notebooks/changelog)
+    output_docs_json = output_dir / 'docs.json'
+    mintlifier_docs_json = pixeltable_dir / 'docs' / 'target' / 'docs.json'
+
+    if output_docs_json.exists() and mintlifier_docs_json.exists():
+        print(f"   Merging SDK section into docs.json...")
+
+        with open(output_docs_json, 'r') as f:
             docs_config = json.load(f)
+
+        with open(mintlifier_docs_json, 'r') as f:
+            mintlifier_config = json.load(f)
+
+        # Extract SDK tab from mintlifier output
+        sdk_tab = None
+        for tab in mintlifier_config.get('navigation', {}).get('tabs', []):
+            if tab.get('tab') == 'Pixeltable SDK':
+                sdk_tab = tab
+                break
+
+        # Replace SDK tab in our source docs.json with mintlifier's version
+        # IMPORTANT: Keep all other tabs from source (Documentation with notebooks, Changelog, etc.)
+        if sdk_tab:
+            tabs = docs_config.setdefault('navigation', {}).setdefault('tabs', [])
+            sdk_tab_found = False
+
+            for i, tab in enumerate(tabs):
+                if tab.get('tab') == 'Pixeltable SDK':
+                    tabs[i] = sdk_tab
+                    sdk_tab_found = True
+                    break
+
+            if not sdk_tab_found:
+                # SDK tab doesn't exist in source, add it after Documentation tab
+                for i, tab in enumerate(tabs):
+                    if tab.get('tab') == 'Documentation':
+                        tabs.insert(i + 1, sdk_tab)
+                        break
+                else:
+                    # No Documentation tab, just append
+                    tabs.append(sdk_tab)
 
         # Update all SDK paths from sdk/latest/ to sdk/{commit_hash}/
         # Also update dropdown label from "latest" to commit hash
@@ -212,6 +250,8 @@ def generate_docs(venv_dir: Path, pixeltable_dir: Path, output_dir: Path) -> str
 
         with open(output_dir / 'docs.json', 'w') as f:
             json.dump(docs_config, f, indent=2)
+
+        print(f"   ✅ docs.json updated with SDK section")
 
     print(f"   💪 Documentation generated")
     return commit_hash
