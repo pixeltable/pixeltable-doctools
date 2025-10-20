@@ -208,6 +208,17 @@ def create_venv_and_install(temp_dir: Path, pixeltable_dir: Path) -> Path:
     if result.returncode != 0:
         raise RuntimeError(f"Failed to install pixeltable-doctools: {result.stderr}")
 
+    print(f"   Installing quarto-cli for notebook conversion...")
+    result = subprocess.run(
+        [str(pip_path), 'install', '-q', 'quarto-cli'],
+        capture_output=True,
+        text=True
+    )
+
+    if result.returncode != 0:
+        print(f"   ⚠️  Failed to install quarto-cli: {result.stderr}")
+        print(f"   Notebooks may not be generated")
+
     print(f"   ✓ Environment ready")
     return venv_dir
 
