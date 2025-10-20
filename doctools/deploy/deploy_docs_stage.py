@@ -28,6 +28,77 @@ from pathlib import Path
 from doctools.config import get_mintlify_source_path
 
 
+def merge_docs_json(production_docs: dict, local_docs: dict, generated_docs: dict) -> dict:
+    """
+    Merge docs.json from three sources:
+    1. Production (main branch) - has all historical SDK versions
+    2. Local (current repo) - has latest navigation structure (notebooks, etc.)
+    3. Generated (mintlifier) - has new SDK version being deployed
+
+    Strategy:
+    - Use local navigation (tabs) for non-SDK content
+    - Use generated SDK tab to get new version
+    - Merge SDK versions from production + generated
+    - Keep other settings from local (colors, logo, etc.)
+
+    Args:
+        production_docs: docs.json from production (main branch)
+        local_docs: docs.json from current repo
+        generated_docs: docs.json after mintlifier
+
+    Returns:
+        Merged docs.json
+    """
+    import copy
+    result = copy.deepcopy(local_docs)
+
+    # Find SDK tab in each version
+    def find_sdk_tab(docs):
+        if 'navigation' in docs and 'tabs' in docs['navigation']:
+            for tab in docs['navigation']['tabs']:
+                if tab.get('tab') == 'Pixeltable SDK':
+                    return tab
+        return None
+
+    prod_sdk_tab = find_sdk_tab(production_docs)
+    gen_sdk_tab = find_sdk_tab(generated_docs)
+    local_sdk_tab = find_sdk_tab(result)
+
+    if gen_sdk_tab and local_sdk_tab:
+        # Replace local SDK tab with generated one (has new version)
+        for i, tab in enumerate(result['navigation']['tabs']):
+            if tab.get('tab') == 'Pixeltable SDK':
+                result['navigation']['tabs'][i] = gen_sdk_tab
+                break
+
+        # Merge version dropdowns from production into generated
+        if prod_sdk_tab and 'dropdowns' in prod_sdk_tab:
+            gen_dropdowns = gen_sdk_tab.get('dropdowns', [])
+            prod_dropdowns = prod_sdk_tab.get('dropdowns', [])
+
+            # Collect all unique versions (keyed by dropdown name)
+            versions = {}
+            for dropdown in prod_dropdowns:
+                versions[dropdown.get('dropdown')] = dropdown
+            for dropdown in gen_dropdowns:
+                versions[dropdown.get('dropdown')] = dropdown
+
+            # Sort by version number (newest first)
+            sorted_versions = sorted(
+                versions.values(),
+                key=lambda d: d.get('dropdown', ''),
+                reverse=True
+            )
+
+            # Update the SDK tab with merged versions
+            for tab in result['navigation']['tabs']:
+                if tab.get('tab') == 'Pixeltable SDK':
+                    tab['dropdowns'] = sorted_versions
+                    break
+
+    return result
+
+
 def parse_version(version: str) -> tuple[str, str]:
     """
     Parse version string to extract major.minor prefix.
@@ -221,6 +292,7 @@ def generate_docs(venv_dir: Path, pixeltable_dir: Path, output_dir: Path, full_v
     # Fetch docs.json and existing SDK versions from production (main branch)
     # This preserves version dropdown and other minor versions (e.g., v0.3.14)
     print(f"   Fetching docs.json and SDK versions from production (main branch)...")
+    production_docs_json = None
     with tempfile.TemporaryDirectory() as temp_dir:
         docs_repo_dir = Path(temp_dir) / 'pixeltable-docs-www'
 
@@ -233,10 +305,12 @@ def generate_docs(venv_dir: Path, pixeltable_dir: Path, output_dir: Path, full_v
         if result.returncode != 0:
             raise RuntimeError(f"Failed to fetch production docs from main branch: {result.stderr}")
 
-        # Copy ONLY docs.json to preserve version dropdown
+        # Load production docs.json (we'll merge it later)
+        import json
         docs_json = docs_repo_dir / 'docs.json'
         if docs_json.exists():
-            shutil.copy2(docs_json, target_dir_in_clone / 'docs.json')
+            with open(docs_json, 'r') as f:
+                production_docs_json = json.load(f)
 
         # Preserve existing SDK versions to final output
         # But remove any previous versions with the same major.minor prefix
@@ -291,10 +365,43 @@ def generate_docs(venv_dir: Path, pixeltable_dir: Path, output_dir: Path, full_v
         print(f"   Copying newly generated docs to sdk/{full_version}/...")
         shutil.copytree(src_sdk, sdk_output, dirs_exist_ok=True)
 
-    # Copy updated docs.json to output
-    docs_json_in_clone = pixeltable_dir / 'docs' / 'target' / 'docs.json'
-    if docs_json_in_clone.exists():
-        shutil.copy2(docs_json_in_clone, output_dir / 'docs.json')
+    # Merge docs.json from three sources: production, local, and generated
+    print(f"   Merging docs.json from production, local, and generated sources...")
+    generated_docs_json_path = pixeltable_dir / 'docs' / 'target' / 'docs.json'
+    local_docs_json_path = mintlify_src / 'docs.json'
+
+    if generated_docs_json_path.exists() and local_docs_json_path.exists():
+        import json
+
+        # Load all three versions
+        with open(generated_docs_json_path, 'r') as f:
+            generated_docs_json = json.load(f)
+        with open(local_docs_json_path, 'r') as f:
+            local_docs_json = json.load(f)
+
+        # Merge them
+        if production_docs_json:
+            merged_docs_json = merge_docs_json(
+                production_docs_json,
+                local_docs_json,
+                generated_docs_json
+            )
+        else:
+            # No production docs, just merge local + generated
+            merged_docs_json = merge_docs_json(
+                {},
+                local_docs_json,
+                generated_docs_json
+            )
+
+        # Write merged version
+        with open(output_dir / 'docs.json', 'w') as f:
+            json.dump(merged_docs_json, f, indent=2)
+
+        print(f"   ✓ Merged docs.json successfully")
+    elif generated_docs_json_path.exists():
+        # Fallback: just copy generated
+        shutil.copy2(generated_docs_json_path, output_dir / 'docs.json')
 
     print(f"   ✓ Documentation generated")
 
