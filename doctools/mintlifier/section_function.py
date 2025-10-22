@@ -133,8 +133,10 @@ class FunctionSectionGenerator(PageBase):
             elif hasattr(func, "signature") and func.signature:
                 # Pixeltable CallableFunction stores signature as a string
                 sig_str = str(func.signature)
+                # Inject default parameter values into the signature
+                sig_str_with_defaults = self._inject_defaults_into_signature(func, sig_str)
                 # Format signature with line breaks after commas for readability
-                formatted_sig = self._format_signature(sig_str)
+                formatted_sig = self._format_signature(sig_str_with_defaults)
                 content += f"{func_name}{formatted_sig}\n"
             else:
                 # Fall back to standard introspection
@@ -147,6 +149,74 @@ class FunctionSectionGenerator(PageBase):
 
         content += "```\n\n"
         return content
+
+    def _inject_defaults_into_signature(self, func: Any, sig_str: str) -> str:
+        """Inject default parameter values into a signature string.
+
+        Args:
+            func: The function object
+            sig_str: The signature string (e.g., "(audio: Audio) -> Json")
+
+        Returns:
+            Modified signature string with defaults (e.g., "(audio: Audio, model: str = 'whisper-1') -> Json")
+        """
+        try:
+            # Use inspect.signature to get actual defaults
+            sig = inspect.signature(func)
+
+            # Extract the parameters part from the signature string
+            if "(" not in sig_str or ")" not in sig_str:
+                return sig_str
+
+            # Find return type annotation
+            return_type = ""
+            if "->" in sig_str:
+                return_type = sig_str[sig_str.rindex("->"):]
+                sig_str = sig_str[:sig_str.rindex("->")].strip()
+
+            # Extract parameter section
+            params_start = sig_str.index("(")
+            params_end = sig_str.rindex(")")
+            params_str = sig_str[params_start + 1:params_end].strip()
+
+            if not params_str:
+                return sig_str + (" " + return_type if return_type else "")
+
+            # Parse existing parameters from the signature string
+            # Format is like: "audio: Audio, model: str"
+            param_parts = []
+            for param_str in params_str.split(","):
+                param_str = param_str.strip()
+                if not param_str:
+                    continue
+
+                # Extract parameter name
+                if ":" in param_str:
+                    param_name = param_str.split(":")[0].strip()
+                else:
+                    param_name = param_str.strip()
+
+                # Check if this parameter has a default in the actual signature
+                if param_name in sig.parameters:
+                    param = sig.parameters[param_name]
+                    if param.default != inspect.Parameter.empty:
+                        # Add default to the signature string
+                        default_repr = repr(param.default)
+                        param_str += f" = {default_repr}"
+
+                param_parts.append(param_str)
+
+            # Reconstruct the signature
+            new_params_str = ", ".join(param_parts)
+            result = f"({new_params_str})"
+            if return_type:
+                result += " " + return_type
+
+            return result
+
+        except (ValueError, TypeError, AttributeError):
+            # If anything goes wrong, return original signature
+            return sig_str
 
     def _document_parameters(self, func: Any, doc: str) -> str:
         """Document function parameters."""
