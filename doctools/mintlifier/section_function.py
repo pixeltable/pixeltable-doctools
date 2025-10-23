@@ -162,8 +162,17 @@ class FunctionSectionGenerator(PageBase):
             (e.g., "(audio: Audio, *, model: str = 'whisper-1') -> Json")
         """
         try:
+            # For UDFs and decorated functions, inspect.signature may return wrapper signature
+            # Try to get the actual signature if available
+            actual_func = func
+            if hasattr(func, '__wrapped__'):
+                actual_func = func.__wrapped__
+            elif hasattr(func, 'py_fn'):
+                # Pixeltable UDF pattern - get the original Python function
+                actual_func = func.py_fn
+
             # Use inspect.signature to get actual parameter information
-            sig = inspect.signature(func)
+            sig = inspect.signature(actual_func)
 
             # Extract the parameters part from the signature string
             if "(" not in sig_str or ")" not in sig_str:
@@ -202,11 +211,14 @@ class FunctionSectionGenerator(PageBase):
             # Reconstruct signature using inspect.signature parameter order and kinds
             param_parts = []
             seen_keyword_only = False
+            matched_params = 0
 
             for param_name, param in sig.parameters.items():
                 # Skip if this parameter is not in the original signature string
                 if param_name not in param_types:
                     continue
+
+                matched_params += 1
 
                 # Insert * separator before first keyword-only parameter
                 if param.kind == inspect.Parameter.KEYWORD_ONLY and not seen_keyword_only:
@@ -224,6 +236,11 @@ class FunctionSectionGenerator(PageBase):
                     param_str += f" = {default_repr}"
 
                 param_parts.append(param_str)
+
+            # If we couldn't match any parameters, return original signature
+            # This happens when inspect.signature returns decorator wrapper params
+            if matched_params == 0:
+                return f"({params_str})" + (" " + return_type if return_type else "")
 
             # Reconstruct the signature
             new_params_str = ", ".join(param_parts)
