@@ -151,17 +151,18 @@ class FunctionSectionGenerator(PageBase):
         return content
 
     def _inject_defaults_into_signature(self, func: Any, sig_str: str) -> str:
-        """Inject default parameter values into a signature string.
+        """Inject default parameter values and keyword-only separator into a signature string.
 
         Args:
             func: The function object
-            sig_str: The signature string (e.g., "(audio: Audio) -> Json")
+            sig_str: The signature string (e.g., "(audio: Audio, model: str) -> Json")
 
         Returns:
-            Modified signature string with defaults (e.g., "(audio: Audio, model: str = 'whisper-1') -> Json")
+            Modified signature string with defaults and * separator
+            (e.g., "(audio: Audio, *, model: str = 'whisper-1') -> Json")
         """
         try:
-            # Use inspect.signature to get actual defaults
+            # Use inspect.signature to get actual parameter information
             sig = inspect.signature(func)
 
             # Extract the parameters part from the signature string
@@ -182,27 +183,45 @@ class FunctionSectionGenerator(PageBase):
             if not params_str:
                 return sig_str + (" " + return_type if return_type else "")
 
-            # Parse existing parameters from the signature string
-            # Format is like: "audio: Audio, model: str"
-            param_parts = []
+            # Parse existing parameters from the signature string to preserve type annotations
+            # Map parameter name -> type annotation string
+            param_types = {}
             for param_str in params_str.split(","):
                 param_str = param_str.strip()
-                if not param_str:
+                if not param_str or param_str == "*":
                     continue
 
-                # Extract parameter name
                 if ":" in param_str:
                     param_name = param_str.split(":")[0].strip()
+                    param_type = param_str.split(":", 1)[1].strip()
+                    param_types[param_name] = param_type
                 else:
                     param_name = param_str.strip()
+                    param_types[param_name] = None
 
-                # Check if this parameter has a default in the actual signature
-                if param_name in sig.parameters:
-                    param = sig.parameters[param_name]
-                    if param.default != inspect.Parameter.empty:
-                        # Add default to the signature string
-                        default_repr = repr(param.default)
-                        param_str += f" = {default_repr}"
+            # Reconstruct signature using inspect.signature parameter order and kinds
+            param_parts = []
+            seen_keyword_only = False
+
+            for param_name, param in sig.parameters.items():
+                # Skip if this parameter is not in the original signature string
+                if param_name not in param_types:
+                    continue
+
+                # Insert * separator before first keyword-only parameter
+                if param.kind == inspect.Parameter.KEYWORD_ONLY and not seen_keyword_only:
+                    param_parts.append("*")
+                    seen_keyword_only = True
+
+                # Build parameter string with type annotation
+                param_str = param_name
+                if param_types[param_name]:
+                    param_str += f": {param_types[param_name]}"
+
+                # Add default value if present
+                if param.default != inspect.Parameter.empty:
+                    default_repr = repr(param.default)
+                    param_str += f" = {default_repr}"
 
                 param_parts.append(param_str)
 
