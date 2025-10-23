@@ -7,7 +7,7 @@ requires-python = ">=3.10"
 readme = "README.md"
 license = "Apache-2.0"
 dependencies = [
-    "docstring-parser>=0.11",
+    "docstring-parser-fork>=0.0.13",
     "pypandoc>=1.15",
     "nbformat>=5.0",
 ]
