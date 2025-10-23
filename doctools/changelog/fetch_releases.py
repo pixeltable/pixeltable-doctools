@@ -154,8 +154,12 @@ For the latest release information, visit our [GitHub Releases page](https://git
         changelog_content += f"**Released:** {formatted_date}\n"
         changelog_content += f"**Author:** [@{author}](https://github.com/{author})\n"
         changelog_content += f"**View on GitHub:** [{tag_name}]({html_url})\n\n"
-        changelog_content += "---\n\n"
-        changelog_content += f"{body}\n\n"
+
+        # Convert H2 sections to H3 in the body for proper sidebar hierarchy
+        # GitHub release notes use ## for "What's Changed" and "New Contributors"
+        body_formatted = body.replace('\n## ', '\n### ')
+
+        changelog_content += f"{body_formatted}\n\n"
         changelog_content += "---\n\n"
 
     # Write consolidated changelog
