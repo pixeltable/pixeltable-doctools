@@ -86,10 +86,10 @@ description: "Released {formatted_date}"
 
 def generate_changelog_to_dir(output_dir: Path, repo: str = "pixeltable/pixeltable") -> None:
     """
-    Generate changelog MDX files from GitHub releases.
+    Generate consolidated changelog MDX file from GitHub releases.
 
     Args:
-        output_dir: Where to output the .mdx files
+        output_dir: Where to output the .mdx file
         repo: GitHub repository in format 'owner/repo'
     """
     print("📰 Fetching releases from GitHub...")
@@ -115,32 +115,33 @@ def generate_changelog_to_dir(output_dir: Path, repo: str = "pixeltable/pixeltab
         shutil.rmtree(output_dir)
     output_dir.mkdir(parents=True)
 
-    # Create index page
-    print(f"\n📝 Creating changelog index...")
-    index_content = """---
+    # Create consolidated changelog
+    print(f"\n📝 Creating consolidated changelog...")
+    changelog_content = """---
 title: "Changelog"
 description: "Release history and updates for Pixeltable"
 ---
-
-# Changelog
 
 View the complete release history for Pixeltable below. Each release includes detailed information about new features, bug fixes, and improvements.
 
 For the latest release information, visit our [GitHub Releases page](https://github.com/pixeltable/pixeltable/releases).
 
 ---
+
 """
 
-    # Add links to all releases in the index
-    for release in releases[:10]:  # Show latest 10 in index
+    # Add all releases inline
+    for release in releases:
         tag_name = release.get('tag_name', 'unknown')
         name = release.get('name', tag_name)
         published_at = release.get('published_at', '')
+        author = release.get('author', {}).get('login', 'Unknown')
+        html_url = release.get('html_url', '')
+        body = release.get('body', '').strip()
 
         # Parse date
         if published_at:
             try:
-                from datetime import datetime
                 date_obj = datetime.fromisoformat(published_at.replace('Z', '+00:00'))
                 formatted_date = date_obj.strftime('%B %d, %Y')
             except Exception:
@@ -148,36 +149,23 @@ For the latest release information, visit our [GitHub Releases page](https://git
         else:
             formatted_date = 'Unknown date'
 
-        # Link to individual release page
-        filename = tag_name.lstrip('v').replace('/', '-')
-        index_content += f"\n## [{name}](./{filename})\n"
-        index_content += f"**Released:** {formatted_date}\n\n"
+        # Add release section
+        changelog_content += f"## {name}\n\n"
+        changelog_content += f"**Released:** {formatted_date}\n"
+        changelog_content += f"**Author:** [@{author}](https://github.com/{author})\n"
+        changelog_content += f"**View on GitHub:** [{tag_name}]({html_url})\n\n"
+        changelog_content += "---\n\n"
+        changelog_content += f"{body}\n\n"
+        changelog_content += "---\n\n"
 
-    index_path = output_dir / 'changelog.mdx'
-    index_path.write_text(index_content)
-    print(f"   ✅ changelog.mdx (index)")
-
-    # Convert each release to MDX
-    print(f"\n🔨 Converting releases to MDX...")
-
-    for release in releases:
-        tag_name = release.get('tag_name', 'unknown')
-
-        # Sanitize filename (remove 'v' prefix if present)
-        filename = tag_name.lstrip('v').replace('/', '-') + '.mdx'
-        output_path = output_dir / filename
-
-        try:
-            mdx_content = convert_release_to_mdx(release)
-            output_path.write_text(mdx_content)
-            print(f"   ✅ {filename}")
-        except Exception as e:
-            print(f"   ⚠️  Failed to convert {tag_name}: {e}")
-            continue
+    # Write consolidated changelog
+    changelog_path = output_dir / 'changelog.mdx'
+    changelog_path.write_text(changelog_content)
+    print(f"   ✅ changelog.mdx (consolidated)")
 
     print(f"\n💪 Changelog generated successfully!")
     print(f"   Output: {output_dir}")
-    print(f"   Files: {len(list(output_dir.glob('*.mdx')))}")
+    print(f"   File: changelog.mdx with {len(releases)} releases")
 
 
 def main():
