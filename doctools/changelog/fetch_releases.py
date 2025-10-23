@@ -157,7 +157,10 @@ For the latest release information, visit our [GitHub Releases page](https://git
 
         # Convert H2 sections to H3 in the body for proper sidebar hierarchy
         # GitHub release notes use ## for "What's Changed" and "New Contributors"
+        # Handle both mid-body (after newline) and start-of-body cases
         body_formatted = body.replace('\n## ', '\n### ')
+        if body_formatted.startswith('## '):
+            body_formatted = '### ' + body_formatted[3:]
 
         changelog_content += f"{body_formatted}\n\n"
         changelog_content += "---\n\n"
