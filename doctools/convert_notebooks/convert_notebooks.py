@@ -98,7 +98,9 @@ def add_frontmatter_to_mdx(mdx_file: Path, notebooks_dir: Path) -> None:
         return
 
     original_notebook = matching_notebooks[0]
-    notebook_rel_path = original_notebook.relative_to(notebooks_dir.parent)  # Relative to docs/
+    # Get path relative to repo root (not just docs/)
+    repo_root = notebooks_dir.parent.parent  # notebooks_dir is repo/docs/notebooks, so parent.parent is repo
+    notebook_rel_path = original_notebook.relative_to(repo_root)
 
     # Generate URLs
     github_base = "https://github.com/pixeltable/pixeltable/blob/release"
