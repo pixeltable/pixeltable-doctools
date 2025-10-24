@@ -357,6 +357,14 @@ def generate_docs(venv_dir: Path, pixeltable_dir: Path, output_dir: Path, full_v
         else:
             shutil.copy2(item, dest)
 
+    # Copy docs.json from docs/mintlify/ to docs/target/ for mintlifier
+    # Mintlifier will update this file with SDK navigation structure
+    source_docs_json = dest_mintlify / 'docs.json'
+    target_docs_json = target_dir_in_clone / 'docs.json'
+    if source_docs_json.exists():
+        shutil.copy2(source_docs_json, target_docs_json)
+        print(f"   ✓ Copied docs.json to target directory for mintlifier")
+
     # Run mintlifier using venv's Python
     python_path = venv_dir / 'bin' / 'python'
     mintlifier_path = venv_dir / 'bin' / 'mintlifier'

@@ -1,0 +1,1189 @@
+---
+title: "Changelog"
+description: "Release history and updates for Pixeltable"
+---
+
+## Contributors
+
+Pixeltable is built by a vibrant community of contributors. We're grateful for everyone who has helped make Pixeltable better!
+
+**Want to contribute?** Check out our [Contributing Guide](https://github.com/pixeltable/pixeltable/blob/main/CONTRIBUTING.md) to get started.
+
+**Top Contributors:** View our amazing contributors on [GitHub](https://github.com/pixeltable/pixeltable/graphs/contributors).
+
+---
+
+## Release History
+
+View the complete release history for Pixeltable below. Each release includes detailed information about new features, bug fixes, and improvements.
+
+For the latest release information, visit our [GitHub Releases page](https://github.com/pixeltable/pixeltable/releases).
+
+---
+
+### v0.4.18
+
+**Released:** October 22, 2025  
+**Author:** [@aaron-siegel](https://github.com/aaron-siegel)  
+**View on GitHub:** [v0.4.18](https://github.com/pixeltable/pixeltable/releases/tag/v0.4.18)
+
+#### What's Changed
+* Updates to nightly.yml by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/866
+* Streamline CI configs on PRs by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/858
+* Update WhisperX to >=3.7 and enable for Python 3.13 by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/860
+* elements parameter for DocSplitter by @mkornacker in https://github.com/pixeltable/pixeltable/pull/865
+* Fix examples docstring for add_embedding_index() by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/871
+* Improvements to random_tbl_ops script by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/868
+* Enforce `numpy>=2.2` by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/872
+* Segmentation-related improvements by @mkornacker in https://github.com/pixeltable/pixeltable/pull/873
+* Randomize the behavior of `sample()` in the case `seed=None` by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/828
+* [PXT-729] Documentation deploy scripts for Mintlify website and local development by @goodlux in https://github.com/pixeltable/pixeltable/pull/867
+* Properly reconstruct btree and vector indices when a replica is restored by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/875
+* Fix various errors and typos in README and the notebooks by @sergey-mkhitaryan in https://github.com/pixeltable/pixeltable/pull/877
+* UDFs for Hugging Face Auto model integrations by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/870
+
+#### New Contributors
+* @sergey-mkhitaryan made their first contribution in https://github.com/pixeltable/pixeltable/pull/877
+
+**Full Changelog**: https://github.com/pixeltable/pixeltable/compare/v0.4.17...v0.4.18
+
+---
+
+### v0.4.17
+
+**Released:** October 16, 2025  
+**Author:** [@aaron-siegel](https://github.com/aaron-siegel)  
+**View on GitHub:** [v0.4.17](https://github.com/pixeltable/pixeltable/releases/tag/v0.4.17)
+
+#### What's Changed
+* Update model used by Together AI tests by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/846
+* Fix broken links at the bottom of basics notebook by @apreshill in https://github.com/pixeltable/pixeltable/pull/844
+* Retry failed notebook tests once in CI by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/830
+* feat(storage): add Backblaze B2 S3-compatible integration and tests by @jeronimodeleon in https://github.com/pixeltable/pixeltable/pull/840
+* cockroachDB: Set null_ordered_last on session start. by @jpeterson-pxt in https://github.com/pixeltable/pixeltable/pull/838
+* cockroachDB: Explicit coercions for arithmetic ops. by @jpeterson-pxt in https://github.com/pixeltable/pixeltable/pull/839
+* Fix for isolated NB tests in CI by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/847
+* Notebook updates & OpenRouter notebook by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/851
+* ffmpeg with libx264 by @mkornacker in https://github.com/pixeltable/pixeltable/pull/855
+* Fixed incorrect documentation links by @metadaddy in https://github.com/pixeltable/pixeltable/pull/859
+* Update pixeltable-pgserver dependency to 0.4.0 by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/853
+* Support packaging of tables with embedding indices for data sharing by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/841
+* mode 'accurate' for VideoSplitter and segment_video() by @mkornacker in https://github.com/pixeltable/pixeltable/pull/856
+* Added PDF-Page-Chunk-Extractor for image extraction (Issue 703) (PR 705) by @kamir in https://github.com/pixeltable/pixeltable/pull/850
+* Formatting fixes by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/862
+* Fix pyproject and mypy config by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/863
+* Fixes for load_replica_md() with non-snapshot tables by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/861
+* Correctly process cellmd in package/restore by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/864
+
+#### New Contributors
+* @jeronimodeleon made their first contribution in https://github.com/pixeltable/pixeltable/pull/840
+* @metadaddy made their first contribution in https://github.com/pixeltable/pixeltable/pull/859
+* @kamir made their first contribution in https://github.com/pixeltable/pixeltable/pull/850
+
+**Full Changelog**: https://github.com/pixeltable/pixeltable/compare/v0.4.16...v0.4.17
+
+---
+
+### v0.4.16
+
+**Released:** October 08, 2025  
+**Author:** [@aaron-siegel](https://github.com/aaron-siegel)  
+**View on GitHub:** [v0.4.16](https://github.com/pixeltable/pixeltable/releases/tag/v0.4.16)
+
+#### What's Changed
+* Openrouter Integration by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/825
+* Concurrency fixes & random_tbl_ops v2 by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/814
+* Images and arrays in json structures, plus improved storage of array columns by @mkornacker in https://github.com/pixeltable/pixeltable/pull/812
+* Minimal edits to docstrings. by @goodlux in https://github.com/pixeltable/pixeltable/pull/813
+* Add SDK documentation for Mintlify by @goodlux in https://github.com/pixeltable/pixeltable/pull/835
+* Fix for performance problem when importing HF datasets by @mkornacker in https://github.com/pixeltable/pixeltable/pull/833
+* cockroachDB: div, mod operations SQL changed. Timestamp propagated through client stack by @jpeterson-pxt in https://github.com/pixeltable/pixeltable/pull/823
+
+
+**Full Changelog**: https://github.com/pixeltable/pixeltable/compare/v0.4.15...v0.4.16
+
+---
+
+### v0.4.15
+
+**Released:** October 01, 2025  
+**Author:** [@aaron-siegel](https://github.com/aaron-siegel)  
+**View on GitHub:** [v0.4.15](https://github.com/pixeltable/pixeltable/releases/tag/v0.4.15)
+
+#### What's Changed
+* Add a spot for the cookbook in docs/ by @apreshill in https://github.com/pixeltable/pixeltable/pull/815
+* Fixes for notebook tests resource cleanup by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/827
+* Adding export_lancedb() to API reference by @mkornacker in https://github.com/pixeltable/pixeltable/pull/824
+* Replace `create_replica()` with separate `publish()` and `replicate()` methods by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/816
+* PXT-638, PXT-675, PXT-682 Handle Keyboard exception by @amithadke in https://github.com/pixeltable/pixeltable/pull/803
+* PXT-772 Filling in missing docstrings by @goodlux in https://github.com/pixeltable/pixeltable/pull/822
+* with_audio() udf by @mkornacker in https://github.com/pixeltable/pixeltable/pull/826
+
+#### New Contributors
+* @apreshill made their first contribution in https://github.com/pixeltable/pixeltable/pull/815
+
+**Full Changelog**: https://github.com/pixeltable/pixeltable/compare/v0.4.14...v0.4.15
+
+---
+
+### v0.4.14
+
+**Released:** September 23, 2025  
+**Author:** [@aaron-siegel](https://github.com/aaron-siegel)  
+**View on GitHub:** [v0.4.14](https://github.com/pixeltable/pixeltable/releases/tag/v0.4.14)
+
+#### What's Changed
+* Proper implementation of package/restore for non-snapshot replicas by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/797
+* Set up pydoclint by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/805
+* upgrade mint.json -> docs.json by @goodlux in https://github.com/pixeltable/pixeltable/pull/809
+* Enable a destination parameter on stored computed columns. by @jpeterson-pxt in https://github.com/pixeltable/pixeltable/pull/766
+* Add support for running tests with cockroachdb as backend by @amithadke in https://github.com/pixeltable/pixeltable/pull/811
+
+
+**Full Changelog**: https://github.com/pixeltable/pixeltable/compare/v0.4.13...v0.4.14
+
+---
+
+### v0.4.13
+
+**Released:** September 19, 2025  
+**Author:** [@aaron-siegel](https://github.com/aaron-siegel)  
+**View on GitHub:** [v0.4.13](https://github.com/pixeltable/pixeltable/releases/tag/v0.4.13)
+
+#### What's Changed
+* Added pxt.io.export_lancedb() by @mkornacker in https://github.com/pixeltable/pixeltable/pull/795
+* Update README.md by @pierrebrunelle in https://github.com/pixeltable/pixeltable/pull/801
+* Use raw.githubusercontent.com instead of raw.github.com in tests by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/806
+* Simplify & generalize TableDataSource types by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/804
+* Short Sample App: CLI Media Toolkit for Multimodal Data Processing by @pierrebrunelle in https://github.com/pixeltable/pixeltable/pull/802
+* Table.get_versions() by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/800
+* Fixes for nightly CI by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/807
+
+
+**Full Changelog**: https://github.com/pixeltable/pixeltable/compare/v0.4.12...v0.4.13
+
+---
+
+### v0.4.12
+
+**Released:** September 05, 2025  
+**Author:** [@aaron-siegel](https://github.com/aaron-siegel)  
+**View on GitHub:** [v0.4.12](https://github.com/pixeltable/pixeltable/releases/tag/v0.4.12)
+
+#### What's Changed
+* Update model used by groq tests and examples by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/790
+* Clear TempStore, MediaStore, and HF cache after each test in CI by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/792
+* Explicitly install pixeltable in run-isolated-nb-tests.sh by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/794
+* Handle incomplete rate limit headers better by @mkornacker in https://github.com/pixeltable/pixeltable/pull/788
+* SDK changes/fixes for data sharing by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/791
+* Disable TestWhisperx on Linux w/ GPU by @mkornacker in https://github.com/pixeltable/pixeltable/pull/789
+* recompute_columns(): added where parameter by @mkornacker in https://github.com/pixeltable/pixeltable/pull/787
+
+
+**Full Changelog**: https://github.com/pixeltable/pixeltable/compare/v0.4.11...v0.4.12
+
+---
+
+### v0.4.11
+
+**Released:** August 29, 2025  
+**Author:** [@aaron-siegel](https://github.com/aaron-siegel)  
+**View on GitHub:** [v0.4.11](https://github.com/pixeltable/pixeltable/releases/tag/v0.4.11)
+
+#### What's Changed
+* missing .md for VideoSplitter by @mkornacker in https://github.com/pixeltable/pixeltable/pull/784
+* CI & dev environment enhancements by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/785
+
+
+**Full Changelog**: https://github.com/pixeltable/pixeltable/compare/v0.4.10...v0.4.11
+
+---
+
+### v0.4.10
+
+**Released:** August 28, 2025  
+**Author:** [@aaron-siegel](https://github.com/aaron-siegel)  
+**View on GitHub:** [v0.4.10](https://github.com/pixeltable/pixeltable/releases/tag/v0.4.10)
+
+#### What's Changed
+* Fix local_public_names() to properly exclude private functions by @goodlux in https://github.com/pixeltable/pixeltable/pull/778
+* Add .DS_Store to .gitignore by @goodlux in https://github.com/pixeltable/pixeltable/pull/779
+* More video built-ins by @mkornacker in https://github.com/pixeltable/pixeltable/pull/768
+* Add missing __all__ to gemini and whisper modules by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/781
+
+
+**Full Changelog**: https://github.com/pixeltable/pixeltable/compare/v0.4.9...v0.4.10
+
+---
+
+### v0.4.9
+
+**Released:** August 27, 2025  
+**Author:** [@aaron-siegel](https://github.com/aaron-siegel)  
+**View on GitHub:** [v0.4.9](https://github.com/pixeltable/pixeltable/releases/tag/v0.4.9)
+
+#### What's Changed
+* WhisperX Speaker Diarization by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/770
+* Basic support for concurrent pixeltable metadata creation/upgrade by @amithadke in https://github.com/pixeltable/pixeltable/pull/769
+* Support for pydantic models in Table.insert() by @mkornacker in https://github.com/pixeltable/pixeltable/pull/760
+* Add comments for concurrent pixeltable initialization changes by @amithadke in https://github.com/pixeltable/pixeltable/pull/772
+* Disable notebook tests that are failing in CI for unknown reasons by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/777
+* Publish the existing mypy plugin under `pixeltable.mypy` module to make it accessible for external use. by @amithadke in https://github.com/pixeltable/pixeltable/pull/776
+* Remove `ext` package and fold contents into `functions` by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/775
+
+
+**Full Changelog**: https://github.com/pixeltable/pixeltable/compare/v0.4.8...v0.4.9
+
+---
+
+### v0.4.8
+
+**Released:** August 20, 2025  
+**Author:** [@aaron-siegel](https://github.com/aaron-siegel)  
+**View on GitHub:** [v0.4.8](https://github.com/pixeltable/pixeltable/releases/tag/v0.4.8)
+
+#### What's Changed
+* Performance test for chat completion integrations by @mkornacker in https://github.com/pixeltable/pixeltable/pull/746
+* Bugfixes related to missing dependencies by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/747
+* Makefile and pytest improvements by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/753
+* Update dev version of onnx by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/755
+* Pytest configuration fix by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/756
+* RequestRateScheduler improvements by @mkornacker in https://github.com/pixeltable/pixeltable/pull/752
+* Update README.md by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/754
+* Updating tutorial notebook to use Table.recompute_columns(). by @mkornacker in https://github.com/pixeltable/pixeltable/pull/757
+* Changes to pixeltable shared client for R2 support. by @amithadke in https://github.com/pixeltable/pixeltable/pull/653
+* Fix README spacing and linting issues by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/759
+* Move stored_img_cols from ExecNode To RowBuilder, add stored_media_cols by @jpeterson-pxt in https://github.com/pixeltable/pixeltable/pull/749
+* Group local media file operations into a MediaStore or TempStore class by @jpeterson-pxt in https://github.com/pixeltable/pixeltable/pull/748
+* Correct construction of two row_builder members. by @jpeterson-pxt in https://github.com/pixeltable/pixeltable/pull/761
+* PXT-661 PXT-662 Adding checks for dropping column used by view predicates by @amithadke in https://github.com/pixeltable/pixeltable/pull/751
+
+
+**Full Changelog**: https://github.com/pixeltable/pixeltable/compare/v0.4.7...v0.4.8
+
+---
+
+### v0.4.7
+
+**Released:** August 04, 2025  
+**Author:** [@aaron-siegel](https://github.com/aaron-siegel)  
+**View on GitHub:** [v0.4.7](https://github.com/pixeltable/pixeltable/releases/tag/v0.4.7)
+
+#### What's Changed
+* Consolidate ColumnMd operations into from_md() and to_md(). {media_5} by @jpeterson-pxt in https://github.com/pixeltable/pixeltable/pull/715
+* Update README.md + Changelog by @pierrebrunelle in https://github.com/pixeltable/pixeltable/pull/727
+* Consolidate all store_table row prep into DataRow.create_store_table_row. by @jpeterson-pxt in https://github.com/pixeltable/pixeltable/pull/723
+* More rigor in UDF evolution tests by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/728
+* Rerun tests that fail due to concurrency conflicts by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/737
+* Replace most uses of `Union[]` with Python 3.10-style unions by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/735
+* Extend FrameIterator to output all available frame attributes by @mkornacker in https://github.com/pixeltable/pixeltable/pull/716
+* Clean up pytest output by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/740
+* Introduce `TypedDict`s for user-facing table, dir, column, and index metadata by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/739
+* get_dir_contents(), a more structured replacement for list_tables() / list_dirs() by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/742
+* Test cleanup by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/743
+* Prefer public API in tests by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/744
+* Catching missing sqlalchemy transaction-related exceptions by @mkornacker in https://github.com/pixeltable/pixeltable/pull/745
+* PXT-668: Remove unneeded test_sample_md5_fraction. by @jpeterson-pxt in https://github.com/pixeltable/pixeltable/pull/750
+* PXT-671: fixes to RateLimitsScheduler by @mkornacker in https://github.com/pixeltable/pixeltable/pull/741
+* make_video API Doc by @pierrebrunelle in https://github.com/pixeltable/pixeltable/pull/736
+
+
+**Full Changelog**: https://github.com/pixeltable/pixeltable/compare/v0.4.6...v0.4.7
+
+---
+
+### v0.4.6
+
+**Released:** July 24, 2025  
+**Author:** [@aaron-siegel](https://github.com/aaron-siegel)  
+**View on GitHub:** [v0.4.6](https://github.com/pixeltable/pixeltable/releases/tag/v0.4.6)
+
+#### What's Changed
+* Migrate from `poetry` to `uv` by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/722
+
+
+**Full Changelog**: https://github.com/pixeltable/pixeltable/compare/v0.4.5...v0.4.6
+
+---
+
+### v0.4.5
+
+**Released:** July 24, 2025  
+**Author:** [@aaron-siegel](https://github.com/aaron-siegel)  
+**View on GitHub:** [v0.4.5](https://github.com/pixeltable/pixeltable/releases/tag/v0.4.5)
+
+#### What's Changed
+* Consolidate more MediaStore operations - part 3 by @jpeterson-pxt in https://github.com/pixeltable/pixeltable/pull/701
+* Working Python 3.13 dev installation by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/695
+* Replace uses of sql.text() in catalog.py with idiomatic SQLAlchemy by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/707
+* Move some column summary information into RowBuilder. {media_4} by @jpeterson-pxt in https://github.com/pixeltable/pixeltable/pull/711
+* DataFrameResultSet.to_pydantic() by @mkornacker in https://github.com/pixeltable/pixeltable/pull/713
+* PXT-667: Write media files to MediaStore with correct version. by @jpeterson-pxt in https://github.com/pixeltable/pixeltable/pull/714
+* Time travel by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/710
+* Correct the table.history status report for newly created views. by @jpeterson-pxt in https://github.com/pixeltable/pixeltable/pull/719
+* Include all columns in packager data preview by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/720
+* Communicate Column spec for all MediaStore save and move operations by @jpeterson-pxt in https://github.com/pixeltable/pixeltable/pull/718
+* Further simplify DataRowBatch. {media_9} by @jpeterson-pxt in https://github.com/pixeltable/pixeltable/pull/724
+* Use the method plan._insert_prefetch_node everywhere. {media_7} by @jpeterson-pxt in https://github.com/pixeltable/pixeltable/pull/721
+* Support Python 3.10 style union types by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/726
+* Additional config parameters + more flexible rate limit parsing for Azure OpenAI support by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/725
+
+
+**Full Changelog**: https://github.com/pixeltable/pixeltable/compare/v0.4.4...v0.4.5
+
+---
+
+### v0.4.4
+
+**Released:** July 16, 2025  
+**Author:** [@aaron-siegel](https://github.com/aaron-siegel)  
+**View on GitHub:** [v0.4.4](https://github.com/pixeltable/pixeltable/releases/tag/v0.4.4)
+
+#### What's Changed
+* Consolidate MediaStore file operations, including temp file name creation by @jpeterson-pxt in https://github.com/pixeltable/pixeltable/pull/694
+* Update google-genai dev dependency by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/699
+* CI changes for random-tbl-ops by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/697
+* schema_overrides bugfixes by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/700
+* Load replicas as views by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/696
+* Multi-phase transactions by @mkornacker in https://github.com/pixeltable/pixeltable/pull/692
+
+
+**Full Changelog**: https://github.com/pixeltable/pixeltable/compare/v0.4.3...v0.4.4
+
+---
+
+### v0.4.3
+
+**Released:** July 10, 2025  
+**Author:** [@aaron-siegel](https://github.com/aaron-siegel)  
+**View on GitHub:** [v0.4.3](https://github.com/pixeltable/pixeltable/releases/tag/v0.4.3)
+
+#### What's Changed
+* Allow config parameters to be specified in `pxt.init()` by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/680
+* Prepare to report more status in table.history() by @jpeterson-pxt in https://github.com/pixeltable/pixeltable/pull/682
+* `pxt.ls()` command for pretty-printing all contents of a Pixeltable dir by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/681
+* Handle 429 errors in RateLimitScheduler by @mkornacker in https://github.com/pixeltable/pixeltable/pull/670
+* Support dicts and Sequences of dicts in HF datasets [rough-edges PXT-640] by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/684
+* Allow packaging of non-snapshot tables in TablePackager by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/688
+* Use a JSON field xxx_cellmd in place of xxx_errortype and xxx_errormsg by @jpeterson-pxt in https://github.com/pixeltable/pixeltable/pull/685
+* Consolidate media operations in the MediaStore module by @jpeterson-pxt in https://github.com/pixeltable/pixeltable/pull/691
+* Enhance UpdateStatus to subsume SyncStatus. Save user and UpdateStatus in a field in TableVersionMd. by @jpeterson-pxt in https://github.com/pixeltable/pixeltable/pull/689
+* Refactor create_replica to conform to concurrency protocol by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/690
+* Add additional packages & task configurations to nightly.yml by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/693
+* Doc fixes for audio and video UDFs by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/698
+
+
+**Full Changelog**: https://github.com/pixeltable/pixeltable/compare/v0.4.2...v0.4.3
+
+---
+
+### v0.4.2
+
+**Released:** June 27, 2025  
+**Author:** [@aaron-siegel](https://github.com/aaron-siegel)  
+**View on GitHub:** [v0.4.2](https://github.com/pixeltable/pixeltable/releases/tag/v0.4.2)
+
+#### What's Changed
+* Revert various accumulated workarounds in CI by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/669
+* Use ColumnHandles in external stores by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/664
+* Update versions of a few more libraries by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/668
+* First part of additional status collection for table.history reporting. by @jpeterson-pxt in https://github.com/pixeltable/pixeltable/pull/654
+* Add table.history() method to return a user-readable list of known changes to a table.  by @jpeterson-pxt in https://github.com/pixeltable/pixeltable/pull/640
+* Added Table.recompute_columns() by @mkornacker in https://github.com/pixeltable/pixeltable/pull/667
+* Collect more information on ins, del, upd operations. Freeze UpdateStatus. by @jpeterson-pxt in https://github.com/pixeltable/pixeltable/pull/673
+* Refactor SyncStatus for merge with UpdateStatus. by @jpeterson-pxt in https://github.com/pixeltable/pixeltable/pull/674
+* Adding recompute_columns() to overview in table.md by @mkornacker in https://github.com/pixeltable/pixeltable/pull/675
+* CI workflow for random table ops by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/676
+* ~40% improvement in insert performance by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/658
+* Skip whisperx on t4 instances by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/678
+* Pretty-print update status in notebooks or IPython shells by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/677
+* Performance improvements in add_computed_column by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/679
+
+
+**Full Changelog**: https://github.com/pixeltable/pixeltable/compare/v0.4.1...v0.4.2
+
+---
+
+### v0.4.1
+
+**Released:** June 19, 2025  
+**Author:** [@aaron-siegel](https://github.com/aaron-siegel)  
+**View on GitHub:** [v0.4.1](https://github.com/pixeltable/pixeltable/releases/tag/v0.4.1)
+
+#### What's Changed
+* Docs/update model kwargs by @jacobweiss2305 in https://github.com/pixeltable/pixeltable/pull/662
+* Fixes and improvements for nightly CI job by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/665
+* Docs/changelog v0.4.0 by @jacobweiss2305 in https://github.com/pixeltable/pixeltable/pull/663
+* Update dev versions of many libraries used by Pixeltable by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/666
+
+
+**Full Changelog**: https://github.com/pixeltable/pixeltable/compare/v0.4.0...v0.4.1
+
+---
+
+### v0.4.0
+
+**Released:** June 16, 2025  
+**Author:** [@aaron-siegel](https://github.com/aaron-siegel)  
+**View on GitHub:** [v0.4.0](https://github.com/pixeltable/pixeltable/releases/tag/v0.4.0)
+
+#### Highlights
+* Support for concurrent insert/query and table/view operations
+* `sample()` operator for deterministic, pseudo-random samples of tables and data frames
+* More flexible API for optional LLM parameters
+* Groq integration
+* MCP integration
+* HEIC image support
+* Numerous bugfixes
+
+#### All Changes
+* Support for concurrent table operations by @mkornacker in https://github.com/pixeltable/pixeltable/pull/611
+* New Deepseek notebook by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/634
+* Re-enable 3 of the 4 disabled Labelstudio tests by @mkornacker in https://github.com/pixeltable/pixeltable/pull/635
+* Implement `to_sql` for many string methods by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/636
+* Remove extraneous reload_catalog() in test_packager by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/637
+* fix building with llm link by @jacobweiss2305 in https://github.com/pixeltable/pixeltable/pull/638
+* Allow HEIC images by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/639
+* Include preview data in request when publishing a table by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/631
+* WIP: stratified sampling operation on DataFrame by @jpeterson-pxt in https://github.com/pixeltable/pixeltable/pull/591
+* remove main reference and replace with release by @jacobweiss2305 in https://github.com/pixeltable/pixeltable/pull/646
+* docs: add product updates changelog with version history and release notes by @jacobweiss2305 in https://github.com/pixeltable/pixeltable/pull/645
+* remove print statement in gemini tool calls by @jacobweiss2305 in https://github.com/pixeltable/pixeltable/pull/651
+* PXT-595: Raise error if attempting to access metadata from a future v… by @jpeterson-pxt in https://github.com/pixeltable/pixeltable/pull/642
+* Make TableVersion timestamps consistent across propagated changes. by @jpeterson-pxt in https://github.com/pixeltable/pixeltable/pull/643
+* Update RowBuilder.create_table_raw to save PIL image with the jpeg extension by @Yann-CV in https://github.com/pixeltable/pixeltable/pull/648
+* Fix bug in handling "nullary" JsonMapper expressions by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/655
+* Update release.sh to handle pre-releases by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/656
+* Refactor inference API integrations to use `model_kwargs` dicts instead of explicit parameters by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/641
+* Refactor tool invocation unit tests [techdebt] by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/657
+* Concurrent view interactions by @mkornacker in https://github.com/pixeltable/pixeltable/pull/652
+* Consolidate all SQL generation related to sampling inside of SqlSampleNode by @jpeterson-pxt in https://github.com/pixeltable/pixeltable/pull/649
+* Suppressing asyncio slow callback warnings by @mkornacker in https://github.com/pixeltable/pixeltable/pull/660
+* Groq integration by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/659
+* First cut at MCP integration by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/661
+
+#### New Contributors
+* @Yann-CV made their first contribution in https://github.com/pixeltable/pixeltable/pull/648
+
+**Full Changelog**: https://github.com/pixeltable/pixeltable/compare/v0.3.15...v0.4.0
+
+---
+
+### v0.4.0-pre.3
+
+**Released:** June 10, 2025  
+**Author:** [@aaron-siegel](https://github.com/aaron-siegel)  
+**View on GitHub:** [v0.4.0-pre.3](https://github.com/pixeltable/pixeltable/releases/tag/v0.4.0-pre.3)
+
+#### What's Changed
+* Update release.sh to handle pre-releases by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/656
+* Refactor inference API integrations to use `model_kwargs` dicts instead of explicit parameters by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/641
+* Refactor tool invocation unit tests [techdebt] by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/657
+
+
+**Full Changelog**: https://github.com/pixeltable/pixeltable/compare/v0.4.0-pre.2...v0.4.0-pre.3
+
+---
+
+### v0.4.0-pre.2
+
+**Released:** June 07, 2025  
+**Author:** [@aaron-siegel](https://github.com/aaron-siegel)  
+**View on GitHub:** [v0.4.0-pre.2](https://github.com/pixeltable/pixeltable/releases/tag/v0.4.0-pre.2)
+
+#### What's Changed
+* fix building with llm link by @jacobweiss2305 in https://github.com/pixeltable/pixeltable/pull/638
+* Allow HEIC images by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/639
+* Include preview data in request when publishing a table by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/631
+* WIP: stratified sampling operation on DataFrame by @jpeterson-pxt in https://github.com/pixeltable/pixeltable/pull/591
+* remove main reference and replace with release by @jacobweiss2305 in https://github.com/pixeltable/pixeltable/pull/646
+* docs: add product updates changelog with version history and release notes by @jacobweiss2305 in https://github.com/pixeltable/pixeltable/pull/645
+* remove print statement in gemini tool calls by @jacobweiss2305 in https://github.com/pixeltable/pixeltable/pull/651
+* PXT-595: Raise error if attempting to access metadata from a future v… by @jpeterson-pxt in https://github.com/pixeltable/pixeltable/pull/642
+* Make TableVersion timestamps consistent across propagated changes. by @jpeterson-pxt in https://github.com/pixeltable/pixeltable/pull/643
+* Update RowBuilder.create_table_raw to save PIL image with the jpeg extension by @Yann-CV in https://github.com/pixeltable/pixeltable/pull/648
+* Fix bug in handling "nullary" JsonMapper expressions by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/655
+
+#### New Contributors
+* @Yann-CV made their first contribution in https://github.com/pixeltable/pixeltable/pull/648
+
+**Full Changelog**: https://github.com/pixeltable/pixeltable/compare/v0.3.15...v0.4.0-pre.2
+
+---
+
+### v0.4.0-pre.1
+
+**Released:** May 28, 2025  
+**Author:** [@aaron-siegel](https://github.com/aaron-siegel)  
+**View on GitHub:** [v0.4.0-pre.1](https://github.com/pixeltable/pixeltable/releases/tag/v0.4.0-pre.1)
+
+#### What's Changed
+* Support for concurrent table operations by @mkornacker in https://github.com/pixeltable/pixeltable/pull/611
+* New Deepseek notebook by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/634
+* Re-enable 3 of the 4 disabled Labelstudio tests by @mkornacker in https://github.com/pixeltable/pixeltable/pull/635
+* Implement `to_sql` for many string methods by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/636
+* Remove extraneous reload_catalog() in test_packager by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/637
+
+
+**Full Changelog**: https://github.com/pixeltable/pixeltable/compare/v0.3.15...v0.4.0-pre.1
+
+---
+
+### v0.3.15
+
+**Released:** May 25, 2025  
+**Author:** [@aaron-siegel](https://github.com/aaron-siegel)  
+**View on GitHub:** [v0.3.15](https://github.com/pixeltable/pixeltable/releases/tag/v0.3.15)
+
+#### What's Changed
+* Rename blueprint links to guides in pixelagent documentation by @jacobweiss2305 in https://github.com/pixeltable/pixeltable/pull/628
+* Add documentation for embedding_access feature by @jacobweiss2305 in https://github.com/pixeltable/pixeltable/pull/626
+* Improve import documentation by @jacobweiss2305 in https://github.com/pixeltable/pixeltable/pull/624
+* Update mint.json to use Kandinsky color theme by @jacobweiss2305 in https://github.com/pixeltable/pixeltable/pull/633
+* Merge different versions of base tables consistently when pulling replicas by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/625
+* Add UDFs for Google Imagen and Veo; Support Tool Calling in Gemini by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/632
+
+
+**Full Changelog**: https://github.com/pixeltable/pixeltable/compare/v0.3.14...v0.3.15
+
+---
+
+### v0.3.14
+
+**Released:** May 20, 2025  
+**Author:** [@aaron-siegel](https://github.com/aaron-siegel)  
+**View on GitHub:** [v0.3.14](https://github.com/pixeltable/pixeltable/releases/tag/v0.3.14)
+
+#### What's Changed
+* PXT-480: Add DATE type to pixeltable supported types. by @jpeterson-pxt in https://github.com/pixeltable/pixeltable/pull/599
+* PXT-560: Combine ALTER TABLE operations when adding or dropping columns. by @jpeterson-pxt in https://github.com/pixeltable/pixeltable/pull/608
+* Remove support for Python 3.9 by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/596
+* PXT-514 Add distinct to table, dataframe and columnref by @amithadke in https://github.com/pixeltable/pixeltable/pull/598
+* update pixelagent links by @jacobweiss2305 in https://github.com/pixeltable/pixeltable/pull/615
+* Add Bedrock integration notebook with basic chat and tool-based agent by @jacobweiss2305 in https://github.com/pixeltable/pixeltable/pull/600
+* Updates to UDF API docs [rough-edges] by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/616
+* Docs/building with llms and chg log v3.13 by @jacobweiss2305 in https://github.com/pixeltable/pixeltable/pull/610
+* Properly resolve `ColumnRef`s whose reference table differs from the column definition table by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/582
+* change url to include keyword llms by @jacobweiss2305 in https://github.com/pixeltable/pixeltable/pull/619
+* Add make_video examples to documentation by @jacobweiss2305 in https://github.com/pixeltable/pixeltable/pull/618
+* Logic for reconstituting replica data from a published bundle; new `pxt.create_replica()` method by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/581
+* Add configuration page with system settings and API configuration by @jacobweiss2305 in https://github.com/pixeltable/pixeltable/pull/622
+* Switch from deprecated `google-generativeai` package to newer `google-genai` by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/627
+* PXT-573 fixing planner bugs related to aggregate ordering by @mkornacker in https://github.com/pixeltable/pixeltable/pull/629
+* Update object-detection-in-videos notebook by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/630
+
+
+**Full Changelog**: https://github.com/pixeltable/pixeltable/compare/v0.3.13...v0.3.14
+
+---
+
+### v0.3.13
+
+**Released:** May 05, 2025  
+**Author:** [@aaron-siegel](https://github.com/aaron-siegel)  
+**View on GitHub:** [v0.3.13](https://github.com/pixeltable/pixeltable/releases/tag/v0.3.13)
+
+#### What's Changed
+* Update embedding index and add change log by @jacobweiss2305 in https://github.com/pixeltable/pixeltable/pull/574
+* update changelog and add technical diagram by @jacobweiss2305 in https://github.com/pixeltable/pixeltable/pull/586
+* remove sample snippet from installation page by @jacobweiss2305 in https://github.com/pixeltable/pixeltable/pull/587
+* PXT-551 Remove internal column types from pixeltable top level module by @amithadke in https://github.com/pixeltable/pixeltable/pull/584
+* PXT-553: Use source CTE explicitly to generate GROUP BY. by @jpeterson-pxt in https://github.com/pixeltable/pixeltable/pull/588
+* PXT-550 Add markdown when displaying table/dataframe descriptors in n… by @amithadke in https://github.com/pixeltable/pixeltable/pull/585
+* Ensure that extra_fields is properly set in TableDataConduit. by @jpeterson-pxt in https://github.com/pixeltable/pixeltable/pull/583
+* CI fixes by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/593
+* Improvements and fixes for Table._descriptors() by @mkornacker in https://github.com/pixeltable/pixeltable/pull/589
+* AWS Bedrock Adapter by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/592
+* [Sample-App] Reddit Agentic Bot by @pierrebrunelle in https://github.com/pixeltable/pixeltable/pull/590
+* Improved error reporting in ExprEvalError by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/595
+* CI fixes by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/603
+* Add OpenAI tool call to integration notebook by @jacobweiss2305 in https://github.com/pixeltable/pixeltable/pull/601
+* Fix docs integration links by @jacobweiss2305 in https://github.com/pixeltable/pixeltable/pull/605
+* Update Reddit BOT README.md by @pierrebrunelle in https://github.com/pixeltable/pixeltable/pull/602
+* Add comprehensive user workflow test script with timing by @pierrebrunelle in https://github.com/pixeltable/pixeltable/pull/594
+* add deepseek integration notebook by @jacobweiss2305 in https://github.com/pixeltable/pixeltable/pull/606
+* fix typo in file name by @jacobweiss2305 in https://github.com/pixeltable/pixeltable/pull/580
+* Removing anthropic import from FnCallEvaluator by @mkornacker in https://github.com/pixeltable/pixeltable/pull/609
+
+
+**Full Changelog**: https://github.com/pixeltable/pixeltable/compare/v0.3.12...v0.3.13
+
+---
+
+### v0.3.12
+
+**Released:** April 18, 2025  
+**Author:** [@aaron-siegel](https://github.com/aaron-siegel)  
+**View on GitHub:** [v0.3.12](https://github.com/pixeltable/pixeltable/releases/tag/v0.3.12)
+
+#### What's Changed
+* PXT-526: Fix concurrency issues with dir operations  by @jpeterson-pxt in https://github.com/pixeltable/pixeltable/pull/562
+* Enable linting of `tests` by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/575
+* Two grouping aggregation-related bug fixes by @mkornacker in https://github.com/pixeltable/pixeltable/pull/576
+* Introduce create_replica for replica metadata, and refactor metadata ops in `catalog` package by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/564
+* image sim update by @pierrebrunelle in https://github.com/pixeltable/pixeltable/pull/573
+* PXT-410 Handle keyboard interrupt gracefully, clean up in memory stru… by @amithadke in https://github.com/pixeltable/pixeltable/pull/559
+* Client side changes to publish snapshot by @amithadke in https://github.com/pixeltable/pixeltable/pull/579
+* New `pxt.retrieval_tool()` for easily exposing a table as a RAG data source by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/572
+
+
+**Full Changelog**: https://github.com/pixeltable/pixeltable/compare/v0.3.11...v0.3.12
+
+---
+
+### v0.3.11
+
+**Released:** April 12, 2025  
+**Author:** [@aaron-siegel](https://github.com/aaron-siegel)  
+**View on GitHub:** [v0.3.11](https://github.com/pixeltable/pixeltable/releases/tag/v0.3.11)
+
+#### What's Changed
+* Cleanup grouping in examples by @jacobweiss2305 in https://github.com/pixeltable/pixeltable/pull/553
+* New Logo with Black Background for Darkmode Readme by @pierrebrunelle in https://github.com/pixeltable/pixeltable/pull/554
+* update pixelagent page by @jacobweiss2305 in https://github.com/pixeltable/pixeltable/pull/555
+* PXT-525: Disallow multiple where clauses in the specification of a DataFrame. by @jpeterson-pxt in https://github.com/pixeltable/pixeltable/pull/552
+* add tool choice options to our tool execution example by @jacobweiss2305 in https://github.com/pixeltable/pixeltable/pull/557
+* Fix mypy error by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/551
+* Generalize release script so it works with other Pixeltable repos by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/558
+* PXT-465 Add support to initialize Pixeltable with database connection strings by @amithadke in https://github.com/pixeltable/pixeltable/pull/530
+* Removing unused PathDict by @mkornacker in https://github.com/pixeltable/pixeltable/pull/561
+* PXT-319: Disallow updates to media columns. by @jpeterson-pxt in https://github.com/pixeltable/pixeltable/pull/545
+* Prefer file extension over puremagic format when it matches a known document type by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/549
+* Support for separate userspaces in the Pixeltable catalog by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/556
+* Widen numpy version by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/565
+* [Changelog] Update product-updates.mdx by @pierrebrunelle in https://github.com/pixeltable/pixeltable/pull/566
+* Brand New Readme for Launch Prep by @pierrebrunelle in https://github.com/pixeltable/pixeltable/pull/567
+* PXT-461: Enable table.select(None). by @jpeterson-pxt in https://github.com/pixeltable/pixeltable/pull/568
+* Linting for `catalog`, `exec`, `io`, and `tool` by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/560
+* Update README.md by @pierrebrunelle in https://github.com/pixeltable/pixeltable/pull/570
+* Integration of JsonMapper with async expr evaluation. by @mkornacker in https://github.com/pixeltable/pixeltable/pull/563
+* Require type hints for all functions in the code base by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/571
+* Fix for add_embedding_index() when embedding function has arity > 1 by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/569
+
+
+**Full Changelog**: https://github.com/pixeltable/pixeltable/compare/v0.3.10...v0.3.11
+
+---
+
+### v0.3.10
+
+**Released:** April 02, 2025  
+**Author:** [@aaron-siegel](https://github.com/aaron-siegel)  
+**View on GitHub:** [v0.3.10](https://github.com/pixeltable/pixeltable/releases/tag/v0.3.10)
+
+#### What's Changed
+* Introduce `pxtf.map()` as a replacement for >> to create JsonMappers by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/514
+* PXT-384 Support string concatenation operations(+ and *) in Arithmeti… by @amithadke in https://github.com/pixeltable/pixeltable/pull/529
+* restructure docs by @jacobweiss2305 in https://github.com/pixeltable/pixeltable/pull/541
+* Fix event loop debug logging by @mkornacker in https://github.com/pixeltable/pixeltable/pull/544
+* Fold import operations into table_create and insert methods. by @jpeterson-pxt in https://github.com/pixeltable/pixeltable/pull/522
+* PXT-336: Add access method for embedding indices. by @jpeterson-pxt in https://github.com/pixeltable/pixeltable/pull/526
+* remove versions from docs by @jacobweiss2305 in https://github.com/pixeltable/pixeltable/pull/546
+* Use pixeltable-yolox by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/543
+* Documentation updates by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/548
+* Add unit tests for QueryTemplateFunction in JsonMapper by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/542
+* Add table ids to pixeltable mds. by @amithadke in https://github.com/pixeltable/pixeltable/pull/547
+* rename extensions to libraries by @jacobweiss2305 in https://github.com/pixeltable/pixeltable/pull/550
+
+
+**Full Changelog**: https://github.com/pixeltable/pixeltable/compare/v0.3.9...v0.3.10
+
+---
+
+### v0.3.9
+
+**Released:** March 28, 2025  
+**Author:** [@aaron-siegel](https://github.com/aaron-siegel)  
+**View on GitHub:** [v0.3.9](https://github.com/pixeltable/pixeltable/releases/tag/v0.3.9)
+
+#### What's Changed
+* PXT-499 Add create_parents option to create_dir to create missing ele… by @amithadke in https://github.com/pixeltable/pixeltable/pull/525
+* Jw/fix syntax error by @jacobweiss2305 in https://github.com/pixeltable/pixeltable/pull/531
+* Concurrent directory operations by @mkornacker in https://github.com/pixeltable/pixeltable/pull/510
+* adding pixelagent page by @jacobweiss2305 in https://github.com/pixeltable/pixeltable/pull/536
+* PXT-512 Update the together.ai examples notebook to use the newer mod… by @amithadke in https://github.com/pixeltable/pixeltable/pull/537
+* Bugfix when drop_dir() is the first operation after a catalog load by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/539
+* Fixing log output of paths. by @mkornacker in https://github.com/pixeltable/pixeltable/pull/538
+* Bugfix related to chained tool calling by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/534
+* Bugfix involving `@pxt.query` instances whose parameters have default values by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/540
+
+
+**Full Changelog**: https://github.com/pixeltable/pixeltable/compare/v0.3.8...v0.3.9
+
+---
+
+### v0.3.8
+
+**Released:** March 25, 2025  
+**Author:** [@aaron-siegel](https://github.com/aaron-siegel)  
+**View on GitHub:** [v0.3.8](https://github.com/pixeltable/pixeltable/releases/tag/v0.3.8)
+
+#### What's Changed
+* add async support to udfs and column casting to table operations by @jacobweiss2305 in https://github.com/pixeltable/pixeltable/pull/518
+* Jw/docs move mcp server docs by @jacobweiss2305 in https://github.com/pixeltable/pixeltable/pull/519
+* Fix broken link + chatbot by @jacobweiss2305 in https://github.com/pixeltable/pixeltable/pull/520
+* adding jfk mcp server by @jacobweiss2305 in https://github.com/pixeltable/pixeltable/pull/515
+* Update changelogs and added Deepseek to Integration Tab by @pierrebrunelle in https://github.com/pixeltable/pixeltable/pull/523
+* remove default values from udf args in docs by @jacobweiss2305 in https://github.com/pixeltable/pixeltable/pull/527
+* Load jfk index on MCP initialization by @jacobweiss2305 in https://github.com/pixeltable/pixeltable/pull/528
+* Linting for `ext`, `func`, `share`, and `utils` packages by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/517
+* Fix bug in JsonPath serialization by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/532
+* replace get_view with get_table by @jacobweiss2305 in https://github.com/pixeltable/pixeltable/pull/533
+
+
+**Full Changelog**: https://github.com/pixeltable/pixeltable/compare/v0.3.7...v0.3.8
+
+---
+
+### v0.3.7
+
+**Released:** March 19, 2025  
+**Author:** [@aaron-siegel](https://github.com/aaron-siegel)  
+**View on GitHub:** [v0.3.7](https://github.com/pixeltable/pixeltable/releases/tag/v0.3.7)
+
+#### What's Changed
+* remove mentions of [''] notation by @jacobweiss2305 in https://github.com/pixeltable/pixeltable/pull/504
+* Catalog changes to prepare for concurrency by @mkornacker in https://github.com/pixeltable/pixeltable/pull/497
+* update configurations page to match api reference by @jacobweiss2305 in https://github.com/pixeltable/pixeltable/pull/505
+* Introduce linting by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/482
+* add video index to cookbook by @jacobweiss2305 in https://github.com/pixeltable/pixeltable/pull/507
+* Fail gracefully when a backwards incompatibility is detected in a computed column UDF call by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/494
+* Docs/update vision search example by @jacobweiss2305 in https://github.com/pixeltable/pixeltable/pull/508
+* Add MCP to docs by @jacobweiss2305 in https://github.com/pixeltable/pixeltable/pull/509
+* Refactor Config into a separate abstraction distinct from Env by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/511
+* Use just-in-time initialization for spaCy, speeding up pxt.init() by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/513
+* Update Label Studio job to Python 3.10 in nightly CI by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/516
+* Bugfixes by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/512
+
+
+**Full Changelog**: https://github.com/pixeltable/pixeltable/compare/v0.3.6...v0.3.7
+
+---
+
+### v0.3.6
+
+**Released:** March 12, 2025  
+**Author:** [@aaron-siegel](https://github.com/aaron-siegel)  
+**View on GitHub:** [v0.3.6](https://github.com/pixeltable/pixeltable/releases/tag/v0.3.6)
+
+#### What's Changed
+* [OpenAI/Anthropic] Support multiple invocations of the same tool in tool calling logic by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/496
+
+
+**Full Changelog**: https://github.com/pixeltable/pixeltable/compare/v0.3.5...v0.3.6
+
+---
+
+### v0.3.5
+
+**Released:** March 11, 2025  
+**Author:** [@aaron-siegel](https://github.com/aaron-siegel)  
+**View on GitHub:** [v0.3.5](https://github.com/pixeltable/pixeltable/releases/tag/v0.3.5)
+
+#### What's Changed
+* Test suite improvement: Use pytest fixtures for Hugging Face embedding models by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/483
+* PXT-0126: Enable view creation from dataframes which include a select clause by @WildCard932 in https://github.com/pixeltable/pixeltable/pull/479
+* Add user and additional_md fields to metadata structs by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/485
+* Update llama_cpp version and disable in non-Linux CI by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/486
+* Fix documentation for the stored attribute on computed columns. by @WildCard932 in https://github.com/pixeltable/pixeltable/pull/487
+* Update to Poetry 2.x by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/488
+* Add mintlify by @jacobweiss2305 in https://github.com/pixeltable/pixeltable/pull/424
+* Readme update with developer-focused content by @pierrebrunelle in https://github.com/pixeltable/pixeltable/pull/490
+* [OpenAI] Determine completion token upper bounds on a per-model basis by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/493
+* Update pyav to 14.2 and WhisperX to 3.3.1 by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/492
+* Improvements to handling of UDF calls in computed columns by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/481
+* Data sharing: logic for publishing snapshots by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/484
+* Add audio file by @jacobweiss2305 in https://github.com/pixeltable/pixeltable/pull/500
+* PXT-279: Refactor import methods, add functionality. by @WildCard932 in https://github.com/pixeltable/pixeltable/pull/489
+* Deepseek integration by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/498
+* Properly handle relative pathnames and filenames with unusual characters by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/499
+* Release script fixes for poetry 2.0 by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/501
+
+
+**Full Changelog**: https://github.com/pixeltable/pixeltable/compare/v0.3.4...v0.3.5
+
+---
+
+### v0.3.4
+
+**Released:** February 23, 2025  
+**Author:** [@aaron-siegel](https://github.com/aaron-siegel)  
+**View on GitHub:** [v0.3.4](https://github.com/pixeltable/pixeltable/releases/tag/v0.3.4)
+
+#### What's Changed
+* Test resiliency improvements by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/476
+* A packager for table data by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/471
+* PXT-0456: Allow numpy.ndarray arrays to be used a Literal constants by @WildCard932 in https://github.com/pixeltable/pixeltable/pull/478
+* Support OpenAI reasoning models by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/477
+* Update postgres to 16.8 and pgvector to 0.8.0 by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/480
+
+
+**Full Changelog**: https://github.com/pixeltable/pixeltable/compare/v0.3.3...v0.3.4
+
+---
+
+### v0.3.3
+
+**Released:** February 15, 2025  
+**Author:** [@aaron-siegel](https://github.com/aaron-siegel)  
+**View on GitHub:** [v0.3.3](https://github.com/pixeltable/pixeltable/releases/tag/v0.3.3)
+
+#### What's Changed
+* Apply formatting by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/463
+* Converting more udfs to async by @mkornacker in https://github.com/pixeltable/pixeltable/pull/455
+* fix for notebook test failure by @mkornacker in https://github.com/pixeltable/pixeltable/pull/464
+* Fix add_computed_column() syntax in pxtf.huggingface docs by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/465
+* Add export_parquet to docs by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/467
+* PXT-405 AudioSplitter support by @amithadke in https://github.com/pixeltable/pixeltable/pull/451
+* Update README.md by @pierrebrunelle in https://github.com/pixeltable/pixeltable/pull/474
+* Replace deprecated add_computed_column() syntax in docs by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/468
+* PXT-0455: Enable computed columns of all types to be unstored. by @WildCard932 in https://github.com/pixeltable/pixeltable/pull/470
+* [SHOW] PXT-0416: Enable variable parameter in query limit() clause by @WildCard932 in https://github.com/pixeltable/pixeltable/pull/454
+* Tables as UDFs by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/475
+
+
+**Full Changelog**: https://github.com/pixeltable/pixeltable/compare/v0.3.2...v0.3.3
+
+---
+
+### v0.3.2
+
+**Released:** January 31, 2025  
+**Author:** [@aaron-siegel](https://github.com/aaron-siegel)  
+**View on GitHub:** [v0.3.2](https://github.com/pixeltable/pixeltable/releases/tag/v0.3.2)
+
+#### What's Changed
+* dealing with unexpected behavior of AsyncConnectionPool by @mkornacker in https://github.com/pixeltable/pixeltable/pull/447
+* PXT-407 Migrate sample apps to new query syntax by @jacobweiss2305 in https://github.com/pixeltable/pixeltable/pull/441
+* PXT 401/PXT-402  Add verbose system config option by @amithadke in https://github.com/pixeltable/pixeltable/pull/442
+* Pxt-401 Add newline when printing to stdout by @amithadke in https://github.com/pixeltable/pixeltable/pull/448
+* Run tmate in detached mode in pytest action by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/453
+* Support generalized arrays (unparameterized or with only a dtype) by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/450
+* Archive Pixeltable logs from every test run by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/456
+* Remove unused code from arrow.py by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/460
+* Pxt 429 missing tiktoken by @jacobweiss2305 in https://github.com/pixeltable/pixeltable/pull/459
+* upgrade httpcore by @mkornacker in https://github.com/pixeltable/pixeltable/pull/461
+
+
+**Full Changelog**: https://github.com/pixeltable/pixeltable/compare/v0.3.1...v0.3.2
+
+---
+
+### v0.3.1
+
+**Released:** January 24, 2025  
+**Author:** [@aaron-siegel](https://github.com/aaron-siegel)  
+**View on GitHub:** [v0.3.1](https://github.com/pixeltable/pixeltable/releases/tag/v0.3.1)
+
+#### What's Changed
+* fastAPI bug fixed by @2pk03 in https://github.com/pixeltable/pixeltable/pull/440
+* Update Gemini version to 0.8.4 by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/444
+* PXT-0244: Correct validity of col error properties by @WildCard932 in https://github.com/pixeltable/pixeltable/pull/443
+* PXT-396 Treat collections with all constants as Literals. by @amithadke in https://github.com/pixeltable/pixeltable/pull/430
+* Type checking for `tests` package by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/445
+* Phase 1 of parallel execution by @mkornacker in https://github.com/pixeltable/pixeltable/pull/418
+* fix for test_tool_invocations() by @mkornacker in https://github.com/pixeltable/pixeltable/pull/446
+
+#### New Contributors
+* @2pk03 made their first contribution in https://github.com/pixeltable/pixeltable/pull/440
+* @WildCard932 made their first contribution in https://github.com/pixeltable/pixeltable/pull/443
+* @amithadke made their first contribution in https://github.com/pixeltable/pixeltable/pull/430
+
+**Full Changelog**: https://github.com/pixeltable/pixeltable/compare/v0.3.0...v0.3.1
+
+---
+
+### v0.3.0
+
+**Released:** January 17, 2025  
+**Author:** [@aaron-siegel](https://github.com/aaron-siegel)  
+**View on GitHub:** [v0.3.0](https://github.com/pixeltable/pixeltable/releases/tag/v0.3.0)
+
+#### Important
+This release contains a few breaking API changes. The most significant change is that the deprecated syntax for adding columns has been removed. This will now generate an error:
+```python
+t['my_col'] = ...
+```
+Instead, do the following:
+```python
+t.add_computed_column(my_col=...)
+```
+Please refer to the Pixeltable documentation (https://pixeltable.readme.io/) for additional details.
+
+#### What's Changed
+* PXT-179 Add a if_exists parameter to add_* APIs by @anushas in https://github.com/pixeltable/pixeltable/pull/422
+* Add a section on UDAs to the UDF feature guide by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/437
+* Various API changes for version 0.3.0 by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/426
+* Terminology: use 'aggregate' in place of 'aggregator' in UDF docs by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/438
+* Support tool choice in OpenAI and Anthropic by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/436
+
+
+**Full Changelog**: https://github.com/pixeltable/pixeltable/compare/v0.2.30...v0.3.0
+
+---
+
+### v0.2.30
+
+**Released:** January 11, 2025  
+**Author:** [@aaron-siegel](https://github.com/aaron-siegel)  
+**View on GitHub:** [v0.2.30](https://github.com/pixeltable/pixeltable/releases/tag/v0.2.30)
+
+#### What's Changed
+* Add multimodal chat sample app by @jacobweiss2305 in https://github.com/pixeltable/pixeltable/pull/419
+* Windows Support: Update Makefile to enforce file creation with -Force option by @jacobweiss2305 in https://github.com/pixeltable/pixeltable/pull/420
+* Update hf datasets version by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/425
+* `pixeltable.functions.math` module by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/427
+* Sample Apps: AI-Based Trading Chrome Extension by @pierrebrunelle in https://github.com/pixeltable/pixeltable/pull/428
+* PXT-373 - Add if_not_exists parameter to drop_* APIs by @anushas in https://github.com/pixeltable/pixeltable/pull/423
+* Tool calling by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/416
+
+
+**Full Changelog**: https://github.com/pixeltable/pixeltable/compare/v0.2.29...v0.2.30
+
+---
+
+### v0.2.29
+
+**Released:** December 26, 2024  
+**Author:** [@aaron-siegel](https://github.com/aaron-siegel)  
+**View on GitHub:** [v0.2.29](https://github.com/pixeltable/pixeltable/releases/tag/v0.2.29)
+
+#### What's Changed
+* PXT-361 - improve DataFrame docstrings by @anushas in https://github.com/pixeltable/pixeltable/pull/394
+* PXT-354: Bug: Indexed column for a view may not load correctly from persistence by @anushas in https://github.com/pixeltable/pixeltable/pull/395
+* PXT-235 - do not accept bool literals in int columns by @anushas in https://github.com/pixeltable/pixeltable/pull/400
+* PXT-372: Bug: Test-only: Assertion in ReloadTester by @anushas in https://github.com/pixeltable/pixeltable/pull/409
+* PXT-374: Bug: cannot create an index with the same name as one that e… by @anushas in https://github.com/pixeltable/pixeltable/pull/406
+* PXT-388: Change the SQL Engine isolation level to 'REPEATABLE READ' by @anushas in https://github.com/pixeltable/pixeltable/pull/417
+* Allow Function instances, UDFs, and UDAs to have multiple signatures by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/403
+* PXT-179 Add a if_exists parameter to create_* APIs by @anushas in https://github.com/pixeltable/pixeltable/pull/401
+* PXT-382: Bug: Similarity queries do not work correctly with ReloadTester by @anushas in https://github.com/pixeltable/pixeltable/pull/411
+* Adding a Gradio Example to our sample apps by @pierrebrunelle in https://github.com/pixeltable/pixeltable/pull/415
+* Fixes for pgserver by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/421
+* Support JSON Schemas for validating `JsonType` columns by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/380
+
+
+**Full Changelog**: https://github.com/pixeltable/pixeltable/compare/v0.2.28...v0.2.29
+
+---
+
+### v0.2.28
+
+**Released:** December 11, 2024  
+**Author:** [@aaron-siegel](https://github.com/aaron-siegel)  
+**View on GitHub:** [v0.2.28](https://github.com/pixeltable/pixeltable/releases/tag/v0.2.28)
+
+#### What's Changed
+* Update Title in Readme.md of Discord Bot by @pierrebrunelle in https://github.com/pixeltable/pixeltable/pull/399
+* Update Expr.id after a call to substitute() by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/402
+* Working with Gemini notebook by @anushas in https://github.com/pixeltable/pixeltable/pull/393
+* Fixes for PyAV 14 by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/405
+
+
+**Full Changelog**: https://github.com/pixeltable/pixeltable/compare/v0.2.27...v0.2.28
+
+---
+
+### v0.2.27
+
+**Released:** December 01, 2024  
+**Author:** [@aaron-siegel](https://github.com/aaron-siegel)  
+**View on GitHub:** [v0.2.27](https://github.com/pixeltable/pixeltable/releases/tag/v0.2.27)
+
+#### What's Changed
+* Update index.md by @pierrebrunelle in https://github.com/pixeltable/pixeltable/pull/392
+* Gemini adapter by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/391
+* PXT-345 Add .txt support for DocumentType by @anushas in https://github.com/pixeltable/pixeltable/pull/389
+* fix: use != instead of 'is not' for string comparison by @jacobweiss2305 in https://github.com/pixeltable/pixeltable/pull/396
+
+#### New Contributors
+* @jacobweiss2305 made their first contribution in https://github.com/pixeltable/pixeltable/pull/396
+
+**Full Changelog**: https://github.com/pixeltable/pixeltable/compare/v0.2.26...v0.2.27
+
+---
+
+### v0.2.26
+
+**Released:** November 23, 2024  
+**Author:** [@aaron-siegel](https://github.com/aaron-siegel)  
+**View on GitHub:** [v0.2.26](https://github.com/pixeltable/pixeltable/releases/tag/v0.2.26)
+
+#### What's Changed
+* Refactor the `docs` and `examples` folders by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/378
+* Move examples/ to docs/sample-apps/ by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/379
+* Readme Update: Added sample apps to table by @pierrebrunelle in https://github.com/pixeltable/pixeltable/pull/381
+* Python 3.13 Support by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/382
+* Test utility to verify query results after catalog reload by @mkornacker in https://github.com/pixeltable/pixeltable/pull/365
+* Lock av version in dev environment by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/385
+* Update pyproject.toml by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/386
+* Fix handling of Optional vs. Required in astype() by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/387
+* Friendlier `repr` output for Tables, DataFrames, and Expressions by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/384
+* Update Ollama integration for ollama 0.4.0 by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/390
+* Feature guide for time zones by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/388
+* PXT-288 - Provide pxt.io.export_parquet API by @anushas in https://github.com/pixeltable/pixeltable/pull/374
+* PXT-352 gracefully error when using a catalog.Table after it is dropped by @anushas in https://github.com/pixeltable/pixeltable/pull/383
+* Basic joins by @mkornacker in https://github.com/pixeltable/pixeltable/pull/377
+
+
+**Full Changelog**: https://github.com/pixeltable/pixeltable/compare/v0.2.25...v0.2.26
+
+---
+
+### v0.2.25
+
+**Released:** November 18, 2024  
+**Author:** [@aaron-siegel](https://github.com/aaron-siegel)  
+**View on GitHub:** [v0.2.25](https://github.com/pixeltable/pixeltable/releases/tag/v0.2.25)
+
+#### What's Changed
+* Disable sentence_transformers tests on linux ARM by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/370
+* Fix for backwards-incompatible Mistral API change by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/368
+* Reusable retry script for CI by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/369
+* PXT-330 Fix a bug in create_insert_plan by @anushas in https://github.com/pixeltable/pixeltable/pull/372
+* Update README.md by @pierrebrunelle in https://github.com/pixeltable/pixeltable/pull/373
+* Add Context-Aware Discord Bot with Semantic Search Capabilities by @pierrebrunelle in https://github.com/pixeltable/pixeltable/pull/367
+* PXT-290: Allow APIs to accept table/column handles by @anushas in https://github.com/pixeltable/pixeltable/pull/371
+* Partial bindings for `Function` by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/363
+* Add config.md documenting configuration options by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/376
+* TileIterator by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/375
+
+
+**Full Changelog**: https://github.com/pixeltable/pixeltable/compare/v0.2.24...v0.2.25
+
+---
+
+### v0.2.24
+
+**Released:** November 11, 2024  
+**Author:** [@aaron-siegel](https://github.com/aaron-siegel)  
+**View on GitHub:** [v0.2.24](https://github.com/pixeltable/pixeltable/releases/tag/v0.2.24)
+
+#### What's Changed
+* Use torchaudio for preprocessing instead of librosa by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/366
+
+
+**Full Changelog**: https://github.com/pixeltable/pixeltable/compare/v0.2.23...v0.2.24
+
+---
+
+### v0.2.23
+
+**Released:** November 10, 2024  
+**Author:** [@aaron-siegel](https://github.com/aaron-siegel)  
+**View on GitHub:** [v0.2.23](https://github.com/pixeltable/pixeltable/releases/tag/v0.2.23)
+
+#### What's Changed
+* Test infrastructure improvements by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/353
+* Relocate DISCUSSION_TEMPLATE and rename yml files by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/358
+* Code cleanup: Lowercase Dict/List/Set/Tuple/Type by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/357
+* Add tests and a tutorial notebook for Ollama by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/360
+* PXT-334 - Add columns property to the table handle by @anushas in https://github.com/pixeltable/pixeltable/pull/359
+* Two new documentation notebooks by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/349
+* CachePrefetchNode now fetches asynchronously by @mkornacker in https://github.com/pixeltable/pixeltable/pull/354
+* Add support for Hugging Face Speech2TextForConditionalGeneration models by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/362
+* Various API changes by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/351
+* PXT-274 - Use GPUs for sentence_transformers when available by @anushas in https://github.com/pixeltable/pixeltable/pull/361
+* Standalone Next.JS and FastAPI Application to demonstrate how to use Pixeltable as backend. by @pierrebrunelle in https://github.com/pixeltable/pixeltable/pull/348
+* Update .examples/README.md with corrected paths by @pierrebrunelle in https://github.com/pixeltable/pixeltable/pull/364
+
+#### New Contributors
+* @anushas made their first contribution in https://github.com/pixeltable/pixeltable/pull/359
+
+**Full Changelog**: https://github.com/pixeltable/pixeltable/compare/v0.2.22...v0.2.23
+
+---
+
+### v0.2.22
+
+**Released:** November 02, 2024  
+**Author:** [@aaron-siegel](https://github.com/aaron-siegel)  
+**View on GitHub:** [v0.2.22](https://github.com/pixeltable/pixeltable/releases/tag/v0.2.22)
+
+#### What's Changed
+* Docs-fixed by @pierrebrunelle in https://github.com/pixeltable/pixeltable/pull/330
+* Update .md and .ipynb files to use new type hint pattern by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/336
+* Fixes for working-with-huggingface notebook by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/338
+* Switch `FrameIterator` to use PyAV instead of OpenCV by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/340
+* Update Whisper library version by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/341
+* Ollama and llama_cpp integrations by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/342
+* Add CONTRIBUTING.md by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/346
+* Replicate adapter by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/334
+* Support XML document type by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/343
+* Fix Replicate notebook to work with external URLs by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/350
+* Type-checking correctness for remaining Pixeltable packages by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/339
+* Ensure FunctionCall return types have correct nullability by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/347
+* Voxel51 Integration by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/337
+* Add generate() and embed() functions for ollama by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/352
+* Media validation on read by @mkornacker in https://github.com/pixeltable/pixeltable/pull/328
+
+
+**Full Changelog**: https://github.com/pixeltable/pixeltable/compare/v0.2.21...v0.2.22
+
+---
+
+### v0.2.21
+
+**Released:** October 18, 2024  
+**Author:** [@aaron-siegel](https://github.com/aaron-siegel)  
+**View on GitHub:** [v0.2.21](https://github.com/pixeltable/pixeltable/releases/tag/v0.2.21)
+
+#### What's Changed
+* A few updates to CI + Makefile by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/317
+* Update macos-12 to macos-13 in github actions configs by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/321
+* Streamline the create_view API, and update docstrings for globals.py and table.py by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/318
+* Limit use of ubuntu-arm64 and ubuntu-x64-t4 to scheduled runs by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/326
+* Allow @query to be redefined if in __main__ (notebook) scope by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/325
+* Type-checking correctness for several additional packages. by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/319
+* Converting aggregate FunctionCalls to SQL by @mkornacker in https://github.com/pixeltable/pixeltable/pull/320
+* Custom type hints for all Pixeltable types by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/314
+* Raise an exception if an error occurs during add_column() by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/327
+* Add Image.point() to API by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/331
+* Back out changes to BtreeIndex.str_filter and mark as `@staticmethod` by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/333
+* Update documentation and display for new type hint pattern by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/332
+
+
+**Full Changelog**: https://github.com/pixeltable/pixeltable/compare/v0.2.20...v0.2.21
+
+---
+
+### v0.2.20
+
+**Released:** October 04, 2024  
+**Author:** [@aaron-siegel](https://github.com/aaron-siegel)  
+**View on GitHub:** [v0.2.20](https://github.com/pixeltable/pixeltable/releases/tag/v0.2.20)
+
+#### What's Changed
+* Support loading Huggingface datasets that contain images by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/306
+* LRU eviction in FileCache by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/276
+* Allow `__getitem__` syntax in JSON paths by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/308
+* Fix Together AI image endpoint by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/315
+* Allow Nones as input to iterators (and skip over rows with Nones) by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/307
+
+
+**Full Changelog**: https://github.com/pixeltable/pixeltable/compare/v0.2.19...v0.2.20
+
+---
+
+### v0.2.19
+
+**Released:** September 27, 2024  
+**Author:** [@aaron-siegel](https://github.com/aaron-siegel)  
+**View on GitHub:** [v0.2.19](https://github.com/pixeltable/pixeltable/releases/tag/v0.2.19)
+
+#### What's Changed
+* Add documentation for `ext` package to mkdocs by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/287
+* Add min_iou parameter to eval_detections() and improve docstrings by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/285
+* Reformatting code cells to fit display width by @mkornacker in https://github.com/pixeltable/pixeltable/pull/288
+* Inline expression fixes by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/280
+* Improve handling of spacy dependency & fix audio-transcriptions demo by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/289
+* CI Enhancements by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/290
+* Add retries to Together APIs by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/292
+* Implement HF ViTForImageClassification models by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/291
+* Mark certain tests as 'expensive' and run them only once by @aaron-siegel in https://github.com/pixeltable/pixeltable/pull/293
+
+
+**Full Changelog**: https://github.com/pixeltable/pixeltable/compare/v0.2.18...v0.2.19
+
+---
+
