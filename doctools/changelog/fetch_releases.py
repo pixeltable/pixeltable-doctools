@@ -10,6 +10,7 @@ This script:
 """
 
 import json
+import re
 import urllib.request
 from datetime import datetime
 from pathlib import Path
@@ -35,6 +36,27 @@ def fetch_releases_from_github(repo: str = "pixeltable/pixeltable", max_releases
         return releases
     except Exception as e:
         raise RuntimeError(f"Failed to fetch releases from GitHub: {e}")
+
+
+def shorten_pr_links(text: str) -> str:
+    """
+    Shorten GitHub PR links to just show PR number.
+
+    Converts:
+        https://github.com/pixeltable/pixeltable/pull/289
+    To:
+        (#289)
+
+    Args:
+        text: Markdown text with PR links
+
+    Returns:
+        Text with shortened PR links
+    """
+    # Match full PR URLs and replace with (#number)
+    pattern = r'https://github\.com/pixeltable/pixeltable/pull/(\d+)'
+    replacement = r'(#\1)'
+    return re.sub(pattern, replacement, text)
 
 
 def convert_release_to_mdx(release: dict[str, Any]) -> str:
@@ -173,6 +195,9 @@ For the latest release information, visit our [GitHub Releases page](https://git
         body_formatted = body.replace('\n## ', '\n#### ')
         if body_formatted.startswith('## '):
             body_formatted = '#### ' + body_formatted[3:]
+
+        # Shorten PR links to just show (#number) instead of full URLs
+        body_formatted = shorten_pr_links(body_formatted)
 
         changelog_content += f"{body_formatted}\n\n"
         changelog_content += "---\n\n"
