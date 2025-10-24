@@ -40,14 +40,14 @@ def fetch_releases_from_github(repo: str = "pixeltable/pixeltable", max_releases
 
 def shorten_pr_links(text: str) -> str:
     """
-    Shorten GitHub PR links to just show PR number.
+    Shorten GitHub PR links to just show PR number as clickable link.
 
     Converts:
         in https://github.com/pixeltable/pixeltable/pull/289
     To:
-        in #289
+        in [#289](https://github.com/pixeltable/pixeltable/pull/289)
 
-    Matches GitHub's native display format.
+    Matches GitHub's native display format (shows #289 but links to full URL).
 
     Args:
         text: Markdown text with PR links
@@ -55,9 +55,9 @@ def shorten_pr_links(text: str) -> str:
     Returns:
         Text with shortened PR links
     """
-    # Match full PR URLs and replace with #number (GitHub style)
+    # Match full PR URLs and replace with [#number](url) markdown link
     pattern = r'https://github\.com/pixeltable/pixeltable/pull/(\d+)'
-    replacement = r'#\1'
+    replacement = r'[#\1](https://github.com/pixeltable/pixeltable/pull/\1)'
     return re.sub(pattern, replacement, text)
 
 
