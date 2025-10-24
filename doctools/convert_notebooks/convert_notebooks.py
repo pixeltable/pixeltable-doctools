@@ -10,6 +10,7 @@ This script:
 """
 
 import argparse
+import re
 import shutil
 import subprocess
 import sys
@@ -58,6 +59,63 @@ def convert_notebooks() -> None:
     repo_root = find_pixeltable_repo()
     output_dir = get_mintlify_source_path(repo_root) / 'notebooks'
     convert_notebooks_to_dir(repo_root, output_dir)
+
+
+def add_frontmatter_to_mdx(mdx_file: Path, notebooks_dir: Path) -> None:
+    """
+    Post-process MDX file to enhance frontmatter with links.
+
+    Quarto already converts H1 to frontmatter with title.
+    This function adds icon and description with Kaggle/Colab/GitHub links.
+
+    Args:
+        mdx_file: Path to the .mdx file
+        notebooks_dir: Original notebooks directory (for calculating relative path)
+    """
+    content = mdx_file.read_text()
+
+    # Extract existing frontmatter
+    frontmatter_match = re.match(r'^---\n(.*?)\n---\n', content, re.DOTALL)
+    if not frontmatter_match:
+        print(f"⚠️  No frontmatter found in {mdx_file.name}, skipping")
+        return
+
+    existing_frontmatter = frontmatter_match.group(1)
+    content_after_frontmatter = content[frontmatter_match.end():]
+
+    # Extract title from existing frontmatter
+    title_match = re.search(r'^title:\s*(.+)$', existing_frontmatter, re.MULTILINE)
+    if not title_match:
+        print(f"⚠️  No title in frontmatter for {mdx_file.name}, skipping")
+        return
+
+    title = title_match.group(1).strip().strip('"')
+
+    # Try to find matching notebook in notebooks_dir
+    matching_notebooks = list(notebooks_dir.rglob(f'{mdx_file.stem}.ipynb'))
+    if not matching_notebooks:
+        print(f"⚠️  Could not find original notebook for {mdx_file.name}")
+        return
+
+    original_notebook = matching_notebooks[0]
+    notebook_rel_path = original_notebook.relative_to(notebooks_dir.parent)  # Relative to docs/
+
+    # Generate URLs
+    github_base = "https://github.com/pixeltable/pixeltable/blob/release"
+    kaggle_url = f"https://kaggle.com/kernels/welcome?src={github_base}/{notebook_rel_path}"
+    colab_url = f"https://colab.research.google.com/{github_base.replace('https://','')}/{notebook_rel_path}"
+    github_url = f"{github_base}/{notebook_rel_path}"
+
+    # Create enhanced frontmatter
+    enhanced_frontmatter = f'''---
+title: "{title}"
+icon: "notebook"
+description: "[Open in Kaggle]({kaggle_url}) | [Open in Colab]({colab_url}) | [View on GitHub]({github_url})"
+---
+'''
+
+    # Write back with enhanced frontmatter
+    mdx_file.write_text(enhanced_frontmatter + content_after_frontmatter)
 
 
 def find_pixeltable_repo() -> Path:
@@ -161,6 +219,12 @@ def convert_notebooks_to_dir(repo_root: Path, output_dir: Path) -> None:
         # Count converted files
         mdx_files = list(output_dir.rglob('*.mdx'))
         print(f"\n✅ Successfully converted {len(mdx_files)} notebook(s) to MDX")
+
+        # Post-process: Add frontmatter to each MDX file
+        print(f"\n📝 Adding frontmatter to MDX files...")
+        for mdx_file in mdx_files:
+            add_frontmatter_to_mdx(mdx_file, notebooks_dir)
+        print(f"✅ Added frontmatter to {len(mdx_files)} file(s)")
 
         # Show directory structure
         print(f"\n📁 Output directory structure:")
