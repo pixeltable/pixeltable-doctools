@@ -122,6 +122,18 @@ title: "Changelog"
 description: "Release history and updates for Pixeltable"
 ---
 
+## Contributors
+
+Pixeltable is built by a vibrant community of contributors. We're grateful for everyone who has helped make Pixeltable better!
+
+**Want to contribute?** Check out our [Contributing Guide](https://github.com/pixeltable/pixeltable/blob/main/CONTRIBUTING.md) to get started.
+
+**Top Contributors:** View our amazing contributors on [GitHub](https://github.com/pixeltable/pixeltable/graphs/contributors).
+
+---
+
+## Release History
+
 View the complete release history for Pixeltable below. Each release includes detailed information about new features, bug fixes, and improvements.
 
 For the latest release information, visit our [GitHub Releases page](https://github.com/pixeltable/pixeltable/releases).
@@ -149,18 +161,18 @@ For the latest release information, visit our [GitHub Releases page](https://git
         else:
             formatted_date = 'Unknown date'
 
-        # Add release section
-        changelog_content += f"## {name}\n\n"
-        changelog_content += f"**Released:** {formatted_date}\n"
-        changelog_content += f"**Author:** [@{author}](https://github.com/{author})\n"
+        # Add release section (using ### to nest under "Release History")
+        changelog_content += f"### {name}\n\n"
+        changelog_content += f"**Released:** {formatted_date}  \n"
+        changelog_content += f"**Author:** [@{author}](https://github.com/{author})  \n"
         changelog_content += f"**View on GitHub:** [{tag_name}]({html_url})\n\n"
 
-        # Convert H2 sections to H3 in the body for proper sidebar hierarchy
+        # Convert H2 sections to H4 in the body for proper sidebar hierarchy
         # GitHub release notes use ## for "What's Changed" and "New Contributors"
         # Handle both mid-body (after newline) and start-of-body cases
-        body_formatted = body.replace('\n## ', '\n### ')
+        body_formatted = body.replace('\n## ', '\n#### ')
         if body_formatted.startswith('## '):
-            body_formatted = '### ' + body_formatted[3:]
+            body_formatted = '#### ' + body_formatted[3:]
 
         changelog_content += f"{body_formatted}\n\n"
         changelog_content += "---\n\n"
