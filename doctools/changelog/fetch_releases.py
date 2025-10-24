@@ -116,7 +116,7 @@ def generate_changelog_to_dir(output_dir: Path, repo: str = "pixeltable/pixeltab
         output_dir: Where to output the .mdx file
         repo: GitHub repository in format 'owner/repo'
     """
-    print("📰 Fetching releases from GitHub...")
+    print("⚡ Fetching releases from GitHub...")
     print(f"   Repository: {repo}")
     print(f"   Output: {output_dir}")
 
@@ -127,20 +127,20 @@ def generate_changelog_to_dir(output_dir: Path, repo: str = "pixeltable/pixeltab
         raise RuntimeError(f"Failed to fetch releases: {e}")
 
     if not releases:
-        print(f"⚠️  No releases found")
+        print(f"☠️  No releases found")
         return
 
-    print(f"📚 Found {len(releases)} release(s)")
+    print(f"🔥 Found {len(releases)} release(s)")
 
     # Clean output directory
     if output_dir.exists():
-        print(f"🧹 Cleaning output directory: {output_dir}")
+        print(f"💀 Cleaning output directory: {output_dir}")
         import shutil
         shutil.rmtree(output_dir)
     output_dir.mkdir(parents=True)
 
     # Create consolidated changelog
-    print(f"\n📝 Creating consolidated changelog...")
+    print(f"⚠️  Creating consolidated changelog...")
     changelog_content = """---
 title: "Changelog"
 description: "Release history and updates for Pixeltable"
@@ -209,7 +209,7 @@ For the latest release information, visit our [GitHub Releases page](https://git
     changelog_path.write_text(changelog_content)
     print(f"   ✅ changelog.mdx (consolidated)")
 
-    print(f"\n💪 Changelog generated successfully!")
+    print(f"💥 Changelog generated successfully!")
     print(f"   Output: {output_dir}")
     print(f"   File: changelog.mdx with {len(releases)} releases")
 

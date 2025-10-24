@@ -149,7 +149,7 @@ def convert_notebooks_to_dir(repo_root: Path, output_dir: Path) -> None:
         repo_root: Path to pixeltable repository root
         output_dir: Where to output the converted .mdx files
     """
-    print("🔄 Converting Jupyter notebooks to Mintlify MDX format...")
+    print("⚡ Converting Jupyter notebooks to Mintlify MDX format...")
     print(f"   Repository: {repo_root}")
     print(f"   Output: {output_dir}")
 
@@ -168,14 +168,14 @@ def convert_notebooks_to_dir(repo_root: Path, output_dir: Path) -> None:
     # Count notebooks
     notebooks = list(notebooks_dir.rglob('*.ipynb'))
     if not notebooks:
-        print(f"⚠️  No notebooks found in {notebooks_dir}")
+        print(f"☠️  No notebooks found in {notebooks_dir}")
         return
 
-    print(f"📚 Found {len(notebooks)} notebook(s) to convert")
+    print(f"🔥 Found {len(notebooks)} notebook(s) to convert")
 
     # Clean output directory
     if output_dir.exists():
-        print(f"🧹 Cleaning output directory: {output_dir}")
+        print(f"💀 Cleaning output directory: {output_dir}")
         shutil.rmtree(output_dir)
     output_dir.mkdir(parents=True)
 
@@ -223,21 +223,10 @@ def convert_notebooks_to_dir(repo_root: Path, output_dir: Path) -> None:
         print(f"\n✅ Successfully converted {len(mdx_files)} notebook(s) to MDX")
 
         # Post-process: Add frontmatter to each MDX file
-        print(f"\n📝 Adding frontmatter to MDX files...")
+        print(f"\n⚡ Adding frontmatter to MDX files...")
         for mdx_file in mdx_files:
             add_frontmatter_to_mdx(mdx_file, notebooks_dir)
-        print(f"✅ Added frontmatter to {len(mdx_files)} file(s)")
-
-        # Show directory structure
-        print(f"\n📁 Output directory structure:")
-        for mdx_file in sorted(mdx_files):
-            rel_path = mdx_file.relative_to(output_dir)
-            print(f"   {rel_path}")
-
-        print(f"\n💡 Next steps:")
-        print(f"   1. Review converted files in: {output_dir}")
-        print(f"   2. Add notebook pages to {get_mintlify_source_path(repo_root)}/docs.json")
-        print(f"   3. Preview with: cd {get_mintlify_source_path(repo_root)} && mintlify dev")
+        print(f"💥 Added frontmatter to {len(mdx_files)} file(s)")
 
     except subprocess.TimeoutExpired:
         print("\n❌ Quarto conversion timed out after 5 minutes", file=sys.stderr)
