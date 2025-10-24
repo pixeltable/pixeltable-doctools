@@ -43,9 +43,11 @@ def shorten_pr_links(text: str) -> str:
     Shorten GitHub PR links to just show PR number.
 
     Converts:
-        https://github.com/pixeltable/pixeltable/pull/289
+        in https://github.com/pixeltable/pixeltable/pull/289
     To:
-        (#289)
+        in #289
+
+    Matches GitHub's native display format.
 
     Args:
         text: Markdown text with PR links
@@ -53,9 +55,9 @@ def shorten_pr_links(text: str) -> str:
     Returns:
         Text with shortened PR links
     """
-    # Match full PR URLs and replace with (#number)
+    # Match full PR URLs and replace with #number (GitHub style)
     pattern = r'https://github\.com/pixeltable/pixeltable/pull/(\d+)'
-    replacement = r'(#\1)'
+    replacement = r'#\1'
     return re.sub(pattern, replacement, text)
 
 
