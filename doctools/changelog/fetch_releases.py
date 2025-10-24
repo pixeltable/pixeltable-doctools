@@ -38,6 +38,28 @@ def fetch_releases_from_github(repo: str = "pixeltable/pixeltable", max_releases
         raise RuntimeError(f"Failed to fetch releases from GitHub: {e}")
 
 
+def linkify_github_mentions(text: str) -> str:
+    """
+    Convert @username mentions to clickable GitHub profile links.
+
+    Converts:
+        by @aaron-siegel in
+    To:
+        by [@aaron-siegel](https://github.com/aaron-siegel) in
+
+    Args:
+        text: Markdown text with @username mentions
+
+    Returns:
+        Text with linked usernames
+    """
+    # Match @username (letters, numbers, hyphens) and convert to markdown link
+    # Use negative lookahead to avoid re-linking already linked usernames
+    pattern = r'(?<!\[)@([a-zA-Z0-9-]+)(?!\])'
+    replacement = r'[@\1](https://github.com/\1)'
+    return re.sub(pattern, replacement, text)
+
+
 def shorten_pr_links(text: str) -> str:
     """
     Shorten GitHub PR links to just show PR number as clickable link.
@@ -198,7 +220,10 @@ For the latest release information, visit our [GitHub Releases page](https://git
         if body_formatted.startswith('## '):
             body_formatted = '#### ' + body_formatted[3:]
 
-        # Shorten PR links to just show (#number) instead of full URLs
+        # Linkify @username mentions to GitHub profiles
+        body_formatted = linkify_github_mentions(body_formatted)
+
+        # Shorten PR links to just show #number as clickable links
         body_formatted = shorten_pr_links(body_formatted)
 
         changelog_content += f"{body_formatted}\n\n"
