@@ -657,7 +657,19 @@ Documentation for `{name}` is not available.
 
         return_desc = parsed.returns.description or "Return value"
 
-        content += f"- *{return_type}*: {self._escape_mdx(return_desc)}\n\n"
+        # Handle multiline descriptions (e.g., with code blocks)
+        # Need to indent continuation lines to stay within the list item
+        escaped_desc = self._escape_mdx(return_desc)
+        if '\n' in escaped_desc:
+            lines = escaped_desc.split('\n')
+            # First line goes inline with the type
+            formatted_desc = lines[0]
+            # Subsequent lines need 2-space indentation for list item continuation
+            for line in lines[1:]:
+                formatted_desc += '\n  ' + line
+            content += f"- *{return_type}*: {formatted_desc}\n\n"
+        else:
+            content += f"- *{return_type}*: {escaped_desc}\n\n"
         return content
 
     def _extract_return_type_from_signature(self, func) -> Optional[str]:
