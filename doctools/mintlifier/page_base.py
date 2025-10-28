@@ -665,8 +665,12 @@ Documentation for `{name}` is not available.
             # First line goes inline with the type
             formatted_desc = lines[0]
             # Subsequent lines need 2-space indentation for list item continuation
+            # BUT: Don't indent blank lines - they should stay blank to properly close the list
             for line in lines[1:]:
-                formatted_desc += '\n  ' + line
+                if line.strip():  # Only indent non-blank lines
+                    formatted_desc += '\n  ' + line
+                else:
+                    formatted_desc += '\n'  # Blank lines stay blank
             content += f"- *{return_type}*: {formatted_desc}\n\n"
         else:
             content += f"- *{return_type}*: {escaped_desc}\n\n"
