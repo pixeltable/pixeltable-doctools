@@ -19,6 +19,55 @@ from doctools.config import get_mintlify_source_path, get_mintlify_target_path
 from doctools.convert_notebooks.convert_notebooks import convert_notebooks_to_dir
 
 
+def validate_mintlify_docs(target_dir: Path) -> list[str]:
+    """
+    Validate Mintlify documentation for parsing errors.
+
+    Runs mintlify validation and captures any parsing errors.
+
+    Args:
+        target_dir: Directory containing built documentation
+
+    Returns:
+        List of parsing error messages (empty if no errors)
+    """
+    try:
+        # Run mintlify dev with a short timeout to capture parsing errors
+        # The parsing errors appear in stderr immediately on startup
+        result = subprocess.run(
+            ['npx', 'mintlify', 'dev', '--port', '3001'],
+            cwd=str(target_dir),
+            capture_output=True,
+            text=True,
+            timeout=5  # Just need a few seconds to capture initial parsing
+        )
+    except subprocess.TimeoutExpired as e:
+        # Timeout is expected - we just want to capture the initial output
+        stderr_output = e.stderr.decode() if isinstance(e.stderr, bytes) else e.stderr
+        stdout_output = e.stdout.decode() if isinstance(e.stdout, bytes) else e.stdout
+    except Exception as e:
+        # If validation command fails, return a warning but don't fail the build
+        return [f"⚠️  Could not run validation: {str(e)}"]
+    else:
+        # If command completed, use its output
+        stderr_output = result.stderr
+        stdout_output = result.stdout
+
+    # Parse output for error messages
+    errors = []
+    output = (stderr_output or '') + (stdout_output or '')
+
+    for line in output.split('\n'):
+        # Look for parsing error lines
+        if 'parsing error' in line.lower():
+            # Clean up the line for display
+            clean_line = line.strip()
+            if clean_line:
+                errors.append(clean_line)
+
+    return errors
+
+
 def deploy_docs(target_dir: Path, target: str) -> None:
     """
     Deploy documentation to pixeltable-docs-www repository.
@@ -239,6 +288,24 @@ def build_mintlify(target: str) -> None:
 
     print(f"\n✅ Documentation build complete!")
     print(f"   Output directory: {target_dir}")
+
+    # Validate the built documentation for parsing errors
+    print(f"\n🔍 Validating documentation for parsing errors...")
+    validation_errors = validate_mintlify_docs(target_dir)
+
+    if validation_errors:
+        print(f"\n⚠️  Found {len(validation_errors)} parsing error(s):", file=sys.stderr)
+        for error in validation_errors:
+            print(f"   {error}", file=sys.stderr)
+
+        # For dev/stage/prod builds, we want to know about errors but continue
+        # For local builds, we definitely want to see them
+        if target == 'local':
+            print(f"\n   💡 Tip: Check the source docstrings for formatting issues", file=sys.stderr)
+            print(f"   💡 Run: cd {target_dir} && npx mintlify dev", file=sys.stderr)
+            print(f"   to see real-time parsing errors in context", file=sys.stderr)
+    else:
+        print(f"   ✅ No parsing errors found!")
 
     # Deploy if target is dev, stage, or prod
     if target in ['dev', 'stage', 'prod']:
