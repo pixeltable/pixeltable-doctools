@@ -671,6 +671,8 @@ Documentation for `{name}` is not available.
                     formatted_desc += '\n  ' + line
                 else:
                     formatted_desc += '\n'  # Blank lines stay blank
+            # Strip trailing newlines to avoid excessive blank lines, then add standard spacing
+            formatted_desc = formatted_desc.rstrip('\n')
             content += f"- *{return_type}*: {formatted_desc}\n\n"
         else:
             content += f"- *{return_type}*: {escaped_desc}\n\n"
