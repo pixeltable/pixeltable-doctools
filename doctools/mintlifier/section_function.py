@@ -512,7 +512,7 @@ class FunctionSectionGenerator(PageBase):
         if not examples_meta:
             return ""
 
-        content = "\n**Example:**\n\n"
+        content = "**Example:**\n\n"
 
         for meta in examples_meta:
             if meta.description:
@@ -555,7 +555,7 @@ class FunctionSectionGenerator(PageBase):
             return ""
 
         # Format with glamour but subtle headers!
-        content = "\n**Example:**\n\n"
+        content = "**Example:**\n\n"
 
         # Clean up the example text
         lines = examples_text.split("\n")
