@@ -129,20 +129,20 @@ class PageBase:
 
         if not params_str:
             # Empty params
-            return f"(){after_close}"
+            return f"() {after_close}"
 
         # Split parameters by comma, respecting nested brackets
         params = self._split_params(params_str)
 
         if len(params) == 0:
-            return f"(){after_close}"
+            return f"() {after_close}"
         elif len(params) == 1:
             # Single parameter - no line breaks needed
-            return f"({params[0]}){after_close}"
+            return f"({params[0]}) {after_close}"
         else:
             # Multiple parameters - break after each comma
             formatted_params = ",\n    ".join(param.strip() for param in params)
-            return f"(\n    {formatted_params}\n){after_close}"
+            return f"(\n    {formatted_params}\n) {after_close}"
 
     def _split_params(self, params_str: str) -> list:
         """Split parameter string by commas, respecting nested brackets."""
