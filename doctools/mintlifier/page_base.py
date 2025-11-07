@@ -1,5 +1,6 @@
 """Base class for all page generators."""
 
+from docstring_parser.common import Docstring
 import re
 import inspect
 import subprocess
@@ -42,8 +43,11 @@ class PageBase:
         # Remove quotes from type annotations first
         sig_str = self._remove_type_quotes(sig_str)
 
-        # Now manually format with line breaks after commas
-        return self._format_signature_manual(sig_str)
+        if len(sig_str) <= 60:
+            return sig_str
+        else:
+            # Format with line breaks after commas
+            return self._format_signature_manual(sig_str)
 
     def _format_nested_description(self, desc: str) -> str:
         """Format a description that may contain nested bullet points.
@@ -628,7 +632,7 @@ Documentation for `{name}` is not available.
         # No function name, just format the signature
         return self._format_signature_with_ruff(sig_str, default_name)
 
-    def _document_returns(self, parsed, func=None) -> str:
+    def _document_returns(self, parsed: Docstring, func: Any = None) -> str:
         """Document return value - common to both methods and functions.
 
         Args:
@@ -651,7 +655,6 @@ Documentation for `{name}` is not available.
 
         # Clean up type strings (remove <class '...'> format)
         if return_type:
-            import re
             return_type = str(return_type)
             return_type = re.sub(r"<class '([^']+)'>", r"\1", return_type)
 
@@ -660,16 +663,13 @@ Documentation for `{name}` is not available.
         # Handle multiline descriptions (e.g., with code blocks)
         # Need to indent continuation lines to stay within the list item
         escaped_desc = self._escape_mdx(return_desc)
-        if '\n' in escaped_desc:
-            lines = escaped_desc.split('\n')
-            # First line goes inline with the type
-            formatted_desc = lines[0]
-            # Subsequent lines need 2-space indentation for list item continuation
-            for line in lines[1:]:
-                formatted_desc += '\n  ' + line
-            content += f"- *{return_type}*: {formatted_desc}\n\n"
-        else:
-            content += f"- *{return_type}*: {escaped_desc}\n\n"
+        lines = escaped_desc.split('\n')
+        # First line goes inline with the type
+        formatted_desc = lines[0]
+        # Subsequent lines need 2-space indentation for list item continuation
+        for line in lines[1:]:
+            formatted_desc += '\n  ' + line
+        content += f"- `{return_type}`: {formatted_desc}\n\n"
         return content
 
     def _extract_return_type_from_signature(self, func) -> Optional[str]:

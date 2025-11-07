@@ -74,9 +74,12 @@ class FunctionSectionGenerator(PageBase):
             is_udf = self._is_udf(func)
 
         if is_udf:
-            content += f"### `{func_name}()` <sub>udf</sub>\n\n"
+            content += f"### udf `{func_name}()`\n\n"
         else:
-            content += f"### `{func_name}()`\n\n"
+            content += f"### func `{func_name}()`\n\n"
+
+        # Add signature
+        content += self._document_signature(func, func_name)
 
         # Add description
         doc = inspect.getdoc(func) or ""
@@ -86,9 +89,6 @@ class FunctionSectionGenerator(PageBase):
                 content += f"{self._escape_mdx(parsed.short_description)}\n\n"
             if parsed.long_description:
                 content += f"{self._escape_mdx(parsed.long_description)}\n\n"
-
-        # Add signature
-        content += self._document_signature(func, func_name)
 
         # Add parameters
         if doc:
@@ -111,7 +111,7 @@ class FunctionSectionGenerator(PageBase):
 
     def _document_signature(self, func: Any, func_name: str) -> str:
         """Document function signature."""
-        content = "**Signature:**\n\n```python\n"
+        content = "```python\n"
 
         try:
             # Check if it's a polymorphic function FIRST (before accessing .signature which throws)
@@ -319,9 +319,10 @@ class FunctionSectionGenerator(PageBase):
 
             content += f"- **`{param.arg_name}`** "
             if type_str:
-                content += f"(*{type_str}*)"
-            if default is not None:
-                content += f" = `{default}`"
+                content += f"(`{type_str}`"
+                if default is not None:
+                    content += f", default: `{default}`"
+                content += ")"
 
             # Format description with proper nesting for bullet points
             desc = param.description if param.description else "No description"
