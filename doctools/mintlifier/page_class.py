@@ -162,8 +162,6 @@ icon: "square-c"
         if not methods:
             return content
 
-        content += "## Methods\n\n"
-
         # Get class name for inline sections
         class_name = full_path.split(".")[-1]
 
@@ -247,12 +245,7 @@ icon: "square-c"
         if not all_attributes:
             return content
 
-        content += "## Attributes\n\n"
-
-        for i, (attr_name, attr_type, doc, default) in enumerate(sorted(all_attributes)):
-            # Add separator between items (but not before the first one)
-            if i > 0:
-                content += "---\n\n"
+        for attr_name, attr_type, doc, default in sorted(all_attributes):
 
             # Determine the label based on attr_type
             if "property" in attr_type:
@@ -262,8 +255,8 @@ icon: "square-c"
             else:
                 label = "attribute"
 
-            # Format: `attr_name` <sub>type</sub> for consistency with UDFs
-            content += f"### `{attr_name}` <sub>{label}</sub>\n\n"
+            # Format: label `attr_name` for consistency with UDFs
+            content += f"## {label} `{attr_name}`\n\n"
 
             # Add documentation or warning
             if doc:

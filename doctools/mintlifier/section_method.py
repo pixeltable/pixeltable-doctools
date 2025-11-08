@@ -30,8 +30,11 @@ class MethodSectionGenerator(PageBase):
             return ""
 
         # Build section content with elegant visual separation
-        content = "\n---\n\n"  # Beautiful horizontal divider
-        content += f"### `{method_name}()`\n\n"
+        content = "\n"
+        content += f"## method `{method_name}()`\n\n"
+
+        # Add signature
+        content += self._document_signature(method, method_name)
 
         # Add description
         doc = inspect.getdoc(method) or ""
@@ -41,9 +44,6 @@ class MethodSectionGenerator(PageBase):
                 content += f"{self._escape_mdx(parsed.short_description)}\n\n"
             if parsed.long_description:
                 content += f"{self._escape_mdx(parsed.long_description)}\n\n"
-
-        # Add signature
-        content += self._document_signature(method, method_name)
 
         # Add parameters
         if doc:
@@ -70,7 +70,7 @@ class MethodSectionGenerator(PageBase):
 
     def _document_signature(self, method: Any, method_name: str) -> str:
         """Document method signature."""
-        content = "**Signature:**\n\n```python\n"
+        content = "```python\n"
 
         try:
             # Check for Pixeltable's custom signature attribute first
@@ -205,9 +205,10 @@ class MethodSectionGenerator(PageBase):
 
             content += f"- **`{param.arg_name}`** "
             if type_str:
-                content += f"(*{type_str}*)"
-            if default is not None:
-                content += f" = `{default}`"
+                content += f"(`{type_str}`"
+                if default is not None:
+                    content += f", default: `{default}`"
+                content += ")"
             content += f": {self._escape_mdx(param.description) if param.description else 'No description'}\n"
 
         content += "\n"

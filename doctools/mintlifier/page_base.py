@@ -1,5 +1,6 @@
 """Base class for all page generators."""
 
+from docstring_parser.common import Docstring
 import re
 import inspect
 import subprocess
@@ -42,8 +43,11 @@ class PageBase:
         # Remove quotes from type annotations first
         sig_str = self._remove_type_quotes(sig_str)
 
-        # Now manually format with line breaks after commas
-        return self._format_signature_manual(sig_str)
+        if len(sig_str) <= 60:
+            return sig_str
+        else:
+            # Format with line breaks after commas
+            return self._format_signature_manual(sig_str)
 
     def _format_nested_description(self, desc: str) -> str:
         """Format a description that may contain nested bullet points.
@@ -129,20 +133,20 @@ class PageBase:
 
         if not params_str:
             # Empty params
-            return f"(){after_close}"
+            return f"() {after_close}"
 
         # Split parameters by comma, respecting nested brackets
         params = self._split_params(params_str)
 
         if len(params) == 0:
-            return f"(){after_close}"
+            return f"() {after_close}"
         elif len(params) == 1:
             # Single parameter - no line breaks needed
-            return f"({params[0]}){after_close}"
+            return f"({params[0]}) {after_close}"
         else:
             # Multiple parameters - break after each comma
             formatted_params = ",\n    ".join(param.strip() for param in params)
-            return f"(\n    {formatted_params}\n){after_close}"
+            return f"(\n    {formatted_params}\n) {after_close}"
 
     def _split_params(self, params_str: str) -> list:
         """Split parameter string by commas, respecting nested brackets."""
@@ -628,7 +632,7 @@ Documentation for `{name}` is not available.
         # No function name, just format the signature
         return self._format_signature_with_ruff(sig_str, default_name)
 
-    def _document_returns(self, parsed, func=None) -> str:
+    def _document_returns(self, parsed: Docstring, func: Any = None) -> str:
         """Document return value - common to both methods and functions.
 
         Args:
@@ -651,7 +655,6 @@ Documentation for `{name}` is not available.
 
         # Clean up type strings (remove <class '...'> format)
         if return_type:
-            import re
             return_type = str(return_type)
             return_type = re.sub(r"<class '([^']+)'>", r"\1", return_type)
 
@@ -660,29 +663,26 @@ Documentation for `{name}` is not available.
         # Handle multiline descriptions (e.g., with code blocks)
         # Need to indent continuation lines to stay within the list item
         escaped_desc = self._escape_mdx(return_desc)
-        if '\n' in escaped_desc:
-            lines = escaped_desc.split('\n')
-            # First line goes inline with the type
-            formatted_desc = lines[0]
-            # Subsequent lines need 2-space indentation for list item continuation
-            # BUT: Don't indent blank lines - they should stay blank to properly close the list
-            # EXCEPT: Remove blank lines immediately before code fences to avoid lazy line errors
-            for i, line in enumerate(lines[1:], start=1):
-                if line.strip():  # Non-blank line
-                    formatted_desc += '\n  ' + line
-                else:  # Blank line
-                    # Check if next line is a code fence
-                    next_idx = i + 1
-                    if next_idx < len(lines) and lines[next_idx].strip().startswith('```'):
-                        # Skip blank line before code fence
-                        continue
-                    else:
-                        formatted_desc += '\n'  # Preserve other blank lines
-            # Strip trailing newlines to avoid excessive blank lines, then add standard spacing
-            formatted_desc = formatted_desc.rstrip('\n')
-            content += f"- *{return_type}*: {formatted_desc}\n\n"
-        else:
-            content += f"- *{return_type}*: {escaped_desc}\n\n"
+        lines = escaped_desc.split('\n')
+        # First line goes inline with the type
+        formatted_desc = lines[0]
+        # Subsequent lines need 2-space indentation for list item continuation
+        # BUT: Don't indent blank lines - they should stay blank to properly close the list
+        # EXCEPT: Remove blank lines immediately before code fences to avoid lazy line errors
+        for i, line in enumerate(lines[1:], start=1):
+            if line.strip():  # Non-blank line
+                formatted_desc += '\n  ' + line
+            else:  # Blank line
+                # Check if next line is a code fence
+                next_idx = i + 1
+                if next_idx < len(lines) and lines[next_idx].strip().startswith('```'):
+                    # Skip blank line before code fence
+                    continue
+                else:
+                    formatted_desc += '\n'  # Preserve other blank lines
+        # Strip trailing newlines to avoid excessive blank lines, then add standard spacing
+        formatted_desc = formatted_desc.rstrip('\n')
+        content += f"- `{return_type}`: {formatted_desc}\n\n"
         return content
 
     def _extract_return_type_from_signature(self, func) -> Optional[str]:
