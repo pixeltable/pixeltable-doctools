@@ -18,17 +18,11 @@ Workflow:
 5. Run `make docs-stage VERSION=x.y.z` to deploy clean docs to staging
 """
 
-import json
 import shutil
 import subprocess
 import sys
 import tempfile
 from pathlib import Path
-from time import sleep
-from typing import Any
-
-from doctools.build_mintlify.build_mintlify import build_mintlify
-from doctools.config import get_mintlify_source_path
 
 
 def deploy(pxt_repo_dir: Path, temp_dir: Path, branch: str) -> None:
@@ -66,7 +60,6 @@ def deploy(pxt_repo_dir: Path, temp_dir: Path, branch: str) -> None:
             item.unlink()
 
     # Copy all docs from output
-    # TODO: What if there are files in the repo that don't exist in the output?
     print(f"   Copying documentation files...")
     for item in docs_target_dir.iterdir():
         dest = docs_repo_dir / item.name
@@ -105,8 +98,16 @@ def deploy(pxt_repo_dir: Path, temp_dir: Path, branch: str) -> None:
 
 def main():
     """Main entry point."""
+    if len(sys.argv) != 2:
+        print(f"Usage: deploy.py <dev|stage|prod>")
+        sys.exit(1)
 
-    print(f"Deploying documentation to dev for pre-release validation")
+    target = sys.argv[1]
+    if target not in ('dev', 'stage', 'prod'):
+        print(f"Error: Invalid target {target!r}. Must be one of: dev, stage, prod.")
+        sys.exit(1)
+
+    print(f"Deploying documentation for target: {target}")
 
     try:
         import pixeltable as pxt
@@ -122,7 +123,7 @@ def main():
         sys.exit(1)
 
     with tempfile.TemporaryDirectory() as temp_dir:
-        deploy(pxt_repo_dir, temp_dir, 'dev')
+        deploy(pxt_repo_dir, temp_dir, target)
 
     print(f"\nDeployment complete.")
     print(f"   View at: https://pixeltable-dev.mintlify.app/sdk/latest")

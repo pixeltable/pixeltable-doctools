@@ -8,14 +8,12 @@ This script:
 3. Results in a complete, deployable documentation site
 """
 
-import argparse
 import shutil
 import subprocess
 import sys
 from pathlib import Path
 
 from doctools.changelog.fetch_releases import generate_changelog_to_dir
-from doctools.config import get_mintlify_source_path, get_mintlify_target_path
 from doctools.convert_notebooks.convert_notebooks import convert_notebooks_to_dir
 
 
@@ -157,9 +155,9 @@ def build_mintlify(pxt_repo_dir: Path, no_errors: bool = False) -> None:
         print(f"\n⚠️  Found {len(validation_errors)} parsing error(s):", file=sys.stderr)
         for error in validation_errors:
             print(f"   {error}", file=sys.stderr)
-            print(f"\n   💡 Tip: Check the source docstrings for formatting issues", file=sys.stderr)
-            print(f"   💡 Run: cd {target_dir} && npx mintlify dev", file=sys.stderr)
-            print(f"   to see real-time parsing errors in context", file=sys.stderr)
+        print(f"\n   💡 Tip: Check the source docstrings for formatting issues", file=sys.stderr)
+        print(f"   💡 Run: cd {target_dir} && npx mintlify dev", file=sys.stderr)
+        print(f"   to see real-time parsing errors in context", file=sys.stderr)
     else:
         print(f"   ✅ No parsing errors found!")
 
