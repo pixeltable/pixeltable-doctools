@@ -95,25 +95,25 @@ def build_mintlify(pxt_repo_dir: Path, no_errors: bool = False) -> None:
         raise FileNotFoundError(f"OPML file not found: {opml_file}")
 
     # Step 1: Clean and prepare target directory
-    print(f"\n📁 Preparing target directory: {target_dir}")
+    print(f"\nPreparing target directory: {target_dir}")
     if target_dir.exists():
         shutil.rmtree(target_dir)
     target_dir.mkdir(parents=True)
 
     # Step 2: Generate notebooks to docs/mintlify/notebooks/
-    print(f"\n📓 Generating notebooks...")
+    print(f"\nGenerating notebooks ...")
     notebooks_output = target_dir / 'notebooks'
     convert_notebooks_to_dir(pxt_repo_dir, notebooks_output)
-    print(f"   ✅ Notebooks generated to {notebooks_output}")
+    print(f"\nNotebooks generated to {notebooks_output}")
 
     # Step 3: Generate changelog to docs/mintlify/changelog/
-    print(f"\n📰 Generating changelog from GitHub releases...")
+    print(f"\nGenerating changelog from GitHub releases ...")
     changelog_output = target_dir / 'changelog'
     generate_changelog_to_dir(changelog_output)
-    print(f"   ✅ Changelog generated to {changelog_output}")
+    print(f"\nChangelog generated to {changelog_output}")
 
     # Step 4: Copy mintlify source to target
-    print(f"\n📋 Copying source files from {source_dir} to {target_dir}")
+    print(f"\nCopying source files from {source_dir} to {target_dir}")
     for item in source_dir.iterdir():
         if item.name.startswith('.'):
             continue  # Skip hidden files
@@ -127,7 +127,7 @@ def build_mintlify(pxt_repo_dir: Path, no_errors: bool = False) -> None:
 
     # Step 5: Run mintlifier to generate SDK docs
     # Mintlifier now writes directly to docs/target/sdk/latest and updates docs/target/docs.json
-    print(f"\n🔨 Running mintlifier to generate SDK documentation...")
+    print(f"\nRunning mintlifier to generate SDK documentation...")
     print(f"   OPML: {opml_file}")
     print(f"   Output: {target_dir}")
 
@@ -154,7 +154,7 @@ def build_mintlify(pxt_repo_dir: Path, no_errors: bool = False) -> None:
         print(e.stderr, file=sys.stderr)
         raise
 
-    print(f"\n✅ Documentation build complete!")
+    print(f"\nDocumentation build complete!")
     print(f"   Output directory: {target_dir}")
 
     validation_errors = validate_mintlify_docs(target_dir)

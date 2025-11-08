@@ -129,6 +129,8 @@ def deploy(pxt_version: str, pxt_repo_dir: Path, temp_dir: Path, branch: str) ->
     for item in docs_repo_dir.iterdir():
         if item.name.startswith('.git'):
             continue  # Skip .git directory
+        if item.name == 'sdk' and branch != 'dev':
+            continue  # Skip sdk directory for prod/stage deployments
         if item.is_dir():
             shutil.rmtree(item)
         else:
