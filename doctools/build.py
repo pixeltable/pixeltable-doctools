@@ -163,9 +163,6 @@ def build_mintlify(pxt_repo_dir: Path, no_errors: bool = False) -> None:
         print(f"   Run: cd {target_dir} && npx mintlify dev", file=sys.stderr)
         print(f"   to see real-time parsing errors in context", file=sys.stderr)
 
-    print(f"\n   To preview locally, run:")
-    print(f"   cd {target_dir} && npx mintlify dev")
-
 
 def main():
     """Main entry point."""
