@@ -145,7 +145,6 @@ class ModulePageGenerator(PageBase):
                     classes_to_generate.append((child_name, child))
 
             if classes_to_generate:
-                content += "## Classes\n\n"
                 self._generated_classes = []
                 class_parent_groups = parent_groups + [module_name]
 
@@ -182,18 +181,14 @@ class ModulePageGenerator(PageBase):
                     functions.append((name, obj))
 
             # Document functions first
-            if functions:
-                content += "## Functions\n\n"
-                for name, obj in sorted(functions):
-                    func_section = self.function_gen.generate_section(obj, name, module_path, is_udf=False)
-                    content += func_section
+            for name, obj in sorted(functions):
+                func_section = self.function_gen.generate_section(obj, name, module_path, is_udf=False)
+                content += func_section
 
             # Document UDFs second
-            if udfs:
-                content += "## UDFs\n\n"
-                for name, obj in sorted(udfs):
-                    func_section = self.function_gen.generate_section(obj, name, module_path, is_udf=True)
-                    content += func_section
+            for name, obj in sorted(udfs):
+                func_section = self.function_gen.generate_section(obj, name, module_path, is_udf=True)
+                content += func_section
 
             self._generated_functions = []
         else:

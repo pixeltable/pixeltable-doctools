@@ -30,8 +30,8 @@ class MethodSectionGenerator(PageBase):
             return ""
 
         # Build section content with elegant visual separation
-        content = "\n---\n\n"  # Beautiful horizontal divider
-        content += f"### `{method_name}()`\n\n"
+        content = "\n"
+        content += f"## method `{method_name}()`\n\n"
 
         # Add signature
         content += self._document_signature(method, method_name)

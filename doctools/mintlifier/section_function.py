@@ -67,16 +67,16 @@ class FunctionSectionGenerator(PageBase):
         full_path = f"{module_path}.{func_name}"
 
         # Build section content with elegant visual separation
-        content = "\n---\n\n"  # Beautiful horizontal divider
+        content = "\n"
 
         # Use explicit is_udf if provided, otherwise fall back to detection (deprecated)
         if is_udf is None:
             is_udf = self._is_udf(func)
 
         if is_udf:
-            content += f"### udf `{func_name}()`\n\n"
+            content += f"## udf `{func_name}()`\n\n"
         else:
-            content += f"### func `{func_name}()`\n\n"
+            content += f"## func `{func_name}()`\n\n"
 
         # Add signature
         content += self._document_signature(func, func_name)
