@@ -3,6 +3,7 @@
 Deploy documentation.
 """
 
+from copy import deepcopy
 import json
 import shutil
 import subprocess
@@ -46,6 +47,17 @@ def merge_sdk_dropdowns(existing: dict, new: dict) -> None:
     new_sdk_tab['dropdowns'] = DocsJsonUpdater.sort_dropdowns(merged_dropdowns.values())
 
 
+def replace_paths(group: dict[str, Any], old: str, new: str) -> None:
+    pages = group['pages']
+    for i in range(len(pages)):
+        page = pages[i]
+        if isinstance(page, dict):
+            replace_paths(page, old, new)
+        else:
+            assert isinstance(page, str)
+            pages[i] = page.replace(old, new)
+
+
 def deploy(pxt_version: str, pxt_repo_dir: Path, temp_dir: Path, branch: str) -> None:
     """
     Deploy generated docs.
@@ -59,8 +71,9 @@ def deploy(pxt_version: str, pxt_repo_dir: Path, temp_dir: Path, branch: str) ->
         sys.exit(1)
 
     display_version: str
+    warn_changed: bool = False
     if branch == 'dev':
-        display_version = pxt_version
+        display_version = pxt_version.replace('+', '.')
     else:
         # For prod/staging deployments, truncate to major.minor.patch. We do this so that we can redeploy
         # minor changes to the docs post-release, without having to update the repo version tag.
@@ -73,6 +86,8 @@ def deploy(pxt_version: str, pxt_repo_dir: Path, temp_dir: Path, branch: str) ->
             patch_num = int(version_split[2])
             assert patch_num > 0
             display_version = '.'.join([version_split[0], version_split[1], str(patch_num - 1)])
+            warn_changed = True
+    display_version = f'v{display_version}'
 
     # Retrieve current sha
     result = subprocess.run(
@@ -84,10 +99,10 @@ def deploy(pxt_version: str, pxt_repo_dir: Path, temp_dir: Path, branch: str) ->
     )
     pxt_sha = result.stdout.strip()[:8]
 
-    print(f"\nAssembling docs v{display_version} from {pxt_sha} into {branch!r} branch ...")
+    print(f"\nAssembling docs {display_version} from {pxt_sha} into {branch!r} branch ...")
 
-    if pxt_version != display_version:
-        print(f"   NOTE: There have been changes since the official v{display_version} release.")
+    if warn_changed:
+        print(f"   NOTE: There have been changes since the official {display_version} release.")
 
     docs_repo_dir = Path(temp_dir) / 'pixeltable-docs-www'
 
@@ -130,10 +145,20 @@ def deploy(pxt_version: str, pxt_repo_dir: Path, temp_dir: Path, branch: str) ->
         else:
             shutil.copy2(item, dest)
 
+    # Make a second copy of 'latest' as the versioned folder
+    latest_src = docs_target_dir / 'sdk' / 'latest'
+    versioned_dest = docs_repo_dir / 'sdk' / display_version
+    print(f"   Copying latest SDK docs to versioned folder: {versioned_dest}")
+    if versioned_dest.exists():
+        shutil.rmtree(versioned_dest)
+    shutil.copytree(latest_src, versioned_dest)
+
     sdk_tab = find_sdk_tab(new_docs_json)
     assert len(sdk_tab['dropdowns']) == 1 and sdk_tab['dropdowns'][0]['dropdown'] == "latest"
-    dropdown_copy = sdk_tab['dropdowns'][0].copy()
-    dropdown_copy['dropdown'] = f'v{display_version}'
+    dropdown_copy = deepcopy(sdk_tab['dropdowns'][0])
+    dropdown_copy['dropdown'] = display_version
+    for group in dropdown_copy['groups']:
+        replace_paths(group, 'sdk/latest/', f'sdk/{display_version}/')
     sdk_tab['dropdowns'].append(dropdown_copy)
 
     # Merge existing dropdowns if a prod/staging deployment
