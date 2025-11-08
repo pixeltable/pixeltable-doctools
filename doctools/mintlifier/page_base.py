@@ -667,8 +667,21 @@ Documentation for `{name}` is not available.
         # First line goes inline with the type
         formatted_desc = lines[0]
         # Subsequent lines need 2-space indentation for list item continuation
-        for line in lines[1:]:
-            formatted_desc += '\n  ' + line
+        # BUT: Don't indent blank lines - they should stay blank to properly close the list
+        # EXCEPT: Remove blank lines immediately before code fences to avoid lazy line errors
+        for i, line in enumerate(lines[1:], start=1):
+            if line.strip():  # Non-blank line
+                formatted_desc += '\n  ' + line
+            else:  # Blank line
+                # Check if next line is a code fence
+                next_idx = i + 1
+                if next_idx < len(lines) and lines[next_idx].strip().startswith('```'):
+                    # Skip blank line before code fence
+                    continue
+                else:
+                    formatted_desc += '\n'  # Preserve other blank lines
+        # Strip trailing newlines to avoid excessive blank lines, then add standard spacing
+        formatted_desc = formatted_desc.rstrip('\n')
         content += f"- `{return_type}`: {formatted_desc}\n\n"
         return content
 
