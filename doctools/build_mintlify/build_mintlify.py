@@ -68,153 +68,16 @@ def validate_mintlify_docs(target_dir: Path) -> list[str]:
     return errors
 
 
-def deploy_docs(target_dir: Path, target: str) -> None:
-    """
-    Deploy documentation to pixeltable-docs-www repository.
-
-    Args:
-        target_dir: Directory containing built documentation
-        target: Deployment target - 'dev', 'stage', or 'prod'
-    """
-    # Map target to branch name
-    branch_map = {
-        'dev': 'dev',
-        'stage': 'stage',
-        'prod': 'main'
-    }
-    branch = branch_map[target]
-
-    print(f"\n📤 Deploying documentation to {target} environment...")
-    print(f"   Branch: {branch}")
-
-    # Create temporary directory for the docs repo
-    import tempfile
-    with tempfile.TemporaryDirectory() as tmp_dir:
-        docs_repo_dir = Path(tmp_dir) / 'pixeltable-docs-www'
-
-        # Clone the docs repository
-        print(f"\n📥 Cloning pixeltable-docs-www repository...")
-        result = subprocess.run(
-            ['git', 'clone', '-b', branch, 'https://github.com/pixeltable/pixeltable-docs-www.git', str(docs_repo_dir)],
-            capture_output=True,
-            text=True
-        )
-
-        # If branch doesn't exist, clone main and create the branch
-        if result.returncode != 0:
-            print(f"   Branch {branch} doesn't exist, creating it...")
-            subprocess.run(
-                ['git', 'clone', 'https://github.com/pixeltable/pixeltable-docs-www.git', str(docs_repo_dir)],
-                capture_output=True,
-                text=True,
-                check=True
-            )
-            subprocess.run(
-                ['git', 'checkout', '-b', branch],
-                cwd=str(docs_repo_dir),
-                capture_output=True,
-                text=True,
-                check=True
-            )
-
-        # Remove all existing files (except .git)
-        print(f"\n🧹 Cleaning target repository...")
-        for item in docs_repo_dir.iterdir():
-            if item.name != '.git':
-                if item.is_dir():
-                    shutil.rmtree(item)
-                else:
-                    item.unlink()
-
-        # Copy new documentation
-        print(f"\n📋 Copying documentation files...")
-        for item in target_dir.iterdir():
-            dest = docs_repo_dir / item.name
-            if item.is_dir():
-                shutil.copytree(item, dest)
-                print(f"   Copied: {item.name}/")
-            else:
-                shutil.copy2(item, dest)
-                print(f"   Copied: {item.name}")
-
-        # Commit and push
-        print(f"\n💾 Committing changes...")
-        subprocess.run(['git', 'add', '-A'], cwd=str(docs_repo_dir), check=True)
-
-        # Check if there are changes to commit
-        result = subprocess.run(
-            ['git', 'diff', '--staged', '--quiet'],
-            cwd=str(docs_repo_dir)
-        )
-
-        if result.returncode != 0:  # There are changes
-            subprocess.run(
-                ['git', 'commit', '-m', f'Deploy documentation to {target}\n\n🤖 Auto-deployed from pixeltable/pixeltable'],
-                cwd=str(docs_repo_dir),
-                check=True
-            )
-
-            print(f"\n🚀 Pushing to {branch} branch...")
-            subprocess.run(
-                ['git', 'push', 'origin', branch],
-                cwd=str(docs_repo_dir),
-                check=True
-            )
-
-            # Map target to preview URL
-            preview_urls = {
-                'dev': 'https://pixeltable-dev.mintlify.app/',
-                'stage': 'https://pixeltable-stage.mintlify.app/',
-                'prod': 'https://docs.pixeltable.com'
-            }
-            preview_url = preview_urls.get(target, '')
-
-            print(f"\n✅ Documentation deployed successfully to {target}!")
-            if preview_url:
-                print(f"   View preview at: {preview_url}")
-        else:
-            print(f"\n   No changes to deploy.")
-
-
-def find_pixeltable_repo() -> Path:
-    """Find the pixeltable repository root."""
-    # Assume we're running from within pixeltable repo via conda
-    cwd = Path.cwd()
-
-    # Check if we're already in pixeltable repo
-    if get_mintlify_source_path(cwd).exists():
-        return cwd
-
-    # Walk up to find it
-    current = cwd
-    for _ in range(5):  # Don't go up more than 5 levels
-        if get_mintlify_source_path(current).exists():
-            return current
-        current = current.parent
-
-    raise FileNotFoundError(
-        "Could not find pixeltable repository. "
-        "Make sure you're running this from within the pixeltable repo, "
-        "or that docs/mintlify/ exists."
-    )
-
-
-def build_mintlify(target: str) -> None:
+def build_mintlify(pxt_repo_dir: Path, no_errors: bool = False) -> None:
     """
     Build Mintlify documentation site.
-
-    Args:
-        target: Build target - 'local', 'dev', 'stage', or 'prod'
     """
-    print(f"Building Mintlify documentation for target: {target}")
+    print(f"Building docs from repository: {pxt_repo_dir}")
 
-    # Find pixeltable repo
-    repo_root = find_pixeltable_repo()
-    print(f"Found pixeltable repository at: {repo_root}")
-
-    source_dir = get_mintlify_source_path(repo_root)
-    target_dir = get_mintlify_target_path(repo_root)
-    opml_file = repo_root / 'docs' / 'public_api.opml'
+    docs_dir = pxt_repo_dir / 'docs'
+    source_dir = docs_dir / 'mintlify'
+    target_dir = docs_dir / 'target'
+    opml_file = docs_dir / 'public_api.opml'
 
     # Verify source exists
     if not source_dir.exists():
@@ -232,7 +95,7 @@ def build_mintlify(target: str) -> None:
     # Step 2: Generate notebooks to docs/mintlify/notebooks/
     print(f"\n📓 Generating notebooks...")
     notebooks_output = target_dir / 'notebooks'
-    convert_notebooks_to_dir(repo_root, notebooks_output)
+    convert_notebooks_to_dir(pxt_repo_dir, notebooks_output)
     print(f"   ✅ Notebooks generated to {notebooks_output}")
 
     # Step 3: Generate changelog to docs/mintlify/changelog/
@@ -264,12 +127,12 @@ def build_mintlify(target: str) -> None:
         # Run mintlifier - it writes directly to target
         # For stage/prod targets, hide errors from generated docs
         mintlifier_cmd = ['mintlifier']
-        if target in ['stage', 'prod']:
+        if no_errors:
             mintlifier_cmd.append('--no-errors')
 
         result = subprocess.run(
             mintlifier_cmd,
-            cwd=str(repo_root),  # Run from repo root
+            cwd=str(pxt_repo_dir),  # Run from repo root
             capture_output=True,
             text=True,
             check=True
@@ -294,43 +157,32 @@ def build_mintlify(target: str) -> None:
         print(f"\n⚠️  Found {len(validation_errors)} parsing error(s):", file=sys.stderr)
         for error in validation_errors:
             print(f"   {error}", file=sys.stderr)
-
-        # For dev/stage/prod builds, we want to know about errors but continue
-        # For local builds, we definitely want to see them
-        if target == 'local':
             print(f"\n   💡 Tip: Check the source docstrings for formatting issues", file=sys.stderr)
             print(f"   💡 Run: cd {target_dir} && npx mintlify dev", file=sys.stderr)
             print(f"   to see real-time parsing errors in context", file=sys.stderr)
     else:
         print(f"   ✅ No parsing errors found!")
 
-    # Deploy if target is dev, stage, or prod
-    if target in ['dev', 'stage', 'prod']:
-        deploy_docs(target_dir, target)
-    else:
-        print(f"\n   To preview locally, run:")
-        print(f"   cd {target_dir} && npx mintlify dev")
+    print(f"\n   To preview locally, run:")
+    print(f"   cd {target_dir} && npx mintlify dev")
 
 
 def main():
     """Main entry point."""
-    parser = argparse.ArgumentParser(
-        description='Build complete Mintlify documentation site'
-    )
-    parser.add_argument(
-        '--target',
-        choices=['local', 'dev', 'stage', 'prod'],
-        default='local',
-        help='Build target (default: local)'
-    )
-
-    args = parser.parse_args()
-
     try:
-        build_mintlify(args.target)
-    except Exception as e:
-        print(f"\n❌ Build failed: {e}", file=sys.stderr)
+        import pixeltable as pxt
+
+    except ImportError:
+        print(f"Error: `pixeltable` package not found.")
         sys.exit(1)
+
+    # Get current working dir
+    pxt_repo_dir = Path(pxt.__file__).parent.parent.resolve()
+    if pxt_repo_dir != Path.cwd():
+        print(f"Error: Please run this script from the pixeltable repository root.")
+        sys.exit(1)
+
+    build_mintlify(pxt_repo_dir)
 
 
 if __name__ == '__main__':
