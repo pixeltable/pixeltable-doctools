@@ -29,11 +29,14 @@ def validate_mintlify_docs(target_dir: Path) -> list[str]:
     Returns:
         List of parsing error messages (empty if no errors)
     """
+    # Validate the built documentation for parsing errors
+    print(f"\nValidating documentation ...")
+
     try:
         # Run mintlify dev with a short timeout to capture parsing errors
         # The parsing errors appear in stderr immediately on startup
         result = subprocess.run(
-            ['npx', 'mintlify', 'dev', '--port', '3001'],
+            ['npx', 'mintlify', 'dev', '--port', '3001', '--no-open'],
             cwd=str(target_dir),
             capture_output=True,
             text=True,
@@ -62,6 +65,13 @@ def validate_mintlify_docs(target_dir: Path) -> list[str]:
             clean_line = line.strip()
             if clean_line:
                 errors.append(clean_line)
+
+    if errors:
+        print(f"   Found {len(errors)} error(s):")
+        for error in errors:
+            print(f"   {error}")
+    else:
+        print(f"   No errors.")
 
     return errors
 
@@ -147,19 +157,11 @@ def build_mintlify(pxt_repo_dir: Path, no_errors: bool = False) -> None:
     print(f"\n✅ Documentation build complete!")
     print(f"   Output directory: {target_dir}")
 
-    # Validate the built documentation for parsing errors
-    print(f"\n🔍 Validating documentation for parsing errors...")
     validation_errors = validate_mintlify_docs(target_dir)
-
     if validation_errors:
-        print(f"\n⚠️  Found {len(validation_errors)} parsing error(s):", file=sys.stderr)
-        for error in validation_errors:
-            print(f"   {error}", file=sys.stderr)
-        print(f"\n   💡 Tip: Check the source docstrings for formatting issues", file=sys.stderr)
-        print(f"   💡 Run: cd {target_dir} && npx mintlify dev", file=sys.stderr)
+        print(f"\n   Tip: Check the source docstrings for formatting issues", file=sys.stderr)
+        print(f"   Run: cd {target_dir} && npx mintlify dev", file=sys.stderr)
         print(f"   to see real-time parsing errors in context", file=sys.stderr)
-    else:
-        print(f"   ✅ No parsing errors found!")
 
     print(f"\n   To preview locally, run:")
     print(f"   cd {target_dir} && npx mintlify dev")

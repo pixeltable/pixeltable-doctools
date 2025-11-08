@@ -6,7 +6,7 @@ Updates the Mintlify navigation structure with generated SDK documentation.
 
 import json
 from pathlib import Path
-from typing import Dict, List
+from typing import Dict, Iterable, List
 from datetime import datetime
 import shutil
 
@@ -69,7 +69,7 @@ class DocsJsonUpdater:
                 print(f"📝 Added new dropdown: {new_version}")
 
                 # Sort dropdowns by version (newest first)
-                existing_tab["dropdowns"] = self._sort_dropdowns(new_dropdowns)
+                existing_tab["dropdowns"] = self.sort_dropdowns(new_dropdowns)
 
                 # Preserve other fields from new structure (like tab name)
                 existing_tab["tab"] = navigation_structure["tab"]
@@ -92,7 +92,8 @@ class DocsJsonUpdater:
 
         print(f"✅ Updated {self.docs_json_path}")
 
-    def _sort_dropdowns(self, dropdowns: List[Dict]) -> List[Dict]:
+    @classmethod
+    def sort_dropdowns(cls, dropdowns: Iterable[Dict]) -> List[Dict]:
         """Sort dropdowns by version number in descending order (newest first).
 
         Args:
@@ -122,7 +123,7 @@ class DocsJsonUpdater:
                 return (0,)
 
         # Sort by version in descending order (reverse=True for newest first)
-        return sorted(dropdowns, key=parse_version, reverse=True)
+        return sorted(list(dropdowns), key=parse_version, reverse=True)
 
     def validate_structure(self, navigation_structure: Dict) -> List[str]:
         """Validate navigation structure and return any warnings."""

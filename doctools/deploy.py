@@ -1,31 +1,52 @@
 #!/usr/bin/env python3
 """
-Deploy documentation to dev environment for pre-release validation.
-
-This script is for PRE-RELEASE validation and differs from deploy_docs_stage.py:
-- Builds from CURRENT WORKING DIRECTORY (not a git tag)
-- Does NOT require a version number
-- Does NOT use --no-errors flag when running mintlifier
-- Shows all MDX parsing errors so they can be reviewed before release
-- Broken pages still display in Mintlify (with errors visible)
-- Deploys to pixeltable-docs-www/dev branch
-
-Workflow:
-1. Run this BEFORE creating a release tag
-2. Review docs at https://pixeltable-dev.mintlify.app/
-3. Fix any MDX errors in docstrings
-4. Create release tag
-5. Run `make docs-stage VERSION=x.y.z` to deploy clean docs to staging
+Deploy documentation.
 """
 
+import json
 import shutil
 import subprocess
 import sys
 import tempfile
 from pathlib import Path
+from time import sleep
+from typing import Any
+
+from doctools.build import validate_mintlify_docs
+from doctools.mintlifier.docsjson_updater import DocsJsonUpdater
 
 
-def deploy(pxt_repo_dir: Path, temp_dir: Path, branch: str) -> None:
+def find_sdk_tab(docs: dict[str, Any]) -> dict[str, Any]:
+    if 'navigation' in docs and 'tabs' in docs['navigation']:
+        for tab in docs['navigation']['tabs']:
+            if tab.get('tab') == 'Pixeltable SDK':
+                return tab
+    return None
+
+
+def merge_sdk_dropdowns(existing: dict, new: dict) -> None:
+    """
+    Merge dropdowns from the existing navigation structure into the new one; prefer the new
+    one when there is a conflict.
+    """
+    # Find SDK tab in each version
+    existing_sdk_tab = find_sdk_tab(existing)
+    new_sdk_tab = find_sdk_tab(new)
+
+    # Merge version dropdowns from production into generated
+    existing_dropdowns: list[dict] = existing_sdk_tab.get('dropdowns', [])
+    new_dropdowns: list[dict] = new_sdk_tab.get('dropdowns', [])
+
+    for dropdown in existing_dropdowns:
+        dropdown['icon'] = 'archive'
+
+    merged_dropdowns = {dropdown['dropdown']: dropdown for dropdown in existing_dropdowns}
+    merged_dropdowns.update({dropdown['dropdown']: dropdown for dropdown in new_dropdowns})
+
+    new_sdk_tab['dropdowns'] = DocsJsonUpdater.sort_dropdowns(merged_dropdowns.values())
+
+
+def deploy(pxt_version: str, pxt_repo_dir: Path, temp_dir: Path, branch: str) -> None:
     """
     Deploy generated docs.
 
@@ -37,7 +58,36 @@ def deploy(pxt_repo_dir: Path, temp_dir: Path, branch: str) -> None:
         print(f"Error: Docs target directory {docs_target_dir} does not exist. Please build the docs first.")
         sys.exit(1)
 
-    print(f"\nDeploying to {branch!r} branch ...")
+    display_version: str
+    if branch == 'dev':
+        display_version = pxt_version
+    else:
+        # For prod/staging deployments, truncate to major.minor.patch. We do this so that we can redeploy
+        # minor changes to the docs post-release, without having to update the repo version tag.
+        # If this isn't a production release version, we need to substract one from the patch number to
+        # account for our numbering scheme (0.4.23.dev15 should actually publish as 0.4.22 docs).
+        version_split = pxt_version.split('.')
+        if len(version_split) == 3:
+            display_version = pxt_version
+        else:
+            patch_num = int(version_split[2])
+            assert patch_num > 0
+            display_version = '.'.join([version_split[0], version_split[1], str(patch_num - 1)])
+
+    # Retrieve current sha
+    result = subprocess.run(
+        ('git', 'rev-parse', 'HEAD'),
+        cwd=str(pxt_repo_dir),
+        capture_output=True,
+        text=True,
+        check=True
+    )
+    pxt_sha = result.stdout.strip()[:8]
+
+    print(f"\nAssembling docs v{display_version} from {pxt_sha} into {branch!r} branch ...")
+
+    if pxt_version != display_version:
+        print(f"   NOTE: There have been changes since the official v{display_version} release.")
 
     docs_repo_dir = Path(temp_dir) / 'pixeltable-docs-www'
 
@@ -50,6 +100,16 @@ def deploy(pxt_repo_dir: Path, temp_dir: Path, branch: str) -> None:
         check=True
     )
 
+    # Load docs JSON
+    existing_docs_json: dict[str, Any] = {}
+    new_docs_json: dict[str, Any] = {}
+
+    with open(docs_repo_dir / 'docs.json', 'r', encoding='utf-8') as fp:
+        existing_docs_json = json.load(fp)
+
+    with open(docs_target_dir / 'docs.json', 'r', encoding='utf-8') as fp:
+        new_docs_json = json.load(fp)
+
     # Clean existing repo dir
     for item in docs_repo_dir.iterdir():
         if item.name.startswith('.git'):
@@ -60,16 +120,34 @@ def deploy(pxt_repo_dir: Path, temp_dir: Path, branch: str) -> None:
             item.unlink()
 
     # Copy all docs from output
-    print(f"   Copying documentation files...")
+    print(f"   Copying documentation files ...")
     for item in docs_target_dir.iterdir():
         dest = docs_repo_dir / item.name
-        print(f"  {item} -> {dest}")
         if item.is_dir():
             if dest.exists():
                 shutil.rmtree(dest)
             shutil.copytree(item, dest)
         else:
             shutil.copy2(item, dest)
+
+    sdk_tab = find_sdk_tab(new_docs_json)
+    assert len(sdk_tab['dropdowns']) == 1 and sdk_tab['dropdowns'][0]['dropdown'] == "latest"
+    dropdown_copy = sdk_tab['dropdowns'][0].copy()
+    dropdown_copy['dropdown'] = f'v{display_version}'
+    sdk_tab['dropdowns'].append(dropdown_copy)
+
+    # Merge existing dropdowns if a prod/staging deployment
+    if branch != 'dev':
+        print(f"   Merging SDK dropdowns in docs.json ...")
+        merge_sdk_dropdowns(existing_docs_json, new_docs_json)
+
+    with open(docs_repo_dir / 'docs.json', 'w', encoding='utf-8') as fp:
+        json.dump(new_docs_json, fp, indent=2)
+
+    errors = validate_mintlify_docs(docs_repo_dir)
+    if errors and branch != 'dev':
+        print(f"\nERROR: Documentation has parsing errors. Fix before deploying to {branch!r}, or deploy to 'dev' instead.")
+        sys.exit(1)
 
     # Add changes to local repo
     subprocess.run(('git', 'add', '-A'), cwd=str(docs_repo_dir), check=True)
@@ -79,21 +157,24 @@ def deploy(pxt_repo_dir: Path, temp_dir: Path, branch: str) -> None:
     )
 
     if result.returncode != 0:  # There are changes
-        print(f"   Committing changes...")
+        print(f"\nCommitting changes to {branch!r} branch ...")
         subprocess.run(
-            ('git', 'commit', '-m', 'Deploy dev documentation for pre-release validation'),
+            ('git', 'commit', '-m', f'Deploy documentation {display_version} from {pxt_sha}'),
             cwd=str(docs_repo_dir),
             check=True
         )
-        print(f"   Pushing to {branch!r} branch ...")
+        print(f"\nPushing to origin ...")
         subprocess.run(
-            ('git', 'push', 'origin', 'dev'),
+            ('git', 'push', 'origin', branch),
             cwd=str(docs_repo_dir),
             check=True
         )
         print(f"   Deployed successfully")
+
     else:
-        print(f"   No changes to deploy")
+        print(f"\nThere are no changes to deploy.")
+
+    print(f"\nView at: https://pixeltable-{branch}.mintlify.app/sdk/latest")
 
 
 def main():
@@ -123,12 +204,7 @@ def main():
         sys.exit(1)
 
     with tempfile.TemporaryDirectory() as temp_dir:
-        deploy(pxt_repo_dir, temp_dir, target)
-
-    print(f"\nDeployment complete.")
-    print(f"   View at: https://pixeltable-dev.mintlify.app/sdk/latest")
-    print(f"   Note: This deployment shows ALL MDX errors for review")
-    print(f"   Fix any errors in docstrings before creating a release tag")
+        deploy(pxt.__version__, pxt_repo_dir, temp_dir, target)
 
 
 if __name__ == '__main__':
