@@ -6,7 +6,7 @@ Updates the Mintlify navigation structure with generated SDK documentation.
 
 import json
 from pathlib import Path
-from typing import Dict, List
+from typing import Dict, Iterable, List
 from datetime import datetime
 import shutil
 
@@ -47,10 +47,6 @@ class DocsJsonUpdater:
             if tab.get("tab") == self.sdk_tab_name:
                 sdk_tab_index = i
                 break
-            elif tab.get("tab") == "API Reference" and tab.get("href"):
-                # Found the old external link tab
-                sdk_tab_index = i
-                break
 
         # Update or add SDK tab
         if sdk_tab_index is not None:
@@ -61,28 +57,19 @@ class DocsJsonUpdater:
                 new_dropdown = navigation_structure["dropdowns"][0]  # The new version dropdown
                 new_version = new_dropdown["dropdown"]
 
-                # Extract major.minor prefix from new version (e.g., v0.4.17 -> v0.4)
-                import re
-                match = re.match(r'(v\d+\.\d+)', new_version)
-                major_minor_prefix = match.group(1) if match else None
-
-                # Remove any existing dropdowns with the same major.minor prefix
-                if major_minor_prefix:
-                    original_count = len(existing_tab["dropdowns"])
-                    existing_tab["dropdowns"] = [
-                        d for d in existing_tab["dropdowns"]
-                        if not d.get("dropdown", "").startswith(major_minor_prefix)
-                    ]
-                    removed_count = original_count - len(existing_tab["dropdowns"])
-                    if removed_count > 0:
-                        print(f"📝 Removed {removed_count} old version(s) with prefix {major_minor_prefix}")
+                # Remove any existing dropdowns with the same version
+                new_dropdowns = [
+                    d for d in existing_tab["dropdowns"] if not d.get("dropdown") == new_version
+                ]
+                if len(new_dropdowns) < len(existing_tab["dropdowns"]):
+                    print(f"📝 Removed existing dropdown: {new_version}")
 
                 # Add the new version dropdown
-                existing_tab["dropdowns"].append(new_dropdown)
+                new_dropdowns.append(new_dropdown)
                 print(f"📝 Added new dropdown: {new_version}")
 
                 # Sort dropdowns by version (newest first)
-                existing_tab["dropdowns"] = self._sort_dropdowns(existing_tab["dropdowns"])
+                existing_tab["dropdowns"] = self.sort_dropdowns(new_dropdowns)
 
                 # Preserve other fields from new structure (like tab name)
                 existing_tab["tab"] = navigation_structure["tab"]
@@ -105,7 +92,8 @@ class DocsJsonUpdater:
 
         print(f"✅ Updated {self.docs_json_path}")
 
-    def _sort_dropdowns(self, dropdowns: List[Dict]) -> List[Dict]:
+    @classmethod
+    def sort_dropdowns(cls, dropdowns: Iterable[Dict]) -> List[Dict]:
         """Sort dropdowns by version number in descending order (newest first).
 
         Args:
@@ -135,7 +123,7 @@ class DocsJsonUpdater:
                 return (0,)
 
         # Sort by version in descending order (reverse=True for newest first)
-        return sorted(dropdowns, key=parse_version, reverse=True)
+        return sorted(list(dropdowns), key=parse_version, reverse=True)
 
     def validate_structure(self, navigation_structure: Dict) -> List[str]:
         """Validate navigation structure and return any warnings."""

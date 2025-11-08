@@ -149,7 +149,7 @@ def convert_notebooks_to_dir(repo_root: Path, output_dir: Path) -> None:
         repo_root: Path to pixeltable repository root
         output_dir: Where to output the converted .mdx files
     """
-    print("⚡ Converting Jupyter notebooks to Mintlify MDX format...")
+    print("   Converting Jupyter notebooks to Mintlify MDX format...")
     print(f"   Repository: {repo_root}")
     print(f"   Output: {output_dir}")
 
@@ -162,20 +162,19 @@ def convert_notebooks_to_dir(repo_root: Path, output_dir: Path) -> None:
     # Check for quarto
     if not shutil.which('quarto'):
         raise RuntimeError(
-            "Quarto is not installed. Please install it from: https://quarto.org/docs/get-started/"
+            "Quarto is not installed."
         )
 
     # Count notebooks
-    notebooks = list(notebooks_dir.rglob('*.ipynb'))
+    notebooks = [file for file in notebooks_dir.rglob('*.ipynb') if '.ipynb_checkpoints' not in file.parts]
     if not notebooks:
-        print(f"☠️  No notebooks found in {notebooks_dir}")
-        return
+        raise RuntimeError(f"   No notebooks found: {notebooks_dir}")
 
-    print(f"🔥 Found {len(notebooks)} notebook(s) to convert")
+    print(f"   Found {len(notebooks)} notebook(s) to convert.")
 
     # Clean output directory
     if output_dir.exists():
-        print(f"💀 Cleaning output directory: {output_dir}")
+        print(f"   Cleaning output directory: {output_dir}")
         shutil.rmtree(output_dir)
     output_dir.mkdir(parents=True)
 
@@ -187,7 +186,7 @@ def convert_notebooks_to_dir(repo_root: Path, output_dir: Path) -> None:
     config_file.write_text(config)
 
     try:
-        print(f"\n🔨 Running Quarto to convert notebooks...")
+        print(f"Running Quarto to convert notebooks...")
         print(f"   Source: {notebooks_dir}")
         print(f"   Output: {output_dir}")
         print(f"   Config: {config_file.name}")
@@ -220,19 +219,19 @@ def convert_notebooks_to_dir(repo_root: Path, output_dir: Path) -> None:
 
         # Count converted files
         mdx_files = list(output_dir.rglob('*.mdx'))
-        print(f"\n✅ Successfully converted {len(mdx_files)} notebook(s) to MDX")
+        print(f"\nSuccessfully converted {len(mdx_files)} notebook(s) to MDX")
 
         # Post-process: Add frontmatter to each MDX file
-        print(f"\n⚡ Adding frontmatter to MDX files...")
+        print(f"\nAdding frontmatter to MDX files...")
         for mdx_file in mdx_files:
             add_frontmatter_to_mdx(mdx_file, notebooks_dir)
-        print(f"💥 Added frontmatter to {len(mdx_files)} file(s)")
+        print(f"   Added frontmatter to {len(mdx_files)} file(s)")
 
     except subprocess.TimeoutExpired:
-        print("\n❌ Quarto conversion timed out after 5 minutes", file=sys.stderr)
+        print("\nQuarto conversion timed out after 5 minutes", file=sys.stderr)
         raise
     except subprocess.CalledProcessError as e:
-        print(f"\n❌ Error running quarto:", file=sys.stderr)
+        print(f"\nError running quarto:", file=sys.stderr)
         print(e.stdout, file=sys.stderr)
         print(e.stderr, file=sys.stderr)
         raise
