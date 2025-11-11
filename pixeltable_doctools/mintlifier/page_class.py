@@ -100,7 +100,7 @@ class ClassPageGenerator(PageBase):
 
     def _build_class_documentation(self, cls: type, name: str, full_path: str) -> str:
         """Build complete class documentation."""
-        content = f"# class `{full_path}`\n\n"
+        content = f"# `class` {full_path}\n\n"
 
         # Add GitHub link
         github_link = self._get_github_link(cls)
@@ -231,7 +231,7 @@ class ClassPageGenerator(PageBase):
 
         for attr_name, attr_type, doc, prefix in sorted(all_attributes):
 
-            content += f"## attr `{attr_name}`\n\n"
+            content += f"## `attr` {attr_name}\n\n"
 
             # Add type information
             content += f"```\n{attr_name}: {attr_type}\n```\n\n"

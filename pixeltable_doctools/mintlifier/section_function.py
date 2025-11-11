@@ -74,9 +74,9 @@ class FunctionSectionGenerator(PageBase):
             is_udf = self._is_udf(func)
 
         if is_udf:
-            content += f"## udf `{func_name}()`\n\n"
+            content += f"## `udf` {func_name}()\n\n"
         else:
-            content += f"## func `{func_name}()`\n\n"
+            content += f"## `func` {func_name}()\n\n"
 
         # Add signature
         content += self._document_signature(func, func_name)
@@ -442,13 +442,13 @@ class FunctionSectionGenerator(PageBase):
                     in_code = True
 
                 # Remove the >>> prompt and add to code
-                code_line = line.strip()[3:].lstrip()
+                code_line = line.strip()[4:]
                 code_lines.append(code_line)
 
             elif line.strip().startswith("..."):
                 # Continuation of previous code line
                 if in_code:
-                    code_line = line.strip()[3:].lstrip()
+                    code_line = line.strip()[4:]
                     code_lines.append(code_line)
 
             elif in_code:
@@ -526,9 +526,8 @@ class FunctionSectionGenerator(PageBase):
 
                     if example["code"]:
                         # Format the code using ruff for consistent line breaks
-                        formatted_code = self._format_code_with_ruff(example["code"])
                         content += "```python\n"
-                        content += formatted_code
+                        content += example["code"]
                         content += "\n```\n"
 
                     if example["output"]:

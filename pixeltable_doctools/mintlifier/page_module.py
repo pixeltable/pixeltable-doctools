@@ -63,7 +63,7 @@ class ModulePageGenerator(PageBase):
         # Build page content
         content = self._build_frontmatter(module_path, docstring)
 
-        content += f"# module `{module_path}`\n\n"
+        content += f"# `module` {module_path}\n\n"
 
         # Add GitHub link for the module
         github_link = self._get_github_link(module)
