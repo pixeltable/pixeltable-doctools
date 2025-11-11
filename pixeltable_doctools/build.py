@@ -13,8 +13,8 @@ import subprocess
 import sys
 from pathlib import Path
 
-from doctools.changelog.fetch_releases import generate_changelog_to_dir
-from doctools.convert_notebooks.convert_notebooks import convert_notebooks_to_dir
+from pixeltable_doctools.changelog.fetch_releases import generate_changelog_to_dir
+from pixeltable_doctools.convert_notebooks.convert_notebooks import convert_notebooks_to_dir
 
 
 def validate_mintlify_docs(target_dir: Path) -> list[str]:

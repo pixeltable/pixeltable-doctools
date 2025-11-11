@@ -14,8 +14,8 @@ from pathlib import Path
 from time import sleep
 from typing import Any
 
-from doctools.build import validate_mintlify_docs
-from doctools.mintlifier.docsjson_updater import DocsJsonUpdater
+from pixeltable_doctools.build import validate_mintlify_docs
+from pixeltable_doctools.mintlifier.docsjson_updater import DocsJsonUpdater
 
 
 def find_sdk_tab(docs: dict[str, Any]) -> dict[str, Any]:

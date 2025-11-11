@@ -14,10 +14,9 @@ import re
 import shutil
 import subprocess
 import sys
-import tempfile
 from pathlib import Path
 
-from doctools.config import get_mintlify_source_path
+from pixeltable_doctools.config import get_mintlify_source_path
 
 
 # Quarto configuration template
