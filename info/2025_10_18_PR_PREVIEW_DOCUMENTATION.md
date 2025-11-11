@@ -67,7 +67,7 @@ jobs:
 
       - name: Generate documentation
         run: |
-          python -m doctools.mintlifier.mintlifier
+          python -m pixeltable_doctools.mintlifier.mintlifier
 
       - name: Deploy to PR preview branch
         env:
