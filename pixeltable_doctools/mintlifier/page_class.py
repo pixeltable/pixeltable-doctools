@@ -1,5 +1,6 @@
 """Class documentation page generator."""
 
+import griffe
 import inspect
 from pathlib import Path
 from typing import Optional, List
@@ -94,18 +95,12 @@ class ClassPageGenerator(PageBase):
         if parsed and parsed.short_description:
             description = self._escape_yaml(parsed.short_description[:200])
 
-        # Use full path for title, but just class name for sidebar
         class_name = full_path.split(".")[-1]
-        return f"""---
-title: "{full_path}"
-sidebarTitle: "{class_name}"
-icon: "square-c"
----
-"""
+        return f'---\ntitle: "{class_name}"\nicon: "square-c"\n---\n'
 
     def _build_class_documentation(self, cls: type, name: str, full_path: str) -> str:
         """Build complete class documentation."""
-        content = ""
+        content = f"# class `{full_path}`\n\n"
 
         # Add GitHub link
         github_link = self._get_github_link(cls)
@@ -187,76 +182,64 @@ icon: "square-c"
             if name.startswith("_"):
                 continue
             if isinstance(obj, property):
-                doc = inspect.getdoc(obj.fget) if obj.fget else None
-                attr_type = "property"
-                if obj.fset:
-                    attr_type = "property (read/write)"
-                else:
-                    attr_type = "property (read-only)"
-                all_attributes.append((name, attr_type, doc, None))
+                doc = inspect.getdoc(obj.fget)
+                attr_type = inspect.get_annotations(obj.fget).get('return', 'Any')
+                all_attributes.append((name, attr_type, doc, ""))
 
-        # Collect dataclass fields if applicable
-        if dataclasses.is_dataclass(cls):
-            for field in dataclasses.fields(cls):
-                if not field.name.startswith("_"):
-                    # Try to get field documentation from class docstring
-                    field_doc = self._extract_field_doc(cls, field.name)
-                    field_type = self._format_type(field.type) if field.type else "Any"
-                    default = (
-                        field.default
-                        if field.default != dataclasses.MISSING
-                        else field.default_factory
-                        if field.default_factory != dataclasses.MISSING
-                        else None
-                    )
-                    all_attributes.append((field.name, f"field: {field_type}", field_doc, default))
+        # # Collect dataclass fields if applicable
+        # if dataclasses.is_dataclass(cls):
+        #     for field in dataclasses.fields(cls):
+        #         if not field.name.startswith("_"):
+        #             # Try to get field documentation from class docstring
+        #             field_doc = self._extract_field_doc(cls, field.name)
+        #             field_type = self._format_type(field.type) if field.type else "Any"
+        #             default = (
+        #                 field.default
+        #                 if field.default != dataclasses.MISSING
+        #                 else field.default_factory
+        #                 if field.default_factory != dataclasses.MISSING
+        #                 else None
+        #             )
+        #             all_attributes.append((field.name, f"field: {field_type}", field_doc, default))
 
         # Collect TypedDict fields
-        elif hasattr(cls, "__annotations__") and type(cls).__name__ == "_TypedDictMeta":
-            annotations = cls.__annotations__
-            required_keys = getattr(cls, "__required_keys__", set())
-            optional_keys = getattr(cls, "__optional_keys__", set())
-
-            for field_name, field_type in annotations.items():
+        if type(cls).__name__ == "_TypedDictMeta":
+            module_info = griffe.load(cls.__module__)
+            cls_info = module_info[cls.__name__]
+            for field_name, field in cls_info.members.items():
                 if not field_name.startswith("_"):
-                    field_doc = self._extract_field_doc(cls, field_name)
-                    type_str = self._format_type(field_type)
-                    if field_name in optional_keys:
-                        type_str = f"{type_str} (optional)"
-                    elif field_name in required_keys:
-                        type_str = f"{type_str} (required)"
-                    all_attributes.append((field_name, f"field: {type_str}", field_doc, None))
+                    prefix = 'Required. ' if field_name in cls.__required_keys__ else 'Optional. '
+                    field_doc = field.docstring.value if field.docstring is not None else None
+                    type_str = self._format_type(field.annotation) if field.annotation else "Any"
+                    all_attributes.append((field_name, type_str, field_doc, prefix))
 
-        # Collect NamedTuple fields
-        elif hasattr(cls, "_fields") and hasattr(cls, "_field_defaults"):
-            fields = cls._fields
-            defaults = getattr(cls, "_field_defaults", {})
-            types = getattr(cls, "__annotations__", {})
+        # # Collect NamedTuple fields
+        # elif hasattr(cls, "_fields") and hasattr(cls, "_field_defaults"):
+        #     fields = cls._fields
+        #     defaults = getattr(cls, "_field_defaults", {})
+        #     types = getattr(cls, "__annotations__", {})
 
-            for field_name in fields:
-                if not field_name.startswith("_"):
-                    field_doc = self._extract_field_doc(cls, field_name)
-                    type_str = self._format_type(types.get(field_name, "Any"))
-                    default = defaults.get(field_name)
-                    all_attributes.append((field_name, f"field: {type_str}", field_doc, default))
+        #     for field_name in fields:
+        #         if not field_name.startswith("_"):
+        #             field_doc = self._extract_field_doc(cls, field_name)
+        #             type_str = self._format_type(types.get(field_name, "Any"))
+        #             default = defaults.get(field_name)
+        #             all_attributes.append((field_name, f"field: {type_str}", field_doc, default))
 
         if not all_attributes:
             return content
 
-        for attr_name, attr_type, doc, default in sorted(all_attributes):
+        for attr_name, attr_type, doc, prefix in sorted(all_attributes):
 
-            # Determine the label based on attr_type
-            if "property" in attr_type:
-                label = "property"
-            elif "field" in attr_type:
-                label = "field"
-            else:
-                label = "attribute"
+            content += f"## attr `{attr_name}`\n\n"
 
-            # Format: label `attr_name` for consistency with UDFs
-            content += f"## {label} `{attr_name}`\n\n"
+            # Add type information
+            content += f"```\n{attr_name}: {attr_type}\n```\n\n"
 
             # Add documentation or warning
+            # Skip Required/Optional for now; not sure how best to display it, or even if it's useful in our docs
+            # if prefix:
+            #     content += prefix + ' '
             if doc:
                 parsed = parse_docstring(doc) if "\n" in doc else None
                 if parsed and parsed.short_description:
@@ -266,37 +249,14 @@ icon: "square-c"
             elif self.show_errors:
                 content += "⚠️ **No documentation**\n\n"
 
-            # Add type information
-            content += f"**Type:** {attr_type}\n\n"
-
-            # Add default value if present
-            if default is not None:
-                if callable(default):
-                    content += "**Default:** Factory function\n\n"
-                else:
-                    content += f"**Default:** `{default!r}`\n\n"
+            # # Add default value if present
+            # if default is not None:
+            #     if callable(default):
+            #         content += "**Default:** Factory function\n\n"
+            #     else:
+            #         content += f"**Default:** `{default!r}`\n\n"
 
         return content
-
-    def _extract_field_doc(self, cls: type, field_name: str) -> str | None:
-        """Extract documentation for a specific field from class docstring."""
-        doc = inspect.getdoc(cls)
-        if not doc:
-            return None
-
-        # Simple pattern matching for field documentation
-        import re
-
-        pattern = rf"^\s*{re.escape(field_name)}\s*:\s*(.+?)(?=^\s*\w+\s*:|^\s*$)"
-        match = re.search(pattern, doc, re.MULTILINE | re.DOTALL)
-
-        if match:
-            field_doc = match.group(1).strip()
-            # Clean up multiple spaces and newlines
-            field_doc = " ".join(field_doc.split())
-            return field_doc
-
-        return None
 
     def _generate_error_page(self, class_name: str, parent_groups: List[str], error: str) -> str:
         """Generate error page when class can't be loaded."""

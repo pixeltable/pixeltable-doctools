@@ -9,6 +9,7 @@ license = "Apache-2.0"
 dependencies = [
     "docstring-parser>=0.17.0",
     "pypandoc>=1.15",
+    "griffe>=0.45",
     "nbformat>=5.0",
 ]
 

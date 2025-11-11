@@ -63,6 +63,8 @@ class ModulePageGenerator(PageBase):
         # Build page content
         content = self._build_frontmatter(module_path, docstring)
 
+        content += f"# module `{module_path}`\n\n"
+
         # Add GitHub link for the module
         github_link = self._get_github_link(module)
         if github_link:
@@ -496,12 +498,7 @@ class ModulePageGenerator(PageBase):
 
         # Use full module path for title, but just module name for sidebar
         module_name = module_path.split(".")[-1]
-        return f"""---
-title: "{module_path}"
-sidebarTitle: "{module_name}"
-icon: "square-m"
----
-"""
+        return f'---\ntitle: "{module_path}"\nsidebarTitle: "{module_name}"\nicon: "square-m"\n---\n'
 
     def _generate_error_page(self, module_path: str, parent_groups: List[str], error: str) -> str:
         """Generate error page when module can't be imported."""
