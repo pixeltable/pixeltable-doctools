@@ -241,11 +241,7 @@ class ClassPageGenerator(PageBase):
             # if prefix:
             #     content += prefix + ' '
             if doc:
-                parsed = parse_docstring(doc) if "\n" in doc else None
-                if parsed and parsed.short_description:
-                    content += f"{self._escape_mdx(parsed.short_description)}\n\n"
-                else:
-                    content += f"{self._escape_mdx(doc)}\n\n"
+                content += f"{self._escape_mdx(doc)}\n\n"
             elif self.show_errors:
                 content += "⚠️ **No documentation**\n\n"
 
