@@ -74,9 +74,9 @@ class FunctionSectionGenerator(PageBase):
             is_udf = self._is_udf(func)
 
         if is_udf:
-            content += f"## udf `{func_name}()`\n\n"
+            content += f"## `udf` {func_name}()\n\n"
         else:
-            content += f"## func `{func_name}()`\n\n"
+            content += f"## `func` {func_name}()\n\n"
 
         # Add signature
         content += self._document_signature(func, func_name)

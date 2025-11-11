@@ -31,7 +31,7 @@ class MethodSectionGenerator(PageBase):
 
         # Build section content with elegant visual separation
         content = "\n"
-        content += f"## method `{method_name}()`\n\n"
+        content += f"## `method` {method_name}()\n\n"
 
         # Add signature
         content += self._document_signature(method, method_name)
