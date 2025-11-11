@@ -125,16 +125,15 @@ class MethodSectionGenerator(PageBase):
                         if not in_code:
                             in_code = True
                         # Remove prompt markers and collect code
-                        clean = line.replace(">>>", "").replace("...", "   ").rstrip()
+                        clean = line.replace(">>>", "").replace("...", "").rstrip()
                         code_lines.append(clean)
                     elif in_code and line.strip() == "":
                         # Empty line might end code block
                         if i + 1 < len(lines) and not lines[i + 1].strip().startswith((">>>", "...")):
                             # End of code block - format it with ruff
                             code_text = "\n".join(code_lines)
-                            formatted_code = self._format_code_with_ruff(code_text)
                             formatted.append("```python")
-                            formatted.append(formatted_code)
+                            formatted.append(code_text)
                             formatted.append("```")
                             in_code = False
                             code_lines = []
@@ -142,9 +141,8 @@ class MethodSectionGenerator(PageBase):
                         if in_code:
                             # End of code block - format it with ruff
                             code_text = "\n".join(code_lines)
-                            formatted_code = self._format_code_with_ruff(code_text)
                             formatted.append("```python")
-                            formatted.append(formatted_code)
+                            formatted.append(code_text)
                             formatted.append("```")
                             in_code = False
                             code_lines = []
@@ -154,9 +152,8 @@ class MethodSectionGenerator(PageBase):
                 if in_code:
                     # Format remaining code
                     code_text = "\n".join(code_lines)
-                    formatted_code = self._format_code_with_ruff(code_text)
                     formatted.append("```python")
-                    formatted.append(formatted_code)
+                    formatted.append(code_text)
                     formatted.append("```")
 
                 content += "\n".join(formatted) + "\n"
