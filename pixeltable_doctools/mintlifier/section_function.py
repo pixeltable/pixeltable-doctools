@@ -86,9 +86,10 @@ class FunctionSectionGenerator(PageBase):
         if doc:
             parsed = parse_docstring(doc)
             if parsed and parsed.short_description:
-                content += f"{self._escape_mdx(parsed.short_description)}\n\n"
+                content += f"{self._escape_mdx(parsed.short_description)} "
             if parsed.long_description:
-                content += f"{self._escape_mdx(parsed.long_description)}\n\n"
+                content += f"{self._escape_mdx(parsed.long_description)}"
+            content += "\n\n"
 
         # Add parameters
         if doc:
@@ -513,7 +514,7 @@ class FunctionSectionGenerator(PageBase):
         if not examples_meta:
             return ""
 
-        content = "**Example:**\n\n"
+        content = "**Examples:**\n\n"
 
         for meta in examples_meta:
             if meta.description:
@@ -555,7 +556,7 @@ class FunctionSectionGenerator(PageBase):
             return ""
 
         # Format with glamour but subtle headers!
-        content = "**Example:**\n\n"
+        content = "**Examples:**\n\n"
 
         # Clean up the example text
         lines = examples_text.split("\n")

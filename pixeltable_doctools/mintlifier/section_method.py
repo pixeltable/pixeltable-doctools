@@ -41,9 +41,10 @@ class MethodSectionGenerator(PageBase):
         if doc:
             parsed = parse_docstring(doc)
             if parsed and parsed.short_description:
-                content += f"{self._escape_mdx(parsed.short_description)}\n\n"
+                content += f"{self._escape_mdx(parsed.short_description)} "
             if parsed.long_description:
-                content += f"{self._escape_mdx(parsed.long_description)}\n\n"
+                content += f"{self._escape_mdx(parsed.long_description)}"
+            content += "\n\n"
 
         # Add parameters
         if doc:
@@ -108,7 +109,7 @@ class MethodSectionGenerator(PageBase):
             return ""
 
         # Format with subtle headers like Parameters
-        content = "\n**Example:**\n\n"
+        content = "\n**Examples:**\n\n"
 
         for meta in examples_meta:
             if meta.description:
