@@ -342,14 +342,14 @@ Documentation for `{name}` is not available.
                 source_file = inspect.getsourcefile(obj)
                 if source_file and source_file.endswith("__init__.py"):
                     module_path = obj.__name__.replace(".", "/") + "/__init__.py"
-                return f"https://github.com/{self.github_repo}/blob/{self.version}/{module_path}#L0"
+                return f"https://github.com/{self.github_repo}/blob/main/{module_path}#L0"
 
             # For other objects (functions, classes), get the source location
             source_file = inspect.getsourcefile(obj)
             if not source_file:
                 return None
 
-            source_lines, line_number = inspect.getsourcelines(obj)
+            _, line_number = inspect.getsourcelines(obj)
 
             # Get the module name from the object
             module = inspect.getmodule(obj)
@@ -359,7 +359,7 @@ Documentation for `{name}` is not available.
                 # Check if it's an __init__ file
                 if source_file.endswith("__init__.py"):
                     module_path = module.__name__.replace(".", "/") + "/__init__.py"
-                return f"https://github.com/{self.github_repo}/blob/{self.version}/{module_path}#L{line_number}"
+                return f"https://github.com/{self.github_repo}/blob/main/{module_path}#L{line_number}"
 
             return None
         except (TypeError, OSError):

@@ -63,6 +63,11 @@ class ModulePageGenerator(PageBase):
         # Build page content
         content = self._build_frontmatter(module_path, docstring)
 
+        # Add GitHub link for the module
+        github_link = self._get_github_link(module)
+        if github_link:
+            content += f'<a href="{github_link}" target="_blank">View source on GitHub</a>\n\n'
+
         if not docstring:
             if self.show_errors:
                 content += "\n## ⚠️ No Documentation\n\n"
@@ -70,11 +75,6 @@ class ModulePageGenerator(PageBase):
         else:
             # Add the full docstring as the module description
             content += f"\n{self._escape_mdx(docstring)}\n\n"
-
-        # Add GitHub link for the module
-        github_link = self._get_github_link(module)
-        if github_link:
-            content += f'<a href="{github_link}" target="_blank">View source on GitHub</a>\n\n'
 
         # Store parent groups for use in child generation
         self.current_parent_groups = parent_groups
@@ -442,6 +442,12 @@ class ModulePageGenerator(PageBase):
         """Generate function summary documentation."""
         content = f"### {name}\n\n"
 
+        # Add GitHub link if possible
+        source_func = func.__wrapped__ if hasattr(func, "__wrapped__") else func
+        github_link = self._get_github_link(source_func)
+        if github_link:
+            content += f'<a href="{github_link}" target="_blank">View source on GitHub</a>\n\n'
+
         # Handle Pixeltable CallableFunction objects
         if hasattr(func, "__class__") and "CallableFunction" in func.__class__.__name__:
             # Try to get the signature from the wrapped function
@@ -478,12 +484,6 @@ class ModulePageGenerator(PageBase):
             parsed = parse_docstring(doc)
             if parsed.short_description:
                 content += f"{self._escape_mdx(parsed.short_description)}\n\n"
-
-        # Add GitHub link if possible
-        source_func = func.__wrapped__ if hasattr(func, "__wrapped__") else func
-        github_link = self._get_github_link(source_func)
-        if github_link:
-            content += f'<a href="{github_link}" target="_blank">View source on GitHub</a>\n\n'
 
         return content
 

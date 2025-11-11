@@ -107,6 +107,11 @@ icon: "square-c"
         """Build complete class documentation."""
         content = ""
 
+        # Add GitHub link
+        github_link = self._get_github_link(cls)
+        if github_link:
+            content += f'<a href="{github_link}" target="_blank">View source on GitHub</a>\n\n'
+
         # Get docstring
         doc = inspect.getdoc(cls)
         if doc:
@@ -116,13 +121,6 @@ icon: "square-c"
             if self.show_errors:
                 content += "\n## ⚠️ No Documentation\n\n"
                 content += f"<Warning>\nDocumentation for `{name}` is not available.\n</Warning>\n\n"
-
-        # Skip constructor per Marcel's feedback - no longer documenting __init__
-
-        # Add GitHub link
-        github_link = self._get_github_link(cls)
-        if github_link:
-            content += f'<a href="{github_link}" target="_blank">View source on GitHub</a>\n\n'
 
         # Document class methods
         content += self._document_methods(cls, full_path)

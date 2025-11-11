@@ -96,6 +96,15 @@ icon: "circle-t"
         """Build complete type documentation."""
         content = ""
 
+        # Add GitHub link (may not work for type aliases)
+        try:
+            github_link = self._get_github_link(type_cls)
+            if github_link:
+                content += f'<a href="{github_link}" target="_self">View source on GitHub</a>\n\n'
+        except:
+            # Type aliases might not have inspectable source
+            pass
+
         # Get docstring - handle type aliases gracefully
         try:
             doc = inspect.getdoc(type_cls) if hasattr(type_cls, "__doc__") else None
@@ -111,15 +120,6 @@ icon: "circle-t"
             if self.show_errors:
                 content += "## ⚠️ No Documentation\n\n"
                 content += f"<Warning>\nDocumentation for type `{full_path}` is not available.\n</Warning>\n\n"
-
-        # Add GitHub link (may not work for type aliases)
-        try:
-            github_link = self._get_github_link(type_cls)
-            if github_link:
-                content += f'<a href="{github_link}" target="_self">View source on GitHub</a>\n\n'
-        except:
-            # Type aliases might not have inspectable source
-            pass
 
         # Add usage section
         content += self._add_usage_section(type_name)
