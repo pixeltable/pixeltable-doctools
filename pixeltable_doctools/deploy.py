@@ -66,7 +66,7 @@ def deploy(pxt_version: str, pxt_repo_dir: Path, temp_dir: Path, branch: str) ->
     Args:
         output_dir: Directory containing generated docs
     """
-    docs_target_dir = pxt_repo_dir / 'docs' / 'target'
+    docs_target_dir = pxt_repo_dir / 'target' / 'docs'
     if not docs_target_dir.exists():
         print(f"Error: Docs target directory {docs_target_dir} does not exist. Please build the docs first.")
         sys.exit(1)

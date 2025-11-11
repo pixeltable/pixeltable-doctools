@@ -10,9 +10,6 @@ from pathlib import Path
 # All doctools scripts should reference this instead of hardcoding paths
 MINTLIFY_SOURCE_DIR = 'mintlify'  # Changed from 'mintlify-src' (2025-10-19)
 
-# Target directory for built documentation
-MINTLIFY_TARGET_DIR = 'target'
-
 
 def get_mintlify_source_path(repo_root: Path) -> Path:
     """Get the path to the Mintlify source directory.
@@ -33,6 +30,6 @@ def get_mintlify_target_path(repo_root: Path) -> Path:
         repo_root: Path to the pixeltable repository root
 
     Returns:
-        Path to docs/target/ directory
+        Path to target/docs/ directory
     """
-    return repo_root / 'docs' / MINTLIFY_TARGET_DIR
+    return repo_root / 'target' / 'docs'

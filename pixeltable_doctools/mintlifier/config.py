@@ -5,8 +5,8 @@ Mintlifier configuration file
 config = {
     # Paths relative to pixeltable project root
     "opml_path": "/docs/public_api.opml",
-    "docs_json_path": "/docs/target/docs.json",
-    "sdk_output_dir": "/docs/target/sdk/latest",
+    "docs_json_path": "/target/docs/docs.json",
+    "sdk_output_dir": "/target/docs/sdk/latest",
     # GitHub repository information for source links
     "github_repo": "pixeltable/pixeltable",
     "github_package_path": "pixeltable",

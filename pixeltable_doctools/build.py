@@ -3,8 +3,8 @@
 Build complete Mintlify documentation site.
 
 This script:
-1. Copies docs/mintlify/* to docs/target/
-2. Runs mintlifier to generate SDK documentation into docs/target/
+1. Copies docs/mintlify/* to target/docs/
+2. Runs mintlifier to generate SDK documentation into target/docs/
 3. Results in a complete, deployable documentation site
 """
 
@@ -84,7 +84,7 @@ def build_mintlify(pxt_repo_dir: Path, no_errors: bool = False) -> None:
 
     docs_dir = pxt_repo_dir / 'docs'
     source_dir = docs_dir / 'mintlify'
-    target_dir = docs_dir / 'target'
+    target_dir = pxt_repo_dir / 'target' / 'docs'
     opml_file = docs_dir / 'public_api.opml'
 
     # Verify source exists
@@ -126,7 +126,7 @@ def build_mintlify(pxt_repo_dir: Path, no_errors: bool = False) -> None:
             print(f"   Copied file: {item.name}")
 
     # Step 5: Run mintlifier to generate SDK docs
-    # Mintlifier now writes directly to docs/target/sdk/latest and updates docs/target/docs.json
+    # Mintlifier now writes directly to target/docs/sdk/latest and updates target/docs/docs.json
     print(f"\nRunning mintlifier to generate SDK documentation...")
     print(f"   OPML: {opml_file}")
     print(f"   Output: {target_dir}")
