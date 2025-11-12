@@ -8,13 +8,6 @@ import tempfile
 from pathlib import Path
 from typing import Optional, Any, List
 
-try:
-    import pypandoc
-
-    HAS_PANDOC = True
-except ImportError:
-    HAS_PANDOC = False
-
 
 class PageBase:
     """Base page generator with common MDX functionality."""
@@ -549,48 +542,13 @@ Documentation for `{name}` is not available.
         return '\n'.join(result_lines)
 
     def _escape_mdx(self, text: str) -> str:
-        """Escape text for MDX format."""
-        if not text:
-            return ""
-
-        if HAS_PANDOC:
-            try:
-                # Use pypandoc for conversion
-                escaped = pypandoc.convert_text(text, "gfm", format="commonmark", extra_args=["--wrap=none"])
-
-                # MDX-specific escaping - but NOT inside code blocks
-                escaped = self._escape_braces_outside_code(escaped)
-
-                # Convert URLs in angle brackets to markdown links, but preserve angle brackets in code
-                escaped = self._escape_angle_brackets_outside_code(escaped)
-
-                # Handle Sphinx/RST directives like :data:`Quantize.MEDIANCUT`
-                escaped = re.sub(r":data:`([^`]+)`", r"`\1`", escaped)
-                escaped = re.sub(r":(?:py:)?(?:func|class|meth|attr|mod):`([^`]+)`", r"`\1`", escaped)
-
-                # Fix escaped markdown links like \[`Table`\]\[pixeltable.Table\]
-                escaped = re.sub(r"\\\\\[`([^`]+)`\\\\\]\\\\\[([^\]]+)\\\\\]", r"[`\1`](\2)", escaped)
-                escaped = re.sub(r"\\\[`([^`]+)`\\\]\\\[([^\]]+)\\\]", r"[`\1`](\2)", escaped)
-
-                return escaped
-            except Exception:
-                pass
-
-        # Fallback: manual escaping
         # Handle Sphinx/RST directives
         text = re.sub(r":data:`([^`]+)`", r"`\1`", text)
         text = re.sub(r":(?:py:)?(?:func|class|meth|attr|mod):`([^`]+)`", r"`\1`", text)
 
-        # Escape braces for MDX
-        text = text.replace("{", "\\{").replace("}", "\\}")
-
         # Convert URLs in angle brackets to markdown links
         text = re.sub(r"<(https?://[^>]+)>", r"[\1](\1)", text)
-        text = re.sub(r"<(ftp://[^>]+)>", r"[\1](\1)", text)
         text = re.sub(r"<(mailto:[^>]+)>", r"[\1](\1)", text)
-
-        # Handle other angle brackets
-        text = re.sub(r"<([^>]+)>", r"`\1`", text)
 
         return text
 
