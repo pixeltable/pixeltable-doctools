@@ -100,12 +100,12 @@ def add_frontmatter_to_mdx(mdx_file: Path, notebooks_dir: Path) -> None:
     # Get path relative to repo root (not just docs/)
     repo_root = notebooks_dir.parent.parent  # notebooks_dir is repo/docs/notebooks, so parent.parent is repo
     notebook_rel_path = original_notebook.relative_to(repo_root)
+    notebook_github_path = f"pixeltable/pixeltable/blob/release/{notebook_rel_path}"
 
     # Generate URLs
-    github_base = "https://github.com/pixeltable/pixeltable/blob/release"
-    kaggle_url = f"https://kaggle.com/kernels/welcome?src={github_base}/{notebook_rel_path}"
-    colab_url = f"https://colab.research.google.com/{github_base.replace('https://','')}/{notebook_rel_path}"
-    github_url = f"{github_base}/{notebook_rel_path}"
+    github_url = f"https://github.com/{notebook_github_path}"
+    kaggle_url = f"https://kaggle.com/kernels/welcome?src={github_url}"
+    colab_url = f"https://colab.research.google.com/github/{notebook_github_path}"
 
     # Create enhanced frontmatter
     enhanced_frontmatter = f'''---
