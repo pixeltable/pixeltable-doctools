@@ -230,8 +230,7 @@ class FunctionSectionGenerator(PageBase):
 
                 # Add default value if present
                 if param.default != inspect.Parameter.empty:
-                    default_repr = repr(param.default)
-                    param_str += f" = {default_repr}"
+                    param_str += f" = {param.default!r}"
 
                 param_parts.append(param_str)
 
