@@ -550,6 +550,37 @@ Documentation for `{name}` is not available.
         text = re.sub(r"<(https?://[^>]+)>", r"[\1](\1)", text)
         text = re.sub(r"<(mailto:[^>]+)>", r"[\1](\1)", text)
 
+        # Convert inline links
+        # TODO: It's a bit of a hack and relies on the identifier case to determine if it's a class or a
+        #     module function; will need to change if we reorganize the docs output
+        def convert_link(match: re.Match[str]) -> str:
+            link_text = match.group(1)
+            link_target = match.group(2)
+
+            components = link_target.split(".")
+            if not components or not all(c.isidentifier() for c in components) or \
+                (len(components) == 1 and not components[-1][0].isupper()):
+                return match.group(0)  # Not a valid inline link
+
+            target_page: str
+            if components[-1][0].isupper():
+                # Class link
+                target_page = components[-1]
+            else:
+                assert len(components) > 1  # else we would have aborted earlier
+                if components[-2][0].isupper():
+                    # Method link
+                    target_page = f'{components[-2]}#method-{components[-1]}'
+                else:
+                    # Module function link
+                    # TODO: Could be a UDF
+                    target_page = f'{components[-2]}#func-{components[-1]}'
+            target_page = target_page.lower().replace("_", "-")
+            # TODO: Proper version links
+            return f'[{link_text}](./{target_page})'
+
+        text = re.sub(r"\[([^]]*)\]\[([^]]*)\]", convert_link, text, flags=re.ASCII)
+
         return text
 
     def _sanitize_path(self, text: str) -> str:
