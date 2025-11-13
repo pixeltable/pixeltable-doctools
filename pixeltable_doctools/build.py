@@ -94,11 +94,9 @@ def build_mintlify(pxt_repo_dir: Path, no_errors: bool = False) -> None:
     if not opml_file.exists():
         raise FileNotFoundError(f"OPML file not found: {opml_file}")
 
-    # Step 1: Clean and prepare target directory
+    # Step 1: Prepare target directory
     print(f"\nPreparing target directory: {target_dir}")
-    if target_dir.exists():
-        shutil.rmtree(target_dir)
-    target_dir.mkdir(parents=True)
+    target_dir.mkdir(exist_ok=True, parents=True)
 
     # Step 2: Generate notebooks to docs/mintlify/notebooks/
     print(f"\nGenerating notebooks ...")
@@ -119,11 +117,9 @@ def build_mintlify(pxt_repo_dir: Path, no_errors: bool = False) -> None:
             continue  # Skip hidden files
         dest = target_dir / item.name
         if item.is_dir():
-            shutil.copytree(item, dest)
-            print(f"   Copied directory: {item.name}/")
+            shutil.copytree(item, dest, dirs_exist_ok=True)
         else:
             shutil.copy2(item, dest)
-            print(f"   Copied file: {item.name}")
 
     # Step 5: Run mintlifier to generate SDK docs
     # Mintlifier now writes directly to target/docs/sdk/latest and updates target/docs/docs.json
