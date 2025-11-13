@@ -10,6 +10,7 @@ This script:
 """
 
 import argparse
+from glob import glob
 import re
 import shutil
 import subprocess
@@ -169,6 +170,12 @@ def convert_notebooks_to_dir(repo_root: Path, output_dir: Path) -> None:
         print(e.stdout, file=sys.stderr)
         print(e.stderr, file=sys.stderr)
         raise
+
+    finally:
+        gitignores = glob(f'{notebooks_dir}/**/.gitignore', recursive=True)
+        for gitignore in gitignores:
+            print(f'   Removing {gitignore} ...')
+            Path(gitignore).unlink()
 
     # Count converted files
     mdx_files = list(output_dir.rglob('*.mdx'))
