@@ -9,10 +9,12 @@ import textwrap
 class FunctionSectionGenerator(PageBase):
     """Generate documentation sections for functions within module pages."""
 
-    def __init__(self, show_errors: bool = True):
+    default_name: str
+
+    def __init__(self, default_name: str):
         """Initialize the section generator."""
         # Don't initialize PageBase with output_dir since we're not writing files
-        self.show_errors = show_errors
+        self.default_name = default_name
 
     def _is_udf(self, func: Any) -> bool:
         """Check if a function has the @udf decorator by examining its source code.
@@ -76,7 +78,7 @@ class FunctionSectionGenerator(PageBase):
         if is_udf:
             content += f"## `udf` {func_name}()\n\n"
         else:
-            content += f"## `func` {func_name}()\n\n"
+            content += f"## `{self.default_name}` {func_name}()\n\n"
 
         # Add signature
         content += self._document_signature(func, func_name)
@@ -324,7 +326,7 @@ class FunctionSectionGenerator(PageBase):
             # Format description with proper nesting for bullet points
             if param.description:
                 escaped = self._escape_mdx(param.description)
-                indented = textwrap.indent(escaped, "    ")
+                indented = textwrap.indent(escaped, "    ").strip()
                 content += f': {indented}'
             content += "\n"
 
@@ -602,4 +604,4 @@ class FunctionSectionGenerator(PageBase):
 
     def _format_signature(self, sig_str: str) -> str:
         """Format function signature - delegates to base class."""
-        return super()._format_signature(sig_str, default_name="func")
+        return super()._format_signature(sig_str, default_name=self.default_name)
