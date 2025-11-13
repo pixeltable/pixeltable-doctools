@@ -318,7 +318,7 @@ class FunctionSectionGenerator(PageBase):
             if type_str:
                 content += f"(`{type_str}`"
                 if default is not None:
-                    content += f", default: `{default}`"
+                    content += f", default: `{default!r}`"
                 content += ")"
 
             # Format description with proper nesting for bullet points

@@ -202,7 +202,7 @@ class MethodSectionGenerator(PageBase):
             if type_str:
                 content += f"(`{type_str}`"
                 if default is not None:
-                    content += f", default: `{default}`"
+                    content += f", default: `{default!r}`"
                 content += ")"
             content += f": {self._escape_mdx(param.description) if param.description else 'No description'}\n"
 
