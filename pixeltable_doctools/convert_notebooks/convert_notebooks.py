@@ -26,7 +26,7 @@ def convert_notebooks() -> None:
     convert_notebooks_to_dir(repo_root, output_dir)
 
 
-def add_frontmatter_to_mdx(mdx_file: Path, notebooks_dir: Path) -> None:
+def postprocess_mdx(mdx_file: Path, notebooks_dir: Path) -> None:
     """
     Post-process MDX file to enhance frontmatter with links.
 
@@ -80,6 +80,9 @@ icon: "notebook"
 description: "[Open in Kaggle]({kaggle_url}) | [Open in Colab]({colab_url}) | [View on GitHub]({github_url})"
 ---
 '''
+
+    # We need to prepend './' to links like `data-sharing_files/figure-markdown_strict/cell-7-output-1.png`
+    content_after_frontmatter = re.sub(rf'\(({mdx_file.stem}_files/figure-markdown_strict/[^)]*)\)', r'(./\1)', content_after_frontmatter)
 
     # Write back with enhanced frontmatter
     mdx_file.write_text(enhanced_frontmatter + content_after_frontmatter)
@@ -174,7 +177,7 @@ def convert_notebooks_to_dir(repo_root: Path, output_dir: Path) -> None:
     # Post-process: Add frontmatter to each MDX file
     print(f"   Updating frontmatter ...")
     for mdx_file in mdx_files:
-        add_frontmatter_to_mdx(mdx_file, notebooks_dir)
+        postprocess_mdx(mdx_file, notebooks_dir)
     print(f"   Updated frontmatter for {len(mdx_files)} file(s)")
 
 
