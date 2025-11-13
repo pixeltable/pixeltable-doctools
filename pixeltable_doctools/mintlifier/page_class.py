@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import Optional, List
 from .page_base import PageBase
 from docstring_parser import parse as parse_docstring
-from .section_method import MethodSectionGenerator
+from .section_function import FunctionSectionGenerator
 from .section_typeddict import TypedDictSection
 from .section_dataclass import DataclassSection
 from .section_namedtuple import NamedTupleSection
@@ -27,7 +27,7 @@ class ClassPageGenerator(PageBase):
         """Initialize with output directory, version, and error display setting."""
         super().__init__(output_dir, version, show_errors, github_repo, github_package_path)
         # Initialize method generator for inline sections
-        self.method_gen = MethodSectionGenerator(show_errors)
+        self.method_gen = FunctionSectionGenerator("method")
 
         # Initialize attribute section handlers
         self.attribute_handlers = [

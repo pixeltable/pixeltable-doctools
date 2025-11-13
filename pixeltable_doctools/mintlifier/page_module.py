@@ -7,7 +7,6 @@ from typing import Optional, List, Any
 from .page_base import PageBase
 from docstring_parser import parse as parse_docstring
 from .section_function import FunctionSectionGenerator
-from .page_class import ClassPageGenerator
 
 
 class ModulePageGenerator(PageBase):
@@ -25,8 +24,7 @@ class ModulePageGenerator(PageBase):
         """Initialize with output directory, version, and error display setting."""
         super().__init__(output_dir, version, show_errors, github_repo, github_package_path)
         # Initialize child generators
-        self.function_gen = FunctionSectionGenerator(show_errors)
-        self.class_gen = ClassPageGenerator(output_dir, version, show_errors, github_repo, github_package_path)
+        self.function_gen = FunctionSectionGenerator("func")
         # Store internal blacklist
         self.internal_blacklist = set(internal_blacklist) if internal_blacklist else set()
 

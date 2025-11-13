@@ -19,40 +19,6 @@ from pathlib import Path
 from pixeltable_doctools.config import get_mintlify_source_path
 
 
-# Quarto configuration template
-QUARTO_CONFIG = """project:
-  type: default
-  output-dir: {output_dir}
-
-format:
-  docusaurus-md:
-    # Output MDX files directly
-    output-ext: mdx
-    # Test with both echo and output true
-    echo: true
-    output: true
-    warning: false
-    error: false
-    # Preserve YAML frontmatter
-    preserve-yaml: true
-    # Structure settings
-    standalone: false
-    toc: false
-    wrap: auto
-    # ENHANCED media handling
-    fig-format: png
-    fig-dpi: 300
-    fig-path: images/
-    # Extract media from notebooks - needs to be a path string
-    extract-media: images/
-    # Resource paths for finding images
-    resource-path: [".", "images/", "../images/"]
-    default-image-extension: png
-    # Markdown headings
-    markdown-headings: atx
-"""
-
-
 def convert_notebooks() -> None:
     """Convert all notebooks to MDX format (convenience function for CLI)."""
     repo_root = find_pixeltable_repo()
@@ -60,7 +26,7 @@ def convert_notebooks() -> None:
     convert_notebooks_to_dir(repo_root, output_dir)
 
 
-def add_frontmatter_to_mdx(mdx_file: Path, notebooks_dir: Path) -> None:
+def postprocess_mdx(mdx_file: Path, notebooks_dir: Path) -> None:
     """
     Post-process MDX file to enhance frontmatter with links.
 
@@ -114,6 +80,9 @@ icon: "notebook"
 description: "[Open in Kaggle]({kaggle_url}) | [Open in Colab]({colab_url}) | [View on GitHub]({github_url})"
 ---
 '''
+
+    # We need to prepend './' to links like `data-sharing_files/figure-markdown_strict/cell-7-output-1.png`
+    content_after_frontmatter = re.sub(rf'\(({mdx_file.stem}_files/figure-markdown_strict/[^)]*)\)', r'(./\1)', content_after_frontmatter)
 
     # Write back with enhanced frontmatter
     mdx_file.write_text(enhanced_frontmatter + content_after_frontmatter)
@@ -169,75 +138,47 @@ def convert_notebooks_to_dir(repo_root: Path, output_dir: Path) -> None:
     if not notebooks:
         raise RuntimeError(f"   No notebooks found: {notebooks_dir}")
 
-    print(f"   Found {len(notebooks)} notebook(s) to convert.")
+    print(f"   {len(notebooks)} total notebook(s).")
 
-    # Clean output directory
-    if output_dir.exists():
-        print(f"   Cleaning output directory: {output_dir}")
-        shutil.rmtree(output_dir)
-    output_dir.mkdir(parents=True)
+    notebooks_to_convert: list[Path] = []
+    for notebook in notebooks:
+        relpath = notebook.relative_to(notebooks_dir)
+        output_path = output_dir / relpath.with_suffix('.mdx')
+        if not output_path.exists() or notebook.stat().st_mtime > output_path.stat().st_mtime:
+            notebooks_to_convert.append(notebook)
 
-    # Create _quarto.yml config in notebooks directory
-    config_file = notebooks_dir / '_quarto.yml'
+    print(f"   {len(notebooks_to_convert)} notebook(s) need conversion.")
 
-    # Use absolute path for output-dir
-    config = QUARTO_CONFIG.format(output_dir=str(output_dir.absolute()))
-    config_file.write_text(config)
+    if not notebooks_to_convert:
+        return
+
+    print(f"   Running Quarto to convert notebooks...")
+    print(f"      Source: {notebooks_dir}")
+    print(f"      Output: {output_dir}")
 
     try:
-        print(f"Running Quarto to convert notebooks...")
-        print(f"   Source: {notebooks_dir}")
-        print(f"   Output: {output_dir}")
-        print(f"   Config: {config_file.name}")
-
         # Run quarto render
-        result = subprocess.run(
-            ['quarto', 'render', '--to', 'docusaurus-md'],
+        subprocess.run(
+            ['quarto', 'render', *[str(f) for f in notebooks_to_convert], '--quiet', '--to', 'docusaurus-md', '--output-dir', str(output_dir)],
             cwd=str(notebooks_dir),
-            capture_output=True,
-            text=True,
+            check=True,
             timeout=300  # 5 minute timeout
         )
 
-        # Print output
-        if result.stdout:
-            print("\n--- Quarto Output ---")
-            print(result.stdout)
-
-        if result.stderr:
-            print("\n--- Quarto Warnings/Errors ---")
-            print(result.stderr)
-
-        if result.returncode != 0:
-            raise subprocess.CalledProcessError(
-                result.returncode,
-                'quarto render',
-                result.stdout,
-                result.stderr
-            )
-
-        # Count converted files
-        mdx_files = list(output_dir.rglob('*.mdx'))
-        print(f"\nSuccessfully converted {len(mdx_files)} notebook(s) to MDX")
-
-        # Post-process: Add frontmatter to each MDX file
-        print(f"\nAdding frontmatter to MDX files...")
-        for mdx_file in mdx_files:
-            add_frontmatter_to_mdx(mdx_file, notebooks_dir)
-        print(f"   Added frontmatter to {len(mdx_files)} file(s)")
-
-    except subprocess.TimeoutExpired:
-        print("\nQuarto conversion timed out after 5 minutes", file=sys.stderr)
-        raise
-    except subprocess.CalledProcessError as e:
-        print(f"\nError running quarto:", file=sys.stderr)
+    except (subprocess.TimeoutExpired, subprocess.CalledProcessError) as e:
         print(e.stdout, file=sys.stderr)
         print(e.stderr, file=sys.stderr)
         raise
-    finally:
-        # Clean up temporary config file
-        if config_file.exists():
-            config_file.unlink()
+
+    # Count converted files
+    mdx_files = list(output_dir.rglob('*.mdx'))
+    print(f"   Successfully converted {len(mdx_files)} notebook(s) to MDX")
+
+    # Post-process: Add frontmatter to each MDX file
+    print(f"   Updating frontmatter ...")
+    for mdx_file in mdx_files:
+        postprocess_mdx(mdx_file, notebooks_dir)
+    print(f"   Updated frontmatter for {len(mdx_files)} file(s)")
 
 
 def main():

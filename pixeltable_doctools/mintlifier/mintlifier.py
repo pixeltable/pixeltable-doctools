@@ -114,16 +114,6 @@ class Mintlifier:
         sdk_output_dir = self._resolve_path(self.config["sdk_output_dir"])
         sdk_tab = self.config["sdk_tab"]
 
-        # Clean the output directory contents first
-        import shutil
-
-        if sdk_output_dir.exists():
-            for item in sdk_output_dir.iterdir():
-                if item.is_dir():
-                    shutil.rmtree(item)
-                else:
-                    item.unlink()
-
         if not opml_path.exists():
             print(f"❌ OPML file not found: {opml_path}")
             sys.exit(1)

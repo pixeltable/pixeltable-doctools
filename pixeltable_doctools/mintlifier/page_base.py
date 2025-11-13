@@ -42,46 +42,6 @@ class PageBase:
             # Format with line breaks after commas
             return self._format_signature_manual(sig_str)
 
-    def _format_nested_description(self, desc: str) -> str:
-        """Format a description that may contain nested bullet points.
-
-        When a description contains bullet points, they need to be indented
-        to nest properly under the parent bullet in Markdown.
-
-        Args:
-            desc: The description text, possibly with bullet points
-
-        Returns:
-            Formatted description with proper indentation for nested lists
-        """
-        if not desc:
-            return desc
-
-        # Escape MDX first
-        desc = self._escape_mdx(desc)
-
-        lines = desc.split("\n")
-        if len(lines) == 1:
-            # Single line, no special formatting needed
-            return desc
-
-        # Multi-line description - format with proper indentation
-        formatted_lines = []
-        for i, line in enumerate(lines):
-            stripped = line.strip()
-            if i == 0:
-                # First line goes on same line as parameter name
-                formatted_lines.append(stripped)
-            elif stripped.startswith(("-", "*", "+")):
-                # Bullet point - indent with 2 spaces to nest under parent bullet
-                formatted_lines.append(f"  {stripped}")
-            elif stripped:
-                # Regular continuation line - indent to align with description
-                formatted_lines.append(f"  {stripped}")
-            # Skip empty lines
-
-        return "\n".join(formatted_lines)
-
     def _find_matching_paren(self, s: str, open_pos: int) -> int:
         """Find the position of the closing paren that matches the opening paren at open_pos.
 
@@ -549,6 +509,37 @@ Documentation for `{name}` is not available.
         # Convert URLs in angle brackets to markdown links
         text = re.sub(r"<(https?://[^>]+)>", r"[\1](\1)", text)
         text = re.sub(r"<(mailto:[^>]+)>", r"[\1](\1)", text)
+
+        # Convert inline links
+        # TODO: It's a bit of a hack and relies on the identifier case to determine if it's a class or a
+        #     module function; will need to change if we reorganize the docs output
+        def convert_link(match: re.Match[str]) -> str:
+            link_text = match.group(1)
+            link_target = match.group(2)
+
+            components = link_target.split(".")
+            if not components or not all(c.isidentifier() for c in components) or \
+                (len(components) == 1 and not components[-1][0].isupper()):
+                return match.group(0)  # Not a valid inline link
+
+            target_page: str
+            if components[-1][0].isupper():
+                # Class link
+                target_page = components[-1]
+            else:
+                assert len(components) > 1  # else we would have aborted earlier
+                if components[-2][0].isupper():
+                    # Method link
+                    target_page = f'{components[-2]}#method-{components[-1]}'
+                else:
+                    # Module function link
+                    # TODO: Could be a UDF
+                    target_page = f'{components[-2]}#func-{components[-1]}'
+            target_page = target_page.lower().replace("_", "-")
+            # TODO: Proper version links
+            return f'[{link_text}](./{target_page})'
+
+        text = re.sub(r"\[([^]]*)\]\[([^]]*)\]", convert_link, text, flags=re.ASCII)
 
         return text
 

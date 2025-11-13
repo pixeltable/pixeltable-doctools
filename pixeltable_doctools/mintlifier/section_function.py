@@ -4,15 +4,17 @@ import inspect
 from typing import Any
 from docstring_parser import parse as parse_docstring
 from .page_base import PageBase
-
+import textwrap
 
 class FunctionSectionGenerator(PageBase):
     """Generate documentation sections for functions within module pages."""
 
-    def __init__(self, show_errors: bool = True):
+    default_name: str
+
+    def __init__(self, default_name: str):
         """Initialize the section generator."""
         # Don't initialize PageBase with output_dir since we're not writing files
-        self.show_errors = show_errors
+        self.default_name = default_name
 
     def _is_udf(self, func: Any) -> bool:
         """Check if a function has the @udf decorator by examining its source code.
@@ -76,7 +78,7 @@ class FunctionSectionGenerator(PageBase):
         if is_udf:
             content += f"## `udf` {func_name}()\n\n"
         else:
-            content += f"## `func` {func_name}()\n\n"
+            content += f"## `{self.default_name}` {func_name}()\n\n"
 
         # Add signature
         content += self._document_signature(func, func_name)
@@ -111,39 +113,32 @@ class FunctionSectionGenerator(PageBase):
         """Document function signature."""
         content = "```python\n"
 
-        try:
-            # Check if it's a polymorphic function FIRST (before accessing .signature which throws)
-            if hasattr(func, "is_polymorphic") and func.is_polymorphic:
-                # Show ALL signatures for polymorphic functions
-                if hasattr(func, "signatures"):
-                    for i, sig in enumerate(func.signatures, 1):
-                        if len(func.signatures) > 1:
-                            content += f"# Signature {i}:\n"
-                        # Format signature with line breaks after commas for readability
-                        sig_str = str(sig) if sig else "(...)"
-                        formatted_sig = self._format_signature(sig_str)
-                        content += f"{func_name}{formatted_sig}\n"
-                        # Add blank line between signatures for better readability
-                        if i < len(func.signatures):
-                            content += "\n"
-                else:
-                    content += f"{func_name}(...) # Polymorphic function\n"
-            elif hasattr(func, "signature") and func.signature:
-                # Pixeltable CallableFunction stores signature as a string
-                sig_str = str(func.signature)
+        if hasattr(func, "signatures"):
+            # Pixeltable UDF
+            for i, sig in enumerate(func.signatures, 1):
+                if len(func.signatures) > 1:
+                    content += f"# Signature {i}:\n"
+                sig_str = str(sig)
                 # Inject default parameter values into the signature
-                sig_str_with_defaults = self._inject_defaults_into_signature(func, sig_str)
+                if len(func.signatures) == 1:
+                    # TODO: Defaults for polymorphic fns
+                    sig_str = self._inject_defaults_into_signature(func, sig_str)
                 # Format signature with line breaks after commas for readability
-                formatted_sig = self._format_signature(sig_str_with_defaults)
+                formatted_sig = self._format_signature(sig_str)
                 content += f"{func_name}{formatted_sig}\n"
-            else:
-                # Fall back to standard introspection
-                sig = inspect.signature(func)
-                # Format signature with line breaks after commas for readability
-                formatted_sig = self._format_signature(str(sig))
-                content += f"{func_name}{formatted_sig}\n"
-        except (ValueError, TypeError):
-            content += f"{func_name}(...)\n"
+                if i < len(func.signatures):
+                    content += "\n"
+
+        else:
+            # Fall back to standard introspection
+            sig = inspect.signature(func)
+            params = list(sig.parameters.values())
+            if self.default_name == 'method' and params and params[0].name in ('self', 'cls'):
+                params = params[1:]
+                sig = sig.replace(parameters=params)
+            # Format signature with line breaks after commas for readability
+            formatted_sig = self._format_signature(str(sig))
+            content += f"{func_name}{formatted_sig}\n"
 
         content += "```\n\n"
         return content
@@ -318,13 +313,15 @@ class FunctionSectionGenerator(PageBase):
             if type_str:
                 content += f"(`{type_str}`"
                 if default is not None:
-                    content += f", default: `{default}`"
+                    content += f", default: `{default!r}`"
                 content += ")"
 
             # Format description with proper nesting for bullet points
-            desc = param.description if param.description else "No description"
-            formatted_desc = self._format_nested_description(desc)
-            content += f": {formatted_desc}\n"
+            if param.description:
+                escaped = self._escape_mdx(param.description)
+                indented = textwrap.indent(escaped, "    ").strip()
+                content += f': {indented}'
+            content += "\n"
 
         content += "\n"
         return content
@@ -600,4 +597,4 @@ class FunctionSectionGenerator(PageBase):
 
     def _format_signature(self, sig_str: str) -> str:
         """Format function signature - delegates to base class."""
-        return super()._format_signature(sig_str, default_name="func")
+        return super()._format_signature(sig_str, default_name=self.default_name)
