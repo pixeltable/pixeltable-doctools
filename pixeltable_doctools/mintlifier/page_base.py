@@ -42,46 +42,6 @@ class PageBase:
             # Format with line breaks after commas
             return self._format_signature_manual(sig_str)
 
-    def _format_nested_description(self, desc: str) -> str:
-        """Format a description that may contain nested bullet points.
-
-        When a description contains bullet points, they need to be indented
-        to nest properly under the parent bullet in Markdown.
-
-        Args:
-            desc: The description text, possibly with bullet points
-
-        Returns:
-            Formatted description with proper indentation for nested lists
-        """
-        if not desc:
-            return desc
-
-        # Escape MDX first
-        desc = self._escape_mdx(desc)
-
-        lines = desc.split("\n")
-        if len(lines) == 1:
-            # Single line, no special formatting needed
-            return desc
-
-        # Multi-line description - format with proper indentation
-        formatted_lines = []
-        for i, line in enumerate(lines):
-            stripped = line.strip()
-            if i == 0:
-                # First line goes on same line as parameter name
-                formatted_lines.append(stripped)
-            elif stripped.startswith(("-", "*", "+")):
-                # Bullet point - indent with 2 spaces to nest under parent bullet
-                formatted_lines.append(f"  {stripped}")
-            elif stripped:
-                # Regular continuation line - indent to align with description
-                formatted_lines.append(f"  {stripped}")
-            # Skip empty lines
-
-        return "\n".join(formatted_lines)
-
     def _find_matching_paren(self, s: str, open_pos: int) -> int:
         """Find the position of the closing paren that matches the opening paren at open_pos.
 

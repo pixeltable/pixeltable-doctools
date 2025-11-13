@@ -4,7 +4,7 @@ import inspect
 from typing import Any
 from docstring_parser import parse as parse_docstring
 from .page_base import PageBase
-
+import textwrap
 
 class FunctionSectionGenerator(PageBase):
     """Generate documentation sections for functions within module pages."""
@@ -322,9 +322,11 @@ class FunctionSectionGenerator(PageBase):
                 content += ")"
 
             # Format description with proper nesting for bullet points
-            desc = param.description if param.description else "No description"
-            formatted_desc = self._format_nested_description(desc)
-            content += f": {formatted_desc}\n"
+            if param.description:
+                escaped = self._escape_mdx(param.description)
+                indented = textwrap.indent(escaped, "    ")
+                content += f': {indented}'
+            content += "\n"
 
         content += "\n"
         return content
