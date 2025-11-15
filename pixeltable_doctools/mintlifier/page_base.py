@@ -165,7 +165,8 @@ class PageBase:
 
             try:
                 # Run ruff format on the temp file
-                subprocess.run(["ruff", "format", temp_path, "--line-length", "80"], capture_output=True, text=True, check=True, timeout=5)
+                # line length 74 ensures all text is visible in mintlify display
+                subprocess.run(["ruff", "format", temp_path, "--line-length", "74"], capture_output=True, text=True, check=True, timeout=5)
 
                 # Read back the formatted content
                 with open(temp_path, "r") as f:
