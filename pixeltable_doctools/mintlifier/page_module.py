@@ -7,6 +7,7 @@ from typing import Optional, List, Any
 from .page_base import PageBase
 from docstring_parser import parse as parse_docstring
 from .section_function import FunctionSectionGenerator
+from .utils import entity_label
 
 
 class ModulePageGenerator(PageBase):
@@ -61,7 +62,7 @@ class ModulePageGenerator(PageBase):
         # Build page content
         content = self._build_frontmatter(module_path, docstring)
 
-        content += f"# `module` {module_path}\n\n"
+        content += f"# {entity_label('module')} {module_path}\n\n"
 
         # Add GitHub link for the module
         github_link = self._get_github_link(module)
@@ -496,7 +497,7 @@ class ModulePageGenerator(PageBase):
 
         # Use full module path for title, but just module name for sidebar
         module_name = module_path.split(".")[-1]
-        return f'---\ntitle: "{module_path}"\nsidebarTitle: "{module_name}"\nicon: "square-m"\n---\n'
+        return f'---\ntitle: "{module_name}"\nicon: "square-m"\n---\n'
 
     def _generate_error_page(self, module_path: str, parent_groups: List[str], error: str) -> str:
         """Generate error page when module can't be imported."""

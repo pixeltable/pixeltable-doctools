@@ -4,6 +4,8 @@ import griffe
 import inspect
 from pathlib import Path
 from typing import Optional, List
+
+from .utils import entity_label
 from .page_base import PageBase
 from docstring_parser import parse as parse_docstring
 from .section_function import FunctionSectionGenerator
@@ -100,7 +102,7 @@ class ClassPageGenerator(PageBase):
 
     def _build_class_documentation(self, cls: type, name: str, full_path: str) -> str:
         """Build complete class documentation."""
-        content = f"# `class` {full_path}\n\n"
+        content = f"# {entity_label('class')} {full_path}\n\n"
 
         # Add GitHub link
         github_link = self._get_github_link(cls)
@@ -231,7 +233,7 @@ class ClassPageGenerator(PageBase):
 
         for attr_name, attr_type, doc, prefix in sorted(all_attributes):
 
-            content += f"## `attr` {attr_name}\n\n"
+            content += f"## {entity_label('attr')} {attr_name}\n\n"
 
             # Add type information
             content += f"```\n{attr_name}: {attr_type}\n```\n\n"

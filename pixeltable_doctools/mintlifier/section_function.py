@@ -3,6 +3,8 @@
 import inspect
 from typing import Any
 from docstring_parser import parse as parse_docstring
+
+from .utils import entity_label
 from .page_base import PageBase
 import textwrap
 
@@ -75,10 +77,8 @@ class FunctionSectionGenerator(PageBase):
         if is_udf is None:
             is_udf = self._is_udf(func)
 
-        if is_udf:
-            content += f"## `udf` {func_name}()\n\n"
-        else:
-            content += f"## `{self.default_name}` {func_name}()\n\n"
+        entity_type = "udf" if is_udf else self.default_name
+        content += f"## {entity_label(entity_type)} {func_name}()\n\n"
 
         # Add signature
         content += self._document_signature(func, func_name)
