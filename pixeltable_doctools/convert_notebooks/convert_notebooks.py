@@ -15,6 +15,7 @@ import re
 import shutil
 import subprocess
 import sys
+import textwrap
 from pathlib import Path
 
 from pixeltable_doctools.config import get_mintlify_source_path
@@ -70,17 +71,33 @@ def postprocess_mdx(mdx_file: Path, notebooks_dir: Path) -> None:
     notebook_github_path = f"pixeltable/pixeltable/blob/release/{notebook_rel_path}"
 
     # Generate URLs
-    github_url = f"https://github.com/{notebook_github_path}"
-    kaggle_url = f"https://kaggle.com/kernels/welcome?src={github_url}"
+    kaggle_url = f"https://kaggle.com/kernels/welcome?src=https://github.com/{notebook_github_path}"
     colab_url = f"https://colab.research.google.com/github/{notebook_github_path}"
+    download_url = f"https://raw.githubusercontent.com/pixeltable/pixeltable/refs/tags/release/{notebook_rel_path}"
+
+    def img(src: str, alt: str) -> str:
+        return f'<img src="{src}" alt="{alt}" style={{{{ display: "inline", margin: "0px" }}}} noZoom />'
+
+    def img_link(id: str, href: str, src: str, alt: str) -> str:
+        return f'<a href="{href}" id="{id}">{img(src, alt)}</a>'
+
+    links = [
+        img_link("openKaggle", kaggle_url, "https://kaggle.com/static/images/open-in-kaggle.svg", "Open in Kaggle"),
+        img_link("openColab", colab_url, "https://colab.research.google.com/assets/colab-badge.svg", "Open in Colab"),
+        img_link("downloadNotebook", download_url, "https://img.shields.io/badge/%E2%AC%87-Download%20Notebook-blue", "Download Notebook"),
+    ]
+    # Concatenate links and escape quotes
+    description = "&nbsp;&nbsp;".join(links).replace('"', '\\"')
 
     # Create enhanced frontmatter
-    enhanced_frontmatter = f'''---
-title: "{title}"
-icon: "notebook"
-description: "[Open in Kaggle]({kaggle_url}) | [Open in Colab]({colab_url}) | [View on GitHub]({github_url})"
----
-'''
+    enhanced_frontmatter = f'''
+        ---
+        title: "{title}"
+        icon: "notebook"
+        description: "{description}"
+        ---
+        '''
+    enhanced_frontmatter = textwrap.dedent(enhanced_frontmatter).strip() + '\n'
 
     # We need to prepend './' to links like `data-sharing_files/figure-markdown_strict/cell-7-output-1.png`
     content_after_frontmatter = re.sub(rf'\(({mdx_file.stem}_files/figure-markdown_strict/[^)]*)\)', r'(./\1)', content_after_frontmatter)
