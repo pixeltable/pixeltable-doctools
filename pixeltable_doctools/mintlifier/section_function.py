@@ -520,8 +520,9 @@ class FunctionSectionGenerator(PageBase):
 
                     if example["code"]:
                         # Format the code using ruff for consistent line breaks
+                        formatted_code = self._format_code_with_ruff(example["code"])
                         content += "```python\n"
-                        content += example["code"]
+                        content += formatted_code
                         content += "\n```\n"
 
                     if example["output"]:
