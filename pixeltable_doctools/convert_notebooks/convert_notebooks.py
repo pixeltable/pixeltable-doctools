@@ -81,16 +81,18 @@ def postprocess_mdx(mdx_file: Path, notebooks_dir: Path) -> None:
         img_link("openColab", colab_url, "https://colab.research.google.com/assets/colab-badge.svg", "Open in Colab"),
         img_link("downloadNotebook", download_url, "https://img.shields.io/badge/%E2%AC%87-Download%20Notebook-blue", "Download Notebook"),
     ]
-    # Concatenate links and escape quotes
-    description = "&nbsp;&nbsp;".join(links).replace('"', '\\"')
 
     # Create enhanced frontmatter
     enhanced_frontmatter = f'''
         ---
         title: "{title}"
         icon: "notebook"
-        description: "{description}"
         ---
+        {"&nbsp;&nbsp;".join(links)}
+
+        <Tip>This documentation page is also available as an interactive notebook. You can launch the notebook in
+        Kaggle or Colab, or download it for use with an IDE or local Jupyter installation, by clicking one of the
+        above links.</Tip>
         '''
     enhanced_frontmatter = textwrap.dedent(enhanced_frontmatter).strip() + '\n'
 
