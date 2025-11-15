@@ -3,11 +3,12 @@
 import inspect
 import importlib
 from pathlib import Path
+from types import ModuleType
 from typing import Optional, List, Any
 from .page_base import PageBase
 from docstring_parser import parse as parse_docstring
 from .section_function import FunctionSectionGenerator
-from .utils import entity_label
+from .utils import entity_label, github_link
 
 
 class ModulePageGenerator(PageBase):
@@ -60,14 +61,9 @@ class ModulePageGenerator(PageBase):
         explicit_classes = opml_children if opml_children is not None else self._get_module_children(module)
 
         # Build page content
-        content = self._build_frontmatter(module_path, docstring)
+        content = self._build_frontmatter(module, module_name)
 
         content += f"# {entity_label('module')} {module_path}\n\n"
-
-        # Add GitHub link for the module
-        github_link = self._get_github_link(module)
-        if github_link:
-            content += f'<a href="{github_link}" target="_blank">View source on GitHub</a>\n\n'
 
         if not docstring:
             if self.show_errors:
@@ -444,10 +440,10 @@ class ModulePageGenerator(PageBase):
         content = f"### {name}\n\n"
 
         # Add GitHub link if possible
-        source_func = func.__wrapped__ if hasattr(func, "__wrapped__") else func
-        github_link = self._get_github_link(source_func)
-        if github_link:
-            content += f'<a href="{github_link}" target="_blank">View source on GitHub</a>\n\n'
+        # source_func = func.__wrapped__ if hasattr(func, "__wrapped__") else func
+        # github_url = self._get_github_url(source_func)
+        # if github_url:
+        #     content += f'{github_link(github_url)}\n\n'
 
         # Handle Pixeltable CallableFunction objects
         if hasattr(func, "__class__") and "CallableFunction" in func.__class__.__name__:
@@ -488,16 +484,11 @@ class ModulePageGenerator(PageBase):
 
         return content
 
-    def _build_frontmatter(self, module_path: str, docstring: str) -> str:
+    def _build_frontmatter(self, module: ModuleType, name: str) -> str:
         """Build MDX frontmatter."""
-        parsed = parse_docstring(docstring) if docstring else None
-        description = ""
-        if parsed and parsed.short_description:
-            description = self._escape_yaml(parsed.short_description[:200])
-
-        # Use full module path for title, but just module name for sidebar
-        module_name = module_path.split(".")[-1]
-        return f'---\ntitle: "{module_name}"\nicon: "square-m"\n---\n'
+        github_url = self._get_github_url(module)
+        description = "" if github_url is None else github_link(github_url).replace('"', '\\"')
+        return f'---\ntitle: "{name}"\nicon: "square-m"\ndescription: "{description}"\n---\n'
 
     def _generate_error_page(self, module_path: str, parent_groups: List[str], error: str) -> str:
         """Generate error page when module can't be imported."""

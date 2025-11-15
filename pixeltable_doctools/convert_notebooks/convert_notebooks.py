@@ -19,6 +19,7 @@ import textwrap
 from pathlib import Path
 
 from pixeltable_doctools.config import get_mintlify_source_path
+from pixeltable_doctools.mintlifier.utils import img_link
 
 
 def convert_notebooks() -> None:
@@ -74,12 +75,6 @@ def postprocess_mdx(mdx_file: Path, notebooks_dir: Path) -> None:
     kaggle_url = f"https://kaggle.com/kernels/welcome?src=https://github.com/{notebook_github_path}"
     colab_url = f"https://colab.research.google.com/github/{notebook_github_path}"
     download_url = f"https://raw.githubusercontent.com/pixeltable/pixeltable/refs/tags/release/{notebook_rel_path}"
-
-    def img(src: str, alt: str) -> str:
-        return f'<img src="{src}" alt="{alt}" style={{{{ display: "inline", margin: "0px" }}}} noZoom />'
-
-    def img_link(id: str, href: str, src: str, alt: str) -> str:
-        return f'<a href="{href}" id="{id}">{img(src, alt)}</a>'
 
     links = [
         img_link("openKaggle", kaggle_url, "https://kaggle.com/static/images/open-in-kaggle.svg", "Open in Kaggle"),

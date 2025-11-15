@@ -284,7 +284,7 @@ Documentation for `{name}` is not available.
 
         return type_str
 
-    def _get_github_link(self, obj: Any) -> Optional[str]:
+    def _get_github_url(self, obj: Any) -> Optional[str]:
         """Get GitHub link to source code."""
         try:
             # For modules, use __name__ to get the module path

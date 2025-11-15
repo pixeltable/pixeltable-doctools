@@ -5,7 +5,7 @@ import inspect
 from pathlib import Path
 from typing import Optional, List
 
-from .utils import entity_label
+from .utils import entity_label, github_link
 from .page_base import PageBase
 from docstring_parser import parse as parse_docstring
 from .section_function import FunctionSectionGenerator
@@ -91,23 +91,13 @@ class ClassPageGenerator(PageBase):
 
     def _build_frontmatter(self, cls: type, name: str, full_path: str) -> str:
         """Build MDX frontmatter."""
-        doc = inspect.getdoc(cls)
-        parsed = parse_docstring(doc) if doc else None
-        description = ""
-        if parsed and parsed.short_description:
-            description = self._escape_yaml(parsed.short_description[:200])
-
-        class_name = full_path.split(".")[-1]
-        return f'---\ntitle: "{class_name}"\nicon: "square-c"\n---\n'
+        github_url = self._get_github_url(cls)
+        description = "" if github_url is None else github_link(github_url).replace('"', '\\"')
+        return f'---\ntitle: "{name}"\nicon: "square-c"\ndescription: "{description}"\n---\n'
 
     def _build_class_documentation(self, cls: type, name: str, full_path: str) -> str:
         """Build complete class documentation."""
         content = f"# {entity_label('class')} {full_path}\n\n"
-
-        # Add GitHub link
-        github_link = self._get_github_link(cls)
-        if github_link:
-            content += f'<a href="{github_link}" target="_blank">View source on GitHub</a>\n\n'
 
         # Get docstring
         doc = inspect.getdoc(cls)

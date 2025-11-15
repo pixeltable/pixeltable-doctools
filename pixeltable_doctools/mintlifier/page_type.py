@@ -4,6 +4,8 @@ import inspect
 import importlib
 from pathlib import Path
 from typing import Optional, List
+
+from pixeltable_doctools.mintlifier.utils import github_link
 from .page_base import PageBase
 from docstring_parser import parse as parse_docstring
 
@@ -98,9 +100,9 @@ icon: "circle-t"
 
         # Add GitHub link (may not work for type aliases)
         try:
-            github_link = self._get_github_link(type_cls)
-            if github_link:
-                content += f'<a href="{github_link}" target="_self">View source on GitHub</a>\n\n'
+            github_url = self._get_github_url(type_cls)
+            if github_url:
+                content += f'{github_link(github_url)}\n\n'
         except:
             # Type aliases might not have inspectable source
             pass
