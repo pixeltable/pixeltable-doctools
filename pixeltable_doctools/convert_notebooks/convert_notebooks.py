@@ -41,9 +41,20 @@ def preprocess_notebook(input_path: Path, output_path: Path) -> None:
 
     # We want to convert Jupyter alerts into Mintlify callouts, but Quarto erases the <div> tags during processing.
     # So we guard them with special identifiers that we can replace in postprocessing.
+
+    def replace_alert(match: re.Match) -> str:
+        directive = match.group(3)
+        if directive == 'none':
+            return ''  # Skip this alert entirely
+        elif directive is not None:
+            raise RuntimeError(f"Unknown mdx directive {directive!r} for alert in: {input_path}")
+        alert_type = match.group(1)
+        alert_content = match.group(4)
+        return f'(((BEGIN-alert-{alert_type}))){alert_content}(((END-alert)))'
+
     content = re.sub(
-        r'<div class=\\"alert alert-block alert-([a-z]+)\\">(.*?)</div>',
-        r'(((BEGIN-alert-\1)))\2(((END-alert)))',
+        r'<div class=\\"alert alert-block alert-([a-z]+)\\">(<\!-- mdx:([a-z]+) -->)?(.*?)</div>',
+        replace_alert,
         content,
         flags=re.DOTALL,
     )
@@ -230,6 +241,7 @@ def convert_notebooks_to_dir(repo_root: Path, target_dir: Path) -> None:
 
     print(f"   {len(notebooks)} total notebook(s).")
 
+    print(f"   Preparing notebooks ...")
     notebooks_to_convert: list[Path] = []
     for notebook in notebooks:
         relpath = notebook.relative_to(notebooks_dir)
@@ -272,10 +284,12 @@ def convert_notebooks_to_dir(repo_root: Path, target_dir: Path) -> None:
     print(f"   Successfully converted {len(mdx_files)} notebook(s) to MDX")
 
     # Post-process: Add frontmatter to each MDX file
-    print(f"   Updating frontmatter ...")
-    for mdx_file in mdx_files:
+    print(f"   Postprocessing MDX files ...")
+    for notebook in notebooks_to_convert:
+        relpath = notebook.relative_to(preprocess_dir)
+        mdx_file = output_dir / relpath.with_suffix('.mdx')
         postprocess_mdx(mdx_file, notebooks_dir)
-    print(f"   Updated frontmatter for {len(mdx_files)} file(s)")
+    print(f"   Updated frontmatter for {len(notebooks_to_convert)} file(s)")
 
 
 def main():
