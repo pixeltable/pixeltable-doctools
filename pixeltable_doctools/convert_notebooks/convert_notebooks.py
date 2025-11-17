@@ -168,6 +168,10 @@ def postprocess_mdx(mdx_file: Path, notebooks_dir: Path) -> None:
     # Replace links to docs.pixeltable.com with internal links
     content_after_frontmatter = re.sub(r'\(https?://docs\.pixeltable\.com/([^)]*?)\)', r'(/\1)', content_after_frontmatter)
 
+    # Align table cells
+    content_after_frontmatter = content_after_frontmatter.replace('<td>', '<td style="vertical-align: middle;">')
+    content_after_frontmatter = content_after_frontmatter.replace('<td data-quarto-table-cell-role="th">', '<td style="vertical-align: middle;">')
+
     # Write back with enhanced frontmatter
     mdx_file.write_text(enhanced_frontmatter + content_after_frontmatter, encoding='utf-8')
 
