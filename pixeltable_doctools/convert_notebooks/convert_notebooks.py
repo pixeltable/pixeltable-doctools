@@ -11,6 +11,7 @@ This script:
 
 import argparse
 from glob import glob
+import html
 import re
 import shutil
 import subprocess
@@ -27,6 +28,41 @@ def convert_notebooks() -> None:
     repo_root = find_pixeltable_repo()
     output_dir = get_mintlify_source_path(repo_root) / 'notebooks'
     convert_notebooks_to_dir(repo_root, output_dir)
+
+
+def preprocess_notebook(input_path: Path, output_path: Path) -> None:
+    content = input_path.read_text()
+
+    # For unknown reasons, when Jupyter outputs the results of a Python `print()` statement, it is rendered as
+    # MIME type "text/markdown" (unlike the console output of a statement, which is rendered as "text/html").
+    # This confuses Quarto, so we revert to "text/html" in such cases. This does not appear to have any negative
+    # side effects, at least on the existing documentation base.
+    content = content.replace('"text/markdown"', '"text/html"')
+
+    # We want to convert Jupyter alerts into Mintlify callouts, but Quarto erases the <div> tags during processing.
+    # So we guard them with special identifiers that we can replace in postprocessing.
+
+    def replace_alert(match: re.Match) -> str:
+        directive = match.group(3)
+        if directive == 'none':
+            return ''  # Skip this alert entirely
+        elif directive is not None:
+            raise RuntimeError(f"Unknown mdx directive {directive!r} for alert in: {input_path}")
+        alert_type = match.group(1)
+        alert_content = match.group(4)
+        return f'(((BEGIN-alert-{alert_type}))){alert_content}(((END-alert)))'
+
+    content = re.sub(
+        r'<div class=\\"alert alert-block alert-([a-z]+)\\">(<\!-- mdx:([a-z]+) -->)?(.*?)</div>',
+        replace_alert,
+        content,
+        flags=re.DOTALL,
+    )
+
+    # Similarly, Quarto messes with certain HTML tags that aren't a problem for Mintlify, so we escape them.
+    content = re.sub(r'<(li|/li)>', r'(((HTML-\1)))', content)
+
+    output_path.write_text(content, encoding='utf-8')
 
 
 def postprocess_mdx(mdx_file: Path, notebooks_dir: Path) -> None:
@@ -99,8 +135,62 @@ def postprocess_mdx(mdx_file: Path, notebooks_dir: Path) -> None:
     # We need to prepend './' to links like `data-sharing_files/figure-markdown_strict/cell-7-output-1.png`
     content_after_frontmatter = re.sub(rf'\(({mdx_file.stem}_files/figure-markdown_strict/[^)]*)\)', r'(./\1)', content_after_frontmatter)
 
+    def replace_code_block(match: re.Match) -> str:
+        code_content = match.group(1)
+        # HTML escapes
+        code_content = html.escape(code_content)
+        # Markdown escapes (backticks, braces, brackets)
+        code_content = re.sub(r'([`{}\[\]])', r'\\\1', code_content)
+        # Replace spaces with &nbsp;
+        code_content = code_content.replace(' ', '&nbsp;')
+        return f"<pre style={{{{ 'margin': '-20px 20px 0px 20px', 'padding': '0px', 'background-color': 'transparent', 'color': 'black' }}}}>{code_content}</pre>"
+
+    # Replace ``` text blocks with transparent <pre>
+    content_after_frontmatter = re.sub(
+        r'``` text(.*?)```',
+        replace_code_block,
+        content_after_frontmatter,
+        flags=re.DOTALL,
+    )
+
+    # Now combine consecutive <pre> blocks into one
+    content_after_frontmatter = re.sub(r'</pre>\n\n<pre[^>]*>\n', '', content_after_frontmatter)
+
+    TAG_MAP = {
+        'info': 'Note',
+        'success': 'Check',
+        'warning': 'Warning',
+        'danger': 'Danger',
+    }
+
+    def replace_callout(match: re.Match) -> str:
+        tag = TAG_MAP.get(match.group(1), 'Note')
+        text = match.group(2)
+        return f'<{tag}>\n{text}\n</{tag}>'
+
+    # Replace alert guards with Mintlify callouts
+    content_after_frontmatter = re.sub(
+        r'\(\(\(BEGIN-alert-([a-z]+)\)\)\)(.*?)\(\(\(END-alert\)\)\)',
+        replace_callout,
+        content_after_frontmatter,
+        flags=re.DOTALL,
+    )
+
+    # Replace escaped HTML tags back to normal
+    content_after_frontmatter = re.sub(r'\(\(\(HTML-([a-z/]*)\)\)\)', r'<\1>', content_after_frontmatter)
+
+    # Replace links to docs.pixeltable.com with internal links
+    content_after_frontmatter = re.sub(r'\(https?://docs\.pixeltable\.com/([^)]*?)\)', r'(/\1)', content_after_frontmatter)
+
+    # Align table cells
+    content_after_frontmatter = content_after_frontmatter.replace('<td>', '<td style="vertical-align: middle;">')
+    content_after_frontmatter = content_after_frontmatter.replace('<td data-quarto-table-cell-role="th">', '<td style="vertical-align: middle;">')
+
+    # Fix margins for HTML output cells
+    content_after_frontmatter = content_after_frontmatter.replace('dangerouslySetInnerHTML', "style={{ 'margin': '0px 20px 0px 20px' }} dangerouslySetInnerHTML")
+
     # Write back with enhanced frontmatter
-    mdx_file.write_text(enhanced_frontmatter + content_after_frontmatter)
+    mdx_file.write_text(enhanced_frontmatter + content_after_frontmatter, encoding='utf-8')
 
 
 def find_pixeltable_repo() -> Path:
@@ -124,7 +214,7 @@ def find_pixeltable_repo() -> Path:
     )
 
 
-def convert_notebooks_to_dir(repo_root: Path, output_dir: Path) -> None:
+def convert_notebooks_to_dir(repo_root: Path, target_dir: Path) -> None:
     """
     Convert all notebooks in repo_root/docs/notebooks to MDX format.
 
@@ -132,50 +222,60 @@ def convert_notebooks_to_dir(repo_root: Path, output_dir: Path) -> None:
         repo_root: Path to pixeltable repository root
         output_dir: Where to output the converted .mdx files
     """
+    from pixeltable_doctools.convert_notebooks import convert_notebooks
+
     print("   Converting Jupyter notebooks to Mintlify MDX format...")
-    print(f"   Repository: {repo_root}")
-    print(f"   Output: {output_dir}")
+    print(f"      Repository: {repo_root}")
+    print(f"      Output: {target_dir}")
 
     notebooks_dir = repo_root / 'docs' / 'notebooks'
+    preprocess_dir = target_dir / 'pre-docs' / 'notebooks'
+    output_dir = target_dir / 'docs' / 'notebooks'
+
+    # Check for quarto
+    if not shutil.which('quarto'):
+        raise RuntimeError("Quarto is not installed.")
 
     # Verify source exists
     if not notebooks_dir.exists():
         raise FileNotFoundError(f"Notebooks directory not found: {notebooks_dir}")
 
-    # Check for quarto
-    if not shutil.which('quarto'):
-        raise RuntimeError(
-            "Quarto is not installed."
-        )
-
-    # Count notebooks
+    # Find notebooks
     notebooks = [file for file in notebooks_dir.rglob('*.ipynb') if '.ipynb_checkpoints' not in file.parts]
     if not notebooks:
-        raise RuntimeError(f"   No notebooks found: {notebooks_dir}")
+        raise RuntimeError(f"No notebooks found: {notebooks_dir}")
 
     print(f"   {len(notebooks)} total notebook(s).")
 
+    print(f"   Preparing notebooks ...")
     notebooks_to_convert: list[Path] = []
     for notebook in notebooks:
         relpath = notebook.relative_to(notebooks_dir)
         output_path = output_dir / relpath.with_suffix('.mdx')
         if not output_path.exists() or notebook.stat().st_mtime > output_path.stat().st_mtime:
-            notebooks_to_convert.append(notebook)
+            pre_path = preprocess_dir / relpath
+            pre_path.parent.mkdir(parents=True, exist_ok=True)
+            preprocess_notebook(notebook, pre_path)
+            notebooks_to_convert.append(pre_path)
 
     print(f"   {len(notebooks_to_convert)} notebook(s) need conversion.")
 
     if not notebooks_to_convert:
         return
 
-    print(f"   Running Quarto to convert notebooks...")
-    print(f"      Source: {notebooks_dir}")
+    print(f"   Preparing Quarto configuration ...")
+    quarto_cfg_path = Path(convert_notebooks.__file__).parent / '_quarto.yml'
+    shutil.copy2(quarto_cfg_path, preprocess_dir / '_quarto.yml')
+
+    print(f"   Running Quarto to convert notebooks ...")
+    print(f"      Source: {preprocess_dir}")
     print(f"      Output: {output_dir}")
 
     try:
         # Run quarto render
         subprocess.run(
             ['quarto', 'render', *[str(f) for f in notebooks_to_convert], '--quiet', '--to', 'docusaurus-md', '--output-dir', str(output_dir)],
-            cwd=str(notebooks_dir),
+            cwd=str(preprocess_dir),
             check=True,
             timeout=300  # 5 minute timeout
         )
@@ -185,21 +285,17 @@ def convert_notebooks_to_dir(repo_root: Path, output_dir: Path) -> None:
         print(e.stderr, file=sys.stderr)
         raise
 
-    finally:
-        gitignores = glob(f'{notebooks_dir}/**/.gitignore', recursive=True)
-        for gitignore in gitignores:
-            print(f'   Removing {gitignore} ...')
-            Path(gitignore).unlink()
-
     # Count converted files
     mdx_files = list(output_dir.rglob('*.mdx'))
     print(f"   Successfully converted {len(mdx_files)} notebook(s) to MDX")
 
     # Post-process: Add frontmatter to each MDX file
-    print(f"   Updating frontmatter ...")
-    for mdx_file in mdx_files:
+    print(f"   Postprocessing MDX files ...")
+    for notebook in notebooks_to_convert:
+        relpath = notebook.relative_to(preprocess_dir)
+        mdx_file = output_dir / relpath.with_suffix('.mdx')
         postprocess_mdx(mdx_file, notebooks_dir)
-    print(f"   Updated frontmatter for {len(mdx_files)} file(s)")
+    print(f"   Updated frontmatter for {len(notebooks_to_convert)} file(s)")
 
 
 def main():

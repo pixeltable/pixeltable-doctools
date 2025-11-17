@@ -84,8 +84,10 @@ def build_mintlify(pxt_repo_dir: Path, no_errors: bool = False) -> None:
 
     docs_dir = pxt_repo_dir / 'docs'
     source_dir = docs_dir / 'mintlify'
-    target_dir = pxt_repo_dir / 'target' / 'docs'
     opml_file = docs_dir / 'public_api.opml'
+
+    target_dir = pxt_repo_dir / 'target'
+    output_dir = target_dir / 'docs'
 
     # Verify source exists
     if not source_dir.exists():
@@ -95,27 +97,23 @@ def build_mintlify(pxt_repo_dir: Path, no_errors: bool = False) -> None:
         raise FileNotFoundError(f"OPML file not found: {opml_file}")
 
     # Step 1: Prepare target directory
-    print(f"\nPreparing target directory: {target_dir}")
-    target_dir.mkdir(exist_ok=True, parents=True)
+    print(f"\nPreparing output directory: {output_dir}")
+    output_dir.mkdir(exist_ok=True, parents=True)
 
     # Step 2: Generate notebooks to docs/mintlify/notebooks/
     print(f"\nGenerating notebooks ...")
-    notebooks_output = target_dir / 'notebooks'
-    convert_notebooks_to_dir(pxt_repo_dir, notebooks_output)
-    print(f"\nNotebooks generated to {notebooks_output}")
+    convert_notebooks_to_dir(pxt_repo_dir, target_dir)
 
     # Step 3: Generate changelog to docs/mintlify/changelog/
     print(f"\nGenerating changelog from GitHub releases ...")
-    changelog_output = target_dir / 'changelog'
-    generate_changelog_to_dir(changelog_output)
-    print(f"\nChangelog generated to {changelog_output}")
+    generate_changelog_to_dir(output_dir / 'changelog')
 
     # Step 4: Copy mintlify source to target
-    print(f"\nCopying source files from {source_dir} to {target_dir}")
+    print(f"\nCopying source files from {source_dir} to {output_dir}")
     for item in source_dir.iterdir():
         if item.name.startswith('.'):
             continue  # Skip hidden files
-        dest = target_dir / item.name
+        dest = output_dir / item.name
         if item.is_dir():
             shutil.copytree(item, dest, dirs_exist_ok=True)
         else:
@@ -125,7 +123,7 @@ def build_mintlify(pxt_repo_dir: Path, no_errors: bool = False) -> None:
     # Mintlifier now writes directly to target/docs/sdk/latest and updates target/docs/docs.json
     print(f"\nRunning mintlifier to generate SDK documentation...")
     print(f"   OPML: {opml_file}")
-    print(f"   Output: {target_dir}")
+    print(f"   Output: {output_dir}")
 
     try:
         # Run mintlifier - it writes directly to target
@@ -151,12 +149,12 @@ def build_mintlify(pxt_repo_dir: Path, no_errors: bool = False) -> None:
         raise
 
     print(f"\nDocumentation build complete!")
-    print(f"   Output directory: {target_dir}")
+    print(f"   Output directory: {output_dir}")
 
-    validation_errors = validate_mintlify_docs(target_dir)
+    validation_errors = validate_mintlify_docs(output_dir)
     if validation_errors:
         print(f"\n   Tip: Check the source docstrings for formatting issues", file=sys.stderr)
-        print(f"   Run: cd {target_dir} && npx mintlify dev", file=sys.stderr)
+        print(f"   Run: cd {output_dir} && npx mintlify dev", file=sys.stderr)
         print(f"   to see real-time parsing errors in context", file=sys.stderr)
 
 
