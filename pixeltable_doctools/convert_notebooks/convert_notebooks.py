@@ -143,7 +143,7 @@ def postprocess_mdx(mdx_file: Path, notebooks_dir: Path) -> None:
         code_content = re.sub(r'([{}\[\]])', r'\\\1', code_content)
         # Replace spaces with &nbsp;
         code_content = code_content.replace(' ', '&nbsp;')
-        return f"<pre style={{{{ 'margin': '0px', 'padding': '0px', 'background-color': 'transparent', 'color': 'black' }}}}>{code_content}</pre>"
+        return f"<pre style={{{{ 'margin': '-20px 20px -20px 20px', 'padding': '0px', 'background-color': 'transparent', 'color': 'black' }}}}>{code_content}</pre>"
 
     # Replace ``` text blocks with transparent <pre>
     content_after_frontmatter = re.sub(
