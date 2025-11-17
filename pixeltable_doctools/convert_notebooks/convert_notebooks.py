@@ -139,11 +139,11 @@ def postprocess_mdx(mdx_file: Path, notebooks_dir: Path) -> None:
         code_content = match.group(1)
         # HTML escapes
         code_content = html.escape(code_content)
-        # Replace braces and brackets with markdown escapes
-        code_content = re.sub(r'([{}\[\]])', r'\\\1', code_content)
+        # Markdown escapes (backticks, braces, brackets)
+        code_content = re.sub(r'([`{}\[\]])', r'\\\1', code_content)
         # Replace spaces with &nbsp;
         code_content = code_content.replace(' ', '&nbsp;')
-        return f"<pre style={{{{ 'margin': '-20px 20px -20px 20px', 'padding': '0px', 'background-color': 'transparent', 'color': 'black' }}}}>{code_content}</pre>"
+        return f"<pre style={{{{ 'margin': '-20px 20px 0px 20px', 'padding': '0px', 'background-color': 'transparent', 'color': 'black' }}}}>{code_content}</pre>"
 
     # Replace ``` text blocks with transparent <pre>
     content_after_frontmatter = re.sub(
@@ -152,6 +152,9 @@ def postprocess_mdx(mdx_file: Path, notebooks_dir: Path) -> None:
         content_after_frontmatter,
         flags=re.DOTALL,
     )
+
+    # Now combine consecutive <pre> blocks into one
+    content_after_frontmatter = re.sub(r'</pre>\n\n<pre[^>]*>\n', '', content_after_frontmatter)
 
     TAG_MAP = {
         'info': 'Note',

@@ -205,7 +205,7 @@ def deploy(pxt_version: str, pxt_repo_dir: Path, temp_dir: Path, branch: str) ->
     else:
         print(f"\nThere are no changes to deploy.")
 
-    print(f"\nView at: https://pixeltable-{branch}.mintlify.app/sdk/latest")
+    print(f"\nView at: https://pixeltable-{branch}.mintlify.app/")
 
 
 def deploy_to_prod():
