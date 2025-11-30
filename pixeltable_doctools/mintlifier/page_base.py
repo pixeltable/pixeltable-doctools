@@ -1,10 +1,11 @@
 """Base class for all page generators."""
 
-from docstring_parser.common import Docstring
+from docstring_parser import Docstring, parse as parse_docstring
 import re
 import inspect
 import subprocess
 import tempfile
+import textwrap
 from pathlib import Path
 from typing import Optional, Any, List
 
@@ -501,6 +502,86 @@ Documentation for `{name}` is not available.
             result_lines.append(''.join(parts))
 
         return '\n'.join(result_lines)
+
+    def _document_parameters(self, func: Any, doc: str) -> str:
+        """Document function parameters."""
+        parsed = parse_docstring(doc)
+        if not parsed or not parsed.params:
+            return ""
+
+        content = "**Parameters:**\n\n"
+
+        # Get signature for default values and type annotations
+        params_with_defaults = {}
+        params_with_types = {}
+        try:
+            # For polymorphic functions, document ALL parameter variants
+            if hasattr(func, "is_polymorphic") and func.is_polymorphic and hasattr(func, "signatures"):
+                # Collect all unique parameters from all signatures
+                all_params = {}
+                for sig in func.signatures:
+                    if hasattr(sig, "parameters"):
+                        for param_name, param in sig.parameters.items():
+                            if param_name not in all_params:
+                                # Store first occurrence of each param
+                                all_params[param_name] = param
+                                if hasattr(param, "col_type"):
+                                    params_with_types[param_name] = str(param.col_type)
+                                if hasattr(param, "default") and param.default is not None:
+                                    params_with_defaults[param_name] = param.default
+            # For regular Pixeltable functions, parse the signature string
+            elif hasattr(func, "signature") and func.signature:
+                # Parse signature string like "(audio: Audio) -> Json"
+                sig_str = str(func.signature)
+                # Extract parameters from the string
+                if "(" in sig_str and ")" in sig_str:
+                    params_str = sig_str[sig_str.index("(") + 1 : sig_str.index(")")]
+                    if params_str:
+                        for param in params_str.split(","):
+                            param = param.strip()
+                            if ":" in param:
+                                name, type_str = param.split(":", 1)
+                                params_with_types[name.strip()] = type_str.strip()
+            else:
+                # Standard introspection
+                sig = inspect.signature(func)
+                for param_name, param in sig.parameters.items():
+                    if param.default != inspect.Parameter.empty:
+                        params_with_defaults[param_name] = param.default
+                    if param.annotation != inspect.Parameter.empty:
+                        params_with_types[param_name] = param.annotation
+        except (ValueError, TypeError):
+            pass
+
+        for param in parsed.params:
+            # Format parameter
+            type_str = params_with_types.get(param.arg_name, param.type_name or "Any")
+            # Clean up type strings that break MDX
+            if type_str:
+                import re
+
+                # Convert to string first if it's not already
+                type_str = str(type_str)
+                # Remove <class '...'> format
+                type_str = re.sub(r"<class '([^']+)'>", r"\1", type_str)
+            default = params_with_defaults.get(param.arg_name)
+
+            content += f"- **`{param.arg_name}`** "
+            if type_str:
+                content += f"(`{type_str}`"
+                if default is not None:
+                    content += f", default: `{default!r}`"
+                content += ")"
+
+            # Format description with proper nesting for bullet points
+            if param.description:
+                escaped = self._escape_mdx(param.description)
+                indented = textwrap.indent(escaped, "    ").strip()
+                content += f': {indented}'
+            content += "\n"
+
+        content += "\n"
+        return content
 
     def _escape_mdx(self, text: str) -> str:
         # Handle Sphinx/RST directives

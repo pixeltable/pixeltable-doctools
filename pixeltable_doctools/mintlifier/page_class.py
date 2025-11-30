@@ -102,8 +102,11 @@ class ClassPageGenerator(PageBase):
         # Get docstring
         doc = inspect.getdoc(cls)
         if doc:
-            # Add the full docstring as the class description
-            content += f"\n{self._escape_mdx(doc)}\n\n"
+            parsed = parse_docstring(doc)
+            if parsed.description:
+                content += f"\n{self._escape_mdx(parsed.description)}\n\n"
+            if hasattr(cls, '__init__'):
+                content += self._document_parameters(getattr(cls, '__init__'), doc)
         else:
             if self.show_errors:
                 content += "\n## ⚠️ No Documentation\n\n"
@@ -125,24 +128,14 @@ class ClassPageGenerator(PageBase):
         # Get methods to document
         methods = []
 
-        if self.opml_children:
-            # Only document specified methods
-            for method_name in self.opml_children:
-                if hasattr(cls, method_name):
-                    obj = getattr(cls, method_name)
-                    if inspect.ismethod(obj) or inspect.isfunction(obj):
-                        methods.append((method_name, obj))
-                else:
-                    print(f"        ⚠️ Method {method_name} not found in {full_path}")
-        else:
-            # Document all public methods
-            for name, obj in inspect.getmembers(cls):
-                # Skip private methods except special methods we want to document
-                if name.startswith("_") and name not in ["__call__", "__enter__", "__exit__"]:
-                    continue
+        # Only document specified methods
+        for method_name in self.opml_children:
+            if hasattr(cls, method_name):
+                obj = getattr(cls, method_name)
                 if inspect.ismethod(obj) or inspect.isfunction(obj):
-                    # Skip __init__ per Marcel's feedback
-                    methods.append((name, obj))
+                    methods.append((method_name, obj))
+            else:
+                print(f"        ⚠️ Method {method_name} not found in {full_path}")
 
         if not methods:
             return content
