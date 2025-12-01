@@ -9,8 +9,10 @@ This script:
 4. Outputs to docs/mintlify/notebooks/ preserving directory structure
 """
 
+from io import BytesIO
+import PIL.Image
 import argparse
-from glob import glob
+import base64
 import html
 import re
 import shutil
@@ -188,6 +190,27 @@ def postprocess_mdx(mdx_file: Path, notebooks_dir: Path) -> None:
 
     # Fix margins for HTML output cells
     content_after_frontmatter = content_after_frontmatter.replace('dangerouslySetInnerHTML', "style={{ 'margin': '0px 20px 0px 20px' }} dangerouslySetInnerHTML")
+
+    # Downsample images for smaller markdown file size
+    def replace_image(match: re.Match) -> str:
+        b64_img = match.group(1)
+        width = int(match.group(2))
+
+        img_data = base64.b64decode(b64_img)
+        img = PIL.Image.open(BytesIO(img_data))
+        if img.width > width:
+            resized = img.resize((width, int(img.height * width / img.width)), PIL.Image.LANCZOS)
+            buf = BytesIO()
+            resized.save(buf, format='webp')
+            b64_img = base64.b64encode(buf.getvalue()).decode('utf-8')
+
+        return f'<img\nsrc="data:image/webp;base64,{b64_img}"\nwidth="{width}" />'
+    content_after_frontmatter = re.sub(
+        r'<img\nsrc="data:image/webp;base64,([^"]+)"\nwidth="(\d+)" />',
+        replace_image,
+        content_after_frontmatter,
+        flags=re.MULTILINE,
+    )
 
     # Write back with enhanced frontmatter
     mdx_file.write_text(enhanced_frontmatter + content_after_frontmatter, encoding='utf-8')
