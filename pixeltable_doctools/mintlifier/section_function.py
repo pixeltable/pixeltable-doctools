@@ -1,8 +1,9 @@
 """Generate documentation sections for functions within module pages."""
 
 import inspect
-from typing import Any
 from docstring_parser import Docstring, DocstringMeta, parse as parse_docstring
+from typing import Any, Callable
+from typing_extensions import get_overloads
 
 from .utils import entity_label
 from .page_base import PageBase
@@ -67,8 +68,6 @@ class FunctionSectionGenerator(PageBase):
         Returns:
             Markdown string for the function documentation
         """
-        full_path = f"{module_path}.{func_name}"
-
         # Build section content with elegant visual separation
         content = "\n"
 
@@ -82,26 +81,14 @@ class FunctionSectionGenerator(PageBase):
         # Add signature
         content += self._document_signature(func, func_name)
 
-        # Add description
         doc = inspect.getdoc(func)
         if doc:
             parsed = parse_docstring(doc)
             if parsed.description:
                 content += f"{self._escape_mdx(parsed.description)}\n\n"
-
-        # Add parameters
-        if doc:
             content += self._document_parameters(func, doc)
-
-        # Add returns
-        if doc:
-            parsed = parse_docstring(doc)
             if parsed and parsed.returns:
                 content += self._document_returns(parsed, func)
-
-        # Add examples using docstring_parser
-        if doc:
-            parsed = parse_docstring(doc)
             examples_meta = [m for m in parsed.meta if m.args and "examples" in m.args[0].lower()]
             if examples_meta:
                 content += self._format_examples_from_meta(examples_meta)
@@ -134,15 +121,26 @@ class FunctionSectionGenerator(PageBase):
 
         else:
             # Fall back to standard introspection
-            content += "Signature\n"
-            sig = inspect.signature(func)
-            params = list(sig.parameters.values())
-            if self.default_name == 'method' and params and params[0].name in ('self', 'cls'):
-                params = params[1:]
-                sig = sig.replace(parameters=params)
-            # Format signature with line breaks after commas for readability
-            formatted_sig = self._format_signature(str(sig))
-            content += f"{func_name}{formatted_sig}\n"
+            assert isinstance(func, Callable)
+            overloads = get_overloads(func)
+            if len(overloads) > 1:
+                content += "Signatures\n"
+            else:
+                content += "Signature\n"
+
+            for i, overload_fn in enumerate(overloads or [func], 1):
+                if len(overloads) > 1:
+                    content += f"# Signature {i}:\n"
+                sig = inspect.signature(overload_fn)
+                params = list(sig.parameters.values())
+                if self.default_name == 'method' and params and params[0].name in ('self', 'cls'):
+                    params = params[1:]
+                    sig = sig.replace(parameters=params)
+                # Format signature with line breaks after commas for readability
+                formatted_sig = self._format_signature(str(sig))
+                content += f"{func_name}{formatted_sig}\n"
+                if i < len(overloads):
+                    content += "\n"
 
         content += "```\n\n"
         return content
