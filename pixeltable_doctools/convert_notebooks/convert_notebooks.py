@@ -103,6 +103,9 @@ def postprocess_mdx(mdx_file: Path, notebooks_dir: Path) -> None:
         print(f"⚠️  Could not find original notebook for {mdx_file.name}")
         return
 
+    # Sidebar title
+    sidebar_title = title.removeprefix('Working with ').removeprefix('Using ').removesuffix(' in Pixeltable').removesuffix(' with Pixeltable')
+
     original_notebook = matching_notebooks[0]
     # Get path relative to repo root (not just docs/)
     repo_root = notebooks_dir.parent.parent  # notebooks_dir is repo/docs/notebooks, so parent.parent is repo
@@ -124,6 +127,7 @@ def postprocess_mdx(mdx_file: Path, notebooks_dir: Path) -> None:
     enhanced_frontmatter = f'''
         ---
         title: "{title}"
+        sidebarTitle: "{sidebar_title}"
         icon: "notebook"
         ---
         {"&nbsp;&nbsp;".join(links)}
@@ -251,9 +255,9 @@ def convert_notebooks_to_dir(repo_root: Path, target_dir: Path) -> None:
     print(f"      Repository: {repo_root}")
     print(f"      Output: {target_dir}")
 
-    notebooks_dir = repo_root / 'docs' / 'notebooks'
-    preprocess_dir = target_dir / 'pre-docs' / 'notebooks'
-    output_dir = target_dir / 'docs' / 'notebooks'
+    notebooks_dir = repo_root / 'docs' / 'release'
+    preprocess_dir = target_dir / 'pre-docs'
+    output_dir = target_dir / 'docs'
 
     # Check for quarto
     if not shutil.which('quarto'):
@@ -307,10 +311,6 @@ def convert_notebooks_to_dir(repo_root: Path, target_dir: Path) -> None:
         print(e.stdout, file=sys.stderr)
         print(e.stderr, file=sys.stderr)
         raise
-
-    # Count converted files
-    mdx_files = list(output_dir.rglob('*.mdx'))
-    print(f"   Successfully converted {len(mdx_files)} notebook(s) to MDX")
 
     # Post-process: Add frontmatter to each MDX file
     print(f"   Postprocessing MDX files ...")

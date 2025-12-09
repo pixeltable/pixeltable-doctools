@@ -83,7 +83,7 @@ def build_mintlify(pxt_repo_dir: Path, no_errors: bool = False) -> None:
     print(f"Building docs from repository: {pxt_repo_dir}")
 
     docs_dir = pxt_repo_dir / 'docs'
-    source_dir = docs_dir / 'mintlify'
+    source_dir = docs_dir / 'release'
     opml_file = docs_dir / 'public_api.opml'
 
     target_dir = pxt_repo_dir / 'target'
@@ -111,11 +111,11 @@ def build_mintlify(pxt_repo_dir: Path, no_errors: bool = False) -> None:
     # Step 4: Copy mintlify source to target
     print(f"\nCopying source files from {source_dir} to {output_dir}")
     for item in source_dir.iterdir():
-        if item.name.startswith('.'):
-            continue  # Skip hidden files
+        if item.name.startswith('.') or item.name.endswith('.ipynb'):
+            continue
         dest = output_dir / item.name
         if item.is_dir():
-            shutil.copytree(item, dest, dirs_exist_ok=True)
+            shutil.copytree(item, dest, dirs_exist_ok=True, ignore=shutil.ignore_patterns('.*', '*.ipynb'))
         else:
             shutil.copy2(item, dest)
 
