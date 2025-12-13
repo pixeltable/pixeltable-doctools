@@ -12,6 +12,7 @@ class FunctionSectionGenerator(PageBase):
     """Generate documentation sections for functions within module pages."""
 
     default_name: str
+    entity_type: str
 
     def __init__(self, default_name: str):
         """Initialize the section generator."""
@@ -56,7 +57,7 @@ class FunctionSectionGenerator(PageBase):
             # If we can't get source (built-in, etc.), assume it's not a UDF
             return False
 
-    def generate_section(self, func: Any, func_name: str, module_path: str, is_udf: bool = None) -> str:
+    def generate_section(self, func: Any, func_name: str, module_path: str, entity_type: str | None = None) -> str:
         """Generate function documentation section for inline use.
 
         Args:
@@ -71,11 +72,15 @@ class FunctionSectionGenerator(PageBase):
         # Build section content with elegant visual separation
         content = "\n"
 
-        # Use explicit is_udf if provided, otherwise fall back to detection (deprecated)
-        if is_udf is None:
-            is_udf = self._is_udf(func)
+        # Infer entity type if not provided
+        if entity_type is None:
+            if self._is_udf(func):  # Deprecated path
+                entity_type = "udf"
+            else:
+                entity_type = self.default_name
 
-        entity_type = "udf" if is_udf else self.default_name
+        self.entity_type = entity_type
+
         content += f"## {entity_label(entity_type)} {func_name}()\n\n"
 
         # Add signature
@@ -108,6 +113,7 @@ class FunctionSectionGenerator(PageBase):
             for i, sig in enumerate(func.signatures, 1):
                 if len(func.signatures) > 1:
                     content += f"# Signature {i}:\n"
+                content += "@pxt.udf\n"
                 sig_str = str(sig)
                 # Inject default parameter values into the signature
                 if len(func.signatures) == 1:
@@ -136,6 +142,10 @@ class FunctionSectionGenerator(PageBase):
                 if self.default_name == 'method' and params and params[0].name in ('self', 'cls'):
                     params = params[1:]
                     sig = sig.replace(parameters=params)
+                if self.entity_type == 'iterator':
+                    # Hack: suppress boilerplate return type for iterators
+                    # TODO: When we refactor iterators, this hack can be removed
+                    sig = sig.replace(return_annotation=inspect._empty)
                 # Format signature with line breaks after commas for readability
                 formatted_sig = self._format_signature(str(sig))
                 content += f"{func_name}{formatted_sig}\n"

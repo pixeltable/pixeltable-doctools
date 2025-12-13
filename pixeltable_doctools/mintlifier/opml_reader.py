@@ -133,11 +133,13 @@ class OPMLReader:
                                                 children=class_children,
                                             )
                                         )
-                                    elif child_type in ("func", "udf"):
+                                    elif child_type in ("func", "udf", "iter"):
                                         # Add function name and type to module's children
                                         child_name = child_path.split(".")[-1]
                                         children.append(child_name)
                                         children_types[child_name] = child_type
+                                    else:
+                                        raise ValueError(f"Unknown child type '{child_type}' in module '{module_path}'")
                         elif item_type == "class":
                             # For standalone classes, collect their method children
                             children = []

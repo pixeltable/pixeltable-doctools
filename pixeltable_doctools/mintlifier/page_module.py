@@ -159,11 +159,11 @@ class ModulePageGenerator(PageBase):
                     content += f"- [{name}](./{name.lower()})\n"
                 content += "\n"
 
-        # Document functions from OPML if available, otherwise auto-discover
         if opml_children and opml_children_types:
             # Use explicit list from OPML
             functions = []
             udfs = []
+            iters = []
 
             for name in opml_children:
                 if not hasattr(module, name):
@@ -172,20 +172,27 @@ class ModulePageGenerator(PageBase):
                 obj = getattr(module, name)
                 func_type = opml_children_types.get(name, "func")
 
-                if func_type == "udf":
-                    udfs.append((name, obj))
-                else:
-                    functions.append((name, obj))
+                match func_type:
+                    case "func":
+                        functions.append((name, obj))
+                    case "iter":
+                        iters.append((name, obj))
+                    case "udf":
+                        udfs.append((name, obj))
+                    case _:
+                        raise AssertionError()
 
-            # Document functions first
             for name, obj in sorted(functions):
-                func_section = self.function_gen.generate_section(obj, name, module_path, is_udf=False)
-                content += func_section
+                section = self.function_gen.generate_section(obj, name, module_path, entity_type=None)
+                content += section
 
-            # Document UDFs second
+            for name, obj in sorted(iters):
+                section = self.function_gen.generate_section(obj, name, module_path, entity_type="iterator")
+                content += section
+
             for name, obj in sorted(udfs):
-                func_section = self.function_gen.generate_section(obj, name, module_path, is_udf=True)
-                content += func_section
+                section = self.function_gen.generate_section(obj, name, module_path, entity_type="udf")
+                content += section
 
             self._generated_functions = []
         else:
@@ -223,7 +230,7 @@ class ModulePageGenerator(PageBase):
                 content += "## UDFs\n\n"
 
                 for name, obj in sorted(functions_to_generate):
-                    func_section = self.function_gen.generate_section(obj, name, module_path, is_udf=None)
+                    func_section = self.function_gen.generate_section(obj, name, module_path)
                     content += func_section
 
                 self._generated_functions = []
