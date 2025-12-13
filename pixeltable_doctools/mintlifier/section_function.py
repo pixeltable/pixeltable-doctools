@@ -113,7 +113,7 @@ class FunctionSectionGenerator(PageBase):
             for i, sig in enumerate(func.signatures, 1):
                 if len(func.signatures) > 1:
                     content += f"# Signature {i}:\n"
-                content += "@pxt.udf\n"
+                content += f"@pxt.{self.entity_type}\n"
                 sig_str = str(sig)
                 # Inject default parameter values into the signature
                 if len(func.signatures) == 1:

@@ -163,6 +163,7 @@ class ModulePageGenerator(PageBase):
             # Use explicit list from OPML
             functions = []
             udfs = []
+            udas = []
             iters = []
 
             for name in opml_children:
@@ -177,6 +178,8 @@ class ModulePageGenerator(PageBase):
                         functions.append((name, obj))
                     case "iter":
                         iters.append((name, obj))
+                    case "uda":
+                        udas.append((name, obj))
                     case "udf":
                         udfs.append((name, obj))
                     case _:
@@ -188,6 +191,10 @@ class ModulePageGenerator(PageBase):
 
             for name, obj in sorted(iters):
                 section = self.function_gen.generate_section(obj, name, module_path, entity_type="iterator")
+                content += section
+
+            for name, obj in sorted(udas):
+                section = self.function_gen.generate_section(obj, name, module_path, entity_type="uda")
                 content += section
 
             for name, obj in sorted(udfs):
