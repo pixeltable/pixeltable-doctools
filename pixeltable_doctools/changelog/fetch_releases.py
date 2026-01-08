@@ -11,6 +11,7 @@ This script:
 
 import json
 import re
+import time
 import urllib.request
 from datetime import datetime
 from pathlib import Path
@@ -30,12 +31,23 @@ def fetch_releases_from_github(repo: str = "pixeltable/pixeltable", max_releases
     """
     url = f"https://api.github.com/repos/{repo}/releases?per_page={max_releases}"
 
-    try:
-        with urllib.request.urlopen(url) as response:
-            releases = json.loads(response.read().decode())
-        return releases
-    except Exception as e:
-        raise RuntimeError(f"Failed to fetch releases from GitHub: {e}")
+    attempt = 0
+    while True:
+        try:
+            with urllib.request.urlopen(url) as response:
+                releases = json.loads(response.read().decode())
+            return releases
+        except Exception as e:
+            # The actual error that we sometimes get is:
+            # urllib.error.HTTPError: HTTP Error 403: rate limit exceeded
+            is_retriable = 'rate limit exceeded' in str(e).lower()
+            if is_retriable and attempt < 3:
+                attempt += 1
+                sleep_time = 2 ** attempt
+                print(f"Retriable error: {e}, sleeping {sleep_time}s before retrying...")
+                time.sleep(sleep_time)
+                continue
+            raise RuntimeError(f"Failed to fetch releases from GitHub: {e}")
 
 
 def linkify_github_mentions(text: str) -> str:
