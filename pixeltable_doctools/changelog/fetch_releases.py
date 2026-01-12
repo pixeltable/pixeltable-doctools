@@ -14,9 +14,10 @@ import re
 import urllib.request
 from datetime import datetime
 from pathlib import Path
+from tenacity import retry, stop_after_attempt, wait_exponential_jitter
 from typing import Any
 
-
+@retry(stop=stop_after_attempt(3), wait=wait_exponential_jitter(initial=3, max=15, jitter=1))
 def fetch_releases_from_github(repo: str = "pixeltable/pixeltable", max_releases: int = 50) -> list[dict[str, Any]]:
     """
     Fetch releases from GitHub API.

@@ -10,6 +10,7 @@ dependencies = [
     "docstring-parser>=0.17.0",
     "griffe>=0.45",
     "nbformat>=5.0",
+    "tenacity>=8.2",
 ]
 
 [project.optional-dependencies]
