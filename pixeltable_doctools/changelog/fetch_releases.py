@@ -173,9 +173,9 @@ description: "Release history and updates for Pixeltable"
 
 Pixeltable is built by a vibrant community of contributors. We're grateful for everyone who has helped make Pixeltable better!
 
-**Want to contribute?** Check out our [Contributing Guide](https://github.com/pixeltable/pixeltable/blob/main/CONTRIBUTING.md) to get started.
+**Want to contribute?** Check out our [Contributing Guide](https://github.com/pixeltable/pixeltable/tree/main?tab=contributing-ov-file#readme) to get started.
 
-**Top Contributors:** View our amazing contributors on [GitHub](https://github.com/pixeltable/pixeltable/graphs/contributors).
+**Top Contributors:** View our top contributors on [GitHub](https://github.com/pixeltable/pixeltable/graphs/contributors).
 
 ---
 
