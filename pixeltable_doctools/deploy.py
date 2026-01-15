@@ -5,6 +5,7 @@ Deploy documentation.
 
 from copy import deepcopy
 import json
+import re
 import shutil
 import subprocess
 import sys
@@ -152,12 +153,21 @@ def deploy(pxt_version: str, pxt_repo_dir: Path, temp_dir: Path, branch: str) ->
     # Copy latest SDK docs twice: as 'latest' and as versioned
     (docs_repo_dir / 'sdk').mkdir(exist_ok=True)
     latest_src = docs_target_dir / 'sdk' / 'latest'
-    for name in ('latest', display_version):
+    for name, noindex in (('latest', False), (display_version, True)):
         dest = docs_repo_dir / 'sdk' / name
         print(f"   Copying latest SDK docs to: {dest}")
         if dest.exists():
             shutil.rmtree(dest)
         shutil.copytree(latest_src, dest)
+        if noindex:
+            print(f"      Adding noindex tags to SDK docs in: {dest}")
+            for mdx_file in dest.rglob('*.mdx'):
+                with open(mdx_file, 'r', encoding='utf-8') as fp:
+                    content = fp.read()
+                # Add noindex to frontmatter for explicit-version SDK docs
+                content = re.sub('---(.*)---', r'---\1noindex: true\n---', content, count=1, flags=re.DOTALL)
+                with open(mdx_file, 'w', encoding='utf-8') as fp:
+                    fp.write(content)
 
     sdk_tab = find_sdk_tab(new_docs_json)
     assert len(sdk_tab['dropdowns']) == 1 and sdk_tab['dropdowns'][0]['dropdown'] == "latest"
