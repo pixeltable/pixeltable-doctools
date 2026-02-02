@@ -86,7 +86,11 @@ class FunctionSectionGenerator(PageBase):
         # Add signature
         content += self._document_signature(func, func_name)
 
-        doc = inspect.getdoc(func)
+        if hasattr(func, "call_output_schema"):
+            # 2.0-style iterator
+            doc = inspect.getdoc(func.decorated_callable)
+        else:
+            doc = inspect.getdoc(func)
         if doc:
             parsed = parse_docstring(doc)
             if parsed.description:
@@ -124,6 +128,17 @@ class FunctionSectionGenerator(PageBase):
                 content += f"{func_name}{formatted_sig}\n"
                 if i < len(func.signatures):
                     content += "\n"
+
+        elif hasattr(func, "call_output_schema"):
+            # 2.0-style iterator
+            content += "Signature\n@pxt.iterator\n"
+            sig = func.signature
+            sig_str = str(sig)
+            sig_str = self._inject_defaults_into_signature(func, sig_str)
+            formatted_sig = self._format_signature(sig_str)
+            # Don't include return type (which currently is always an unhelpful pxt.Json)
+            formatted_sig = formatted_sig.removesuffix(" -> pxt.Json")
+            content += f"{func_name}{formatted_sig}\n"
 
         else:
             # Fall back to standard introspection
@@ -172,6 +187,8 @@ class FunctionSectionGenerator(PageBase):
             actual_func = func
             if hasattr(func, '__wrapped__'):
                 actual_func = func.__wrapped__
+            elif hasattr(func, 'call_output_schema'):
+                actual_func = func.decorated_callable
             elif hasattr(func, 'py_fn'):
                 # Pixeltable UDF pattern - get the original Python function
                 actual_func = func.py_fn
