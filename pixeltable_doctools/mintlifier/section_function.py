@@ -181,99 +181,102 @@ class FunctionSectionGenerator(PageBase):
             Modified signature string with defaults and * separator
             (e.g., "(audio: Audio, *, model: str = 'whisper-1') -> Json")
         """
-        try:
-            # For UDFs and decorated functions, inspect.signature may return wrapper signature
-            # Try to get the actual signature if available
-            actual_func = func
-            if hasattr(func, '__wrapped__'):
-                actual_func = func.__wrapped__
-            elif hasattr(func, 'call_output_schema'):
-                actual_func = func.decorated_callable
-            elif hasattr(func, 'py_fn'):
-                # Pixeltable UDF pattern - get the original Python function
-                actual_func = func.py_fn
+        # For UDFs and decorated functions, inspect.signature may return wrapper signature
+        # Try to get the actual signature if available
+        actual_func = func
+        if hasattr(func, '__wrapped__'):
+            actual_func = func.__wrapped__
+        elif hasattr(func, 'call_output_schema'):
+            actual_func = func.decorated_callable
+        elif hasattr(func, 'py_fn'):
+            # Pixeltable UDF pattern - get the original Python function
+            actual_func = func.py_fn
 
-            # Use inspect.signature to get actual parameter information
-            sig = inspect.signature(actual_func)
+        # Use inspect.signature to get actual parameter information
+        sig = inspect.signature(actual_func)
 
-            # Extract the parameters part from the signature string
-            if "(" not in sig_str or ")" not in sig_str:
-                return sig_str
+        assert "(" in sig_str and ")" in sig_str
 
-            # Find return type annotation
-            return_type = ""
-            if "->" in sig_str:
-                return_type = sig_str[sig_str.rindex("->"):]
-                sig_str = sig_str[:sig_str.rindex("->")].strip()
+        # Find return type annotation
+        return_type = ""
+        if "->" in sig_str:
+            return_type = sig_str[sig_str.rindex("->"):]
+            sig_str = sig_str[:sig_str.rindex("->")].strip()
 
-            # Extract parameter section
-            params_start = sig_str.index("(")
-            params_end = sig_str.rindex(")")
-            params_str = sig_str[params_start + 1:params_end].strip()
+        # Extract parameter section
+        params_start = sig_str.index("(")
+        params_end = sig_str.rindex(")")
+        params_str = sig_str[params_start + 1:params_end].strip()
 
-            if not params_str:
-                return sig_str + (" " + return_type if return_type else "")
+        if len(params_str) == 0:
+            return sig_str + (" " + return_type if return_type else "")
 
-            # Parse existing parameters from the signature string to preserve type annotations
-            # Map parameter name -> type annotation string
-            param_types = {}
-            for param_str in params_str.split(","):
-                param_str = param_str.strip()
-                if not param_str or param_str == "*":
-                    continue
+        # Parse existing parameters from the signature string to preserve type annotations
+        # Map parameter name -> type annotation string
+        param_types = {}
+        for param_str in params_str.split(","):
+            param_str = param_str.strip()
+            if not param_str or param_str == "*":
+                continue
 
-                if ":" in param_str:
-                    param_name = param_str.split(":")[0].strip()
-                    param_type = param_str.split(":", 1)[1].strip()
-                    param_types[param_name] = param_type
-                else:
-                    param_name = param_str.strip()
-                    param_types[param_name] = None
+            if ":" in param_str:
+                param_name = param_str.split(":")[0].strip()
+                param_type = param_str.split(":", 1)[1].strip()
+                param_types[param_name] = param_type
+            else:
+                param_name = param_str.strip()
+                param_types[param_name] = None
 
-            # Reconstruct signature using inspect.signature parameter order and kinds
-            param_parts = []
-            seen_keyword_only = False
-            matched_params = 0
+        # Reconstruct signature using inspect.signature parameter order and kinds
+        param_parts = []
+        seen_keyword_only = False
+        matched_params = 0
 
-            for param_name, param in sig.parameters.items():
-                # Skip if this parameter is not in the original signature string
-                if param_name not in param_types:
-                    continue
+        for param_name, param in sig.parameters.items():
+            if param_name == '_runtime_ctx':
+                continue
 
-                matched_params += 1
+            assert (
+                param_name in param_types or param.kind in (inspect.Parameter.VAR_POSITIONAL, inspect.Parameter.VAR_KEYWORD)
+            ), f'{sig_str}: {param_name} not in {param_types}'
 
-                # Insert * separator before first keyword-only parameter
-                if param.kind == inspect.Parameter.KEYWORD_ONLY and not seen_keyword_only:
-                    param_parts.append("*")
-                    seen_keyword_only = True
+            # Skip if this parameter is not in the original signature string
+            matched_params += 1
 
-                # Build parameter string with type annotation
+            # Insert * separator before first keyword-only parameter
+            if param.kind == inspect.Parameter.KEYWORD_ONLY and not seen_keyword_only:
+                param_parts.append("*")
+                seen_keyword_only = True
+
+            # Build parameter string with type annotation
+            if param.kind == inspect.Parameter.VAR_POSITIONAL:
+                param_str = f"*{param_name}"
+            elif param.kind == inspect.Parameter.VAR_KEYWORD:
+                param_str = f"**{param_name}"
+            else:
                 param_str = param_name
-                if param_types[param_name]:
-                    param_str += f": {param_types[param_name]}"
 
-                # Add default value if present
-                if param.default != inspect.Parameter.empty:
-                    param_str += f" = {param.default!r}"
+            if param_types.get(param_name):
+                param_str += f": {param_types[param_name]}"
 
-                param_parts.append(param_str)
+            # Add default value if present
+            if param.default != inspect.Parameter.empty:
+                param_str += f" = {param.default!r}"
 
-            # If we couldn't match any parameters, return original signature
-            # This happens when inspect.signature returns decorator wrapper params
-            if matched_params == 0:
-                return f"({params_str})" + (" " + return_type if return_type else "")
+            param_parts.append(param_str)
 
-            # Reconstruct the signature
-            new_params_str = ", ".join(param_parts)
-            result = f"({new_params_str})"
-            if return_type:
-                result += " " + return_type
+        # If we couldn't match any parameters, return original signature
+        # This happens when inspect.signature returns decorator wrapper params
+        if matched_params == 0:
+            return f"({params_str})" + (" " + return_type if return_type else "")
 
-            return result
+        # Reconstruct the signature
+        new_params_str = ", ".join(param_parts)
+        result = f"({new_params_str})"
+        if return_type:
+            result += " " + return_type
 
-        except (ValueError, TypeError, AttributeError):
-            # If anything goes wrong, return original signature
-            return sig_str
+        return result
 
     def _wrap_code_line(self, line: str) -> str:
         """Wrap code lines beautifully at logical break points."""
