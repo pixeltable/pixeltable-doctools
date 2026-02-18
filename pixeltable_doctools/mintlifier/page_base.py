@@ -615,9 +615,13 @@ Documentation for `{name}` is not available.
                     target_page = f'{components[-2]}#method-{components[-1]}'
                 else:
                     # Module function link
-                    # TODO: Could be a UDF
-                    target_page = f'{components[-2]}#func-{components[-1]}'
-            target_page = target_page.lower().replace("_", "-")
+                    # TODO: Could be a UDF or iterator - this is a total hack; we need a principled way of
+                    #     determining the type of each object to generate correct links
+                    if components[-1].endswith("_iterator") or components[-1].endswith("_splitter"):
+                        target_page = f'{components[-2]}#iterator-{components[-1]}'
+                    else:
+                        target_page = f'{components[-2]}#func-{components[-1]}'
+            target_page = target_page.lower()
             # TODO: Proper version links
             return f'[{link_text}](./{target_page})'
 
