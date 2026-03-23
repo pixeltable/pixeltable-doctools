@@ -83,8 +83,7 @@ def postprocess_mdx(mdx_file: Path, notebooks_dir: Path) -> None:
     # Extract existing frontmatter
     frontmatter_match = re.match(r'^---\n(.*?)\n---\n', content, re.DOTALL)
     if not frontmatter_match:
-        print(f"⚠️  No frontmatter found in {mdx_file.name}, skipping")
-        return
+        raise RuntimeError(f"No frontmatter found: {mdx_file.name}")
 
     existing_frontmatter = frontmatter_match.group(1)
     content_after_frontmatter = content[frontmatter_match.end():]
@@ -92,16 +91,14 @@ def postprocess_mdx(mdx_file: Path, notebooks_dir: Path) -> None:
     # Extract title from existing frontmatter
     title_match = re.search(r'^title:\s*(.+)$', existing_frontmatter, re.MULTILINE)
     if not title_match:
-        print(f"⚠️  No title in frontmatter for {mdx_file.name}, skipping")
-        return
+        raise RuntimeError(f"No title in frontmatter: {mdx_file.name}")
 
     title = title_match.group(1).strip().strip('"')
 
     # Try to find matching notebook in notebooks_dir
     matching_notebooks = list(notebooks_dir.rglob(f'{mdx_file.stem}.ipynb'))
     if not matching_notebooks:
-        print(f"⚠️  Could not find original notebook for {mdx_file.name}")
-        return
+        raise RuntimeError(f"Could locate original notebook: {mdx_file.name}")
 
     # Sidebar title
     sidebar_title = title.removeprefix('Working with ').removeprefix('Using ').removesuffix(' in Pixeltable').removesuffix(' with Pixeltable')
