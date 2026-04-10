@@ -158,6 +158,14 @@ class ClassPageGenerator(PageBase):
         """Document all attributes (properties, fields, etc.) in a unified section."""
         import dataclasses
 
+        # We currently only do this for dataclasses and TypedDicts.
+        # TODO: Allow for any classes via public_api.opml?
+        #     (Right now this ignores public_api.opml, so if we turn it on for all classes, it would
+        #     pull in a whole bunch of non-public members.)
+
+        if not (type(cls).__name__ == "_TypedDictMeta" or dataclasses.is_dataclass(cls)):
+            return ""
+
         content = ""
         all_attributes = []
 
@@ -170,22 +178,6 @@ class ClassPageGenerator(PageBase):
                 doc = inspect.getdoc(obj.fget)
                 attr_type = inspect.get_annotations(obj.fget).get('return', 'Any')
                 all_attributes.append((name, attr_type, doc, ""))
-
-        # # Collect dataclass fields if applicable
-        # if dataclasses.is_dataclass(cls):
-        #     for field in dataclasses.fields(cls):
-        #         if not field.name.startswith("_"):
-        #             # Try to get field documentation from class docstring
-        #             field_doc = self._extract_field_doc(cls, field.name)
-        #             field_type = self._format_type(field.type) if field.type else "Any"
-        #             default = (
-        #                 field.default
-        #                 if field.default != dataclasses.MISSING
-        #                 else field.default_factory
-        #                 if field.default_factory != dataclasses.MISSING
-        #                 else None
-        #             )
-        #             all_attributes.append((field.name, f"field: {field_type}", field_doc, default))
 
         # Collect TypedDict fields
         if type(cls).__name__ == "_TypedDictMeta":
@@ -210,9 +202,6 @@ class ClassPageGenerator(PageBase):
         #             type_str = self._format_type(types.get(field_name, "Any"))
         #             default = defaults.get(field_name)
         #             all_attributes.append((field_name, f"field: {type_str}", field_doc, default))
-
-        if not all_attributes:
-            return content
 
         for attr_name, attr_type, doc, prefix in sorted(all_attributes):
 
