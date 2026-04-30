@@ -1,6 +1,7 @@
 """Class documentation page generator."""
 
 import griffe
+import importlib
 import inspect
 from pathlib import Path
 from typing import Optional, List
@@ -61,8 +62,6 @@ class ClassPageGenerator(PageBase):
 
         # Import and get class
         try:
-            import importlib
-
             module = importlib.import_module(module_path)
             if not hasattr(module, class_name):
                 return self._generate_error_page(

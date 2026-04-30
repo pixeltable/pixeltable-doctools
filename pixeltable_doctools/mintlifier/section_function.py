@@ -406,16 +406,8 @@ class FunctionSectionGenerator(PageBase):
                         if next_line.startswith(">>>"):
                             # Another >>> immediately after - continue same example
                             pass
-                        elif next_line == "":
-                            # Double blank line - end of example
-                            in_code = False
-                            if code_lines:
-                                current_example["code"] = "\n".join(code_lines)
-                                examples.append(current_example)
-                                current_example = {"description": "", "code": "", "output": ""}
-                                code_lines = []
                         else:
-                            # Text after blank line - end of code block
+                            # Anything else - end of code block
                             in_code = False
                             if code_lines:
                                 current_example["code"] = "\n".join(code_lines)
@@ -435,19 +427,19 @@ class FunctionSectionGenerator(PageBase):
                         current_example = {"description": "", "code": "", "output": ""}
                         code_lines = []
 
-            # Not in code - this is descriptive text
-            elif line.strip():
-                # Add to description
+            else:
+                # Not in code - this is descriptive text
                 if current_example["description"]:
-                    current_example["description"] += " "
-                current_example["description"] += line.strip()
+                    current_example["description"] += "\n"
+                current_example["description"] += line
 
             i += 1
 
         # Don't forget the last example
         if code_lines:
             current_example["code"] = "\n".join(code_lines)
-            examples.append(current_example)
+
+        examples.append(current_example)
 
         # Filter out empty examples
         examples = [ex for ex in examples if ex["code"] or ex["description"]]
