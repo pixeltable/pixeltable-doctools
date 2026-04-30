@@ -153,6 +153,37 @@ class PageBase:
 
         return sig_str
 
+    def _format_code_blocks(self, content: str) -> str:
+        """Format code blocks in the content with proper markdown and line wrapping."""
+        in_code_block = False
+        formatted_text = []
+        code_lines = []
+
+        def emit_code_block() -> None:
+            assert in_code_block
+            assert len(code_lines) > 0
+            code_block = "\n".join(code_lines)
+            formatted_code_block = self._format_code_with_ruff(code_block)
+            formatted_text.append(f'```python\n{formatted_code_block}\n```')
+
+        for line in content.split("\n"):
+            stripped = line.strip()
+            if stripped.startswith('>>>'):
+                in_code_block = True
+            if in_code_block:
+                if stripped.startswith('>>>') or stripped.startswith('...'):
+                    code_lines.append(stripped[4:])
+                else:
+                    emit_code_block()
+                    in_code_block = False
+            if not in_code_block:
+                formatted_text.append(line)
+
+        if in_code_block:
+            emit_code_block()
+
+        return "\n".join(formatted_text)
+
     def _format_code_with_ruff(self, code: str) -> str:
         """Format a code snippet using ruff.
 

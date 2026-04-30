@@ -71,7 +71,8 @@ class ModulePageGenerator(PageBase):
                 content += f"<Warning>\nDocumentation for `{module_path}` is not available.\n</Warning>\n\n"
         else:
             # Add the full docstring as the module description
-            content += f"\n{self._escape_mdx(docstring)}\n\n"
+            formatted_docstring = self._escape_mdx(self._format_code_blocks(docstring))
+            content += f"\n{formatted_docstring}\n\n"
 
         # Store parent groups for use in child generation
         self.current_parent_groups = parent_groups
