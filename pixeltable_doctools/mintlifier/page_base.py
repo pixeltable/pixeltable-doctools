@@ -165,6 +165,7 @@ class PageBase:
             code_block = "\n".join(code_lines)
             formatted_code_block = self._format_code_with_ruff(code_block)
             formatted_text.append(f'```python\n{formatted_code_block}\n```')
+            code_lines.clear()
 
         for line in content.split("\n"):
             stripped = line.strip()
