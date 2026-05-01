@@ -94,7 +94,8 @@ class FunctionSectionGenerator(PageBase):
         if doc:
             parsed = parse_docstring(doc)
             if parsed.description:
-                content += f"{self._escape_mdx(parsed.description)}\n\n"
+                formatted_description = self._escape_mdx(self._format_code_blocks(parsed.description))
+                content += f"{formatted_description}\n\n"
             content += self._document_parameters(func, doc)
             if parsed and parsed.returns:
                 content += self._document_returns(parsed, func)
