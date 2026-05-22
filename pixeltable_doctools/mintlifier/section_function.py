@@ -119,7 +119,7 @@ class FunctionSectionGenerator(PageBase):
                 if len(func.signatures) > 1:
                     content += f"# Signature {i}:\n"
                 content += f"@pxt.{self.entity_type}\n"
-                sig_str = str(sig)
+                sig_str = sig._to_str(pretty_print_json=True)
                 # Inject default parameter values into the signature
                 if len(func.signatures) == 1:
                     # TODO: Defaults for polymorphic fns
@@ -134,7 +134,7 @@ class FunctionSectionGenerator(PageBase):
             # 2.0-style iterator
             content += "Signature\n@pxt.iterator\n"
             sig = func.signature
-            sig_str = str(sig)
+            sig_str = sig._to_str(pretty_print_json=True)
             sig_str = self._inject_defaults_into_signature(func, sig_str)
             formatted_sig = self._format_signature(sig_str)
             # Don't include return type (which currently is always an unhelpful pxt.Json)

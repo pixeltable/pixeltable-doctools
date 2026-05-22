@@ -761,25 +761,16 @@ Documentation for `{name}` is not available.
         Returns:
             Return type string, or None if not found
         """
-        try:
-            # For polymorphic functions, extract from first signature
-            if hasattr(func, "is_polymorphic") and func.is_polymorphic:
-                if hasattr(func, "signatures") and func.signatures:
-                    sig = func.signatures[0]
-                    sig_str = str(sig)
-                    if "->" in sig_str:
-                        return sig_str.split("->")[-1].strip()
-            # For Pixeltable CallableFunction with signature string
-            elif hasattr(func, "signature") and func.signature:
-                sig_str = str(func.signature)
-                if "->" in sig_str:
-                    return sig_str.split("->")[-1].strip()
-            # For standard Python functions
-            else:
-                sig = inspect.signature(func)
-                if sig.return_annotation != inspect.Signature.empty:
-                    return str(sig.return_annotation)
-        except (ValueError, TypeError, AttributeError):
-            pass
+        if hasattr(func, "signatures"):
+            # Pixeltable UDF; use first signature if polymorphic
+            sig = func.signatures[0]
+            sig_str = sig._to_str(pretty_print_json=True)
+            if "->" in sig_str:
+                return sig_str.split("->")[-1].strip()
+        else:
+            # Standard Python functions
+            sig = inspect.signature(func)
+            if sig.return_annotation != inspect.Signature.empty:
+                return str(sig.return_annotation)
 
         return None
