@@ -365,37 +365,6 @@ Documentation for `{name}` is not available.
         else:
             return f"{name}{formatted}"
 
-    def _split_parameters(self, params_str: str) -> List[str]:
-        """Split parameter string handling nested brackets."""
-        params = []
-        current = []
-        depth = 0
-        in_string = False
-        quote_char = None
-
-        for char in params_str:
-            if not in_string:
-                if char in "\"'":
-                    quote_char = char
-                    in_string = True
-                elif char in "([{":
-                    depth += 1
-                elif char in ")]}":
-                    depth -= 1
-                elif char == "," and depth == 0:
-                    params.append("".join(current).strip())
-                    current = []
-                    continue
-            elif char == quote_char and (not current or current[-1] != "\\"):
-                in_string = False
-
-            current.append(char)
-
-        if current:
-            params.append("".join(current).strip())
-
-        return params
-
     def _escape_braces_outside_code(self, text: str) -> str:
         """Escape curly braces in text, but preserve them inside code blocks and inline code.
 

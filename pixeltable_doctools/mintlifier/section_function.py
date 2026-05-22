@@ -215,7 +215,7 @@ class FunctionSectionGenerator(PageBase):
         # Parse existing parameters from the signature string to preserve type annotations
         # Map parameter name -> type annotation string
         param_types = {}
-        for param_str in params_str.split(","):
+        for param_str in self._split_params(params_str):
             param_str = param_str.strip()
             if not param_str or param_str == "*":
                 continue
