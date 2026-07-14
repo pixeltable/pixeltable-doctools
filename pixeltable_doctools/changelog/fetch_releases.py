@@ -84,6 +84,32 @@ def shorten_pr_links(text: str) -> str:
     return re.sub(pattern, replacement, text)
 
 
+def _escape_empty_mdx_fragments(text: str) -> str:
+    """Escape MDX's empty-fragment token in Markdown prose while preserving code."""
+    parts: list[str] = []
+    in_code_block = False
+    in_inline_code = False
+    i = 0
+
+    while i < len(text):
+        if text.startswith("```", i):
+            in_code_block = not in_code_block
+            parts.append("```")
+            i += 3
+        elif not in_code_block and text[i] == "`":
+            in_inline_code = not in_inline_code
+            parts.append("`")
+            i += 1
+        elif not in_code_block and not in_inline_code and text.startswith("<>", i):
+            parts.append("&lt;&gt;")
+            i += 2
+        else:
+            parts.append(text[i])
+            i += 1
+
+    return "".join(parts)
+
+
 def convert_release_to_mdx(release: dict[str, Any]) -> str:
     """
     Convert a GitHub release to Mintlify MDX format.
@@ -99,7 +125,7 @@ def convert_release_to_mdx(release: dict[str, Any]) -> str:
     published_at = release.get('published_at', '')
     author = release.get('author', {}).get('login', 'Unknown')
     html_url = release.get('html_url', '')
-    body = release.get('body', '').strip()
+    body = _escape_empty_mdx_fragments(release.get('body', '').strip())
 
     # Parse date
     if published_at:
@@ -226,6 +252,9 @@ For the latest release information, visit our [GitHub Releases page](https://git
 
         # Shorten PR links to just show #number as clickable links
         body_formatted = shorten_pr_links(body_formatted)
+
+        # A raw <> is an empty JSX fragment in MDX and must not appear in prose.
+        body_formatted = _escape_empty_mdx_fragments(body_formatted)
 
         changelog_content += f"{body_formatted}\n\n"
         changelog_content += "---\n\n"
