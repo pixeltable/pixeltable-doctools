@@ -8,20 +8,22 @@ from pixeltable_doctools.changelog import fetch_releases
 def test_escape_empty_mdx_fragments_preserves_code() -> None:
     text = """Proxy tables: import_<>()
 `inline_<>()`
-```python
+``inline_`<>()``
+````python
 def fenced_<>() -> None:
     pass
-```
+````
 """
 
     assert (
         fetch_releases._escape_empty_mdx_fragments(text)
         == """Proxy tables: import_&lt;&gt;()
 `inline_<>()`
-```python
+``inline_`<>()``
+````python
 def fenced_<>() -> None:
     pass
-```
+````
 """
     )
 

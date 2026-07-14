@@ -87,20 +87,30 @@ def shorten_pr_links(text: str) -> str:
 def _escape_empty_mdx_fragments(text: str) -> str:
     """Escape MDX's empty-fragment token in Markdown prose while preserving code."""
     parts: list[str] = []
-    in_code_block = False
-    in_inline_code = False
+    code_block_delimiter: int | None = None
+    inline_code_delimiter: int | None = None
     i = 0
 
     while i < len(text):
-        if text.startswith("```", i):
-            in_code_block = not in_code_block
-            parts.append("```")
-            i += 3
-        elif not in_code_block and text[i] == "`":
-            in_inline_code = not in_inline_code
-            parts.append("`")
-            i += 1
-        elif not in_code_block and not in_inline_code and text.startswith("<>", i):
+        if text[i] == "`":
+            run_end = i + 1
+            while run_end < len(text) and text[run_end] == "`":
+                run_end += 1
+            run_length = run_end - i
+
+            if code_block_delimiter is not None and run_length >= code_block_delimiter:
+                code_block_delimiter = None
+            elif code_block_delimiter is None and inline_code_delimiter == run_length:
+                inline_code_delimiter = None
+            elif code_block_delimiter is None and inline_code_delimiter is None:
+                if run_length >= 3:
+                    code_block_delimiter = run_length
+                else:
+                    inline_code_delimiter = run_length
+
+            parts.append(text[i:run_end])
+            i = run_end
+        elif code_block_delimiter is None and inline_code_delimiter is None and text.startswith("<>", i):
             parts.append("&lt;&gt;")
             i += 2
         else:
