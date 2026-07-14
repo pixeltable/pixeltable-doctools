@@ -221,6 +221,9 @@ For the latest release information, visit our [GitHub Releases page](https://git
         if body_formatted.startswith('## '):
             body_formatted = '#### ' + body_formatted[3:]
 
+        # Escape angle brackets
+        body_formatted = body_formatted.replace('<', r'\<').replace('>', r'\>')
+
         # Linkify @username mentions to GitHub profiles
         body_formatted = linkify_github_mentions(body_formatted)
 
