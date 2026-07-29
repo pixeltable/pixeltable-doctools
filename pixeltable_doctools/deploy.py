@@ -22,7 +22,7 @@ from pixeltable_doctools.mintlifier.docsjson_updater import DocsJsonUpdater
 def find_sdk_tab(docs: dict[str, Any]) -> dict[str, Any]:
     if 'navigation' in docs and 'tabs' in docs['navigation']:
         for tab in docs['navigation']['tabs']:
-            if tab.get('tab') == 'Pixeltable SDK':
+            if tab.get('tab') == 'Python SDK':
                 return tab
     return None
 

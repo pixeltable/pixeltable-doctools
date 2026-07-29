@@ -11,7 +11,7 @@ config = {
     "github_repo": "pixeltable/pixeltable",
     "github_package_path": "pixeltable",
     # Mintlify SDK tab name
-    "sdk_tab": "Pixeltable SDK",
+    "sdk_tab": "Python SDK",
     # Display errors in generated docs (can be overridden with --no-errors flag)
     "show_errors": True,
     # Internal/runtime classes injected into modules that should never be documented
