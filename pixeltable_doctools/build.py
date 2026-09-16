@@ -8,6 +8,7 @@ This script:
 3. Results in a complete, deployable documentation site
 """
 
+import argparse
 import shutil
 import subprocess
 import sys
@@ -76,7 +77,7 @@ def validate_mintlify_docs(target_dir: Path) -> list[str]:
     return errors
 
 
-def build_mintlify(pxt_repo_dir: Path, no_errors: bool = False) -> None:
+def build_mintlify(pxt_repo_dir: Path, no_errors: bool = False, no_changelog: bool = False) -> None:
     """
     Build Mintlify documentation site.
     """
@@ -105,8 +106,11 @@ def build_mintlify(pxt_repo_dir: Path, no_errors: bool = False) -> None:
     convert_notebooks_to_dir(pxt_repo_dir, target_dir)
 
     # Step 3: Generate changelog to docs/mintlify/changelog/
-    print(f"\nGenerating changelog from GitHub releases ...")
-    generate_changelog_to_dir(output_dir / 'changelog')
+    if no_changelog:
+        print(f"\nSkipping changelog generation.")
+    else:
+        print(f"\nGenerating changelog from GitHub releases ...")
+        generate_changelog_to_dir(output_dir / 'changelog')
 
     # Step 4: Copy mintlify source to target
     print(f"\nCopying source files from {source_dir} to {output_dir}")
@@ -160,6 +164,11 @@ def build_mintlify(pxt_repo_dir: Path, no_errors: bool = False) -> None:
 
 def main():
     """Main entry point."""
+    parser = argparse.ArgumentParser(add_help=False)
+    parser.add_argument("--no-errors", action="store_true")
+    parser.add_argument("--no-changelog", action="store_true", help="Skip changelog generation")
+    args = parser.parse_args()
+
     try:
         import pixeltable as pxt
 
@@ -173,7 +182,7 @@ def main():
         print(f"Error: Please run this script from the pixeltable repository root.")
         sys.exit(1)
 
-    build_mintlify(pxt_repo_dir)
+    build_mintlify(pxt_repo_dir, no_errors=args.no_errors, no_changelog=args.no_changelog)
 
 
 if __name__ == '__main__':
