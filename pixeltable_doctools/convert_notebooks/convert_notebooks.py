@@ -67,7 +67,7 @@ def preprocess_notebook(input_path: Path, output_path: Path) -> None:
     output_path.write_text(content, encoding='utf-8')
 
 
-def postprocess_mdx(mdx_file: Path, notebooks_dir: Path) -> None:
+def postprocess_mdx(mdx_file: Path, notebooks_dir: Path, notebook_ref: str = 'release') -> None:
     """
     Post-process MDX file to enhance frontmatter with links.
 
@@ -107,12 +107,12 @@ def postprocess_mdx(mdx_file: Path, notebooks_dir: Path) -> None:
     # Get path relative to repo root (not just docs/)
     repo_root = notebooks_dir.parent.parent  # notebooks_dir is repo/docs/notebooks, so parent.parent is repo
     notebook_rel_path = original_notebook.relative_to(repo_root)
-    notebook_github_path = f"pixeltable/pixeltable/blob/release/{notebook_rel_path}"
+    notebook_github_path = f"pixeltable/pixeltable/blob/{notebook_ref}/{notebook_rel_path}"
 
     # Generate URLs
     kaggle_url = f"https://kaggle.com/kernels/welcome?src=https://github.com/{notebook_github_path}"
     colab_url = f"https://colab.research.google.com/github/{notebook_github_path}"
-    download_url = f"https://raw.githubusercontent.com/pixeltable/pixeltable/refs/tags/release/{notebook_rel_path}"
+    download_url = f"https://raw.githubusercontent.com/pixeltable/pixeltable/{notebook_ref}/{notebook_rel_path}"
 
     links = [
         img_link("openKaggle", kaggle_url, "https://kaggle.com/static/images/open-in-kaggle.svg", "Open in Kaggle"),
@@ -238,7 +238,7 @@ def find_pixeltable_repo() -> Path:
     )
 
 
-def convert_notebooks_to_dir(repo_root: Path, target_dir: Path) -> None:
+def convert_notebooks_to_dir(repo_root: Path, target_dir: Path, notebook_ref: str = 'release') -> None:
     """
     Convert all notebooks in repo_root/docs/notebooks to MDX format.
 
@@ -314,7 +314,7 @@ def convert_notebooks_to_dir(repo_root: Path, target_dir: Path) -> None:
     for notebook in notebooks_to_convert:
         relpath = notebook.relative_to(preprocess_dir)
         mdx_file = output_dir / relpath.with_suffix('.mdx')
-        postprocess_mdx(mdx_file, notebooks_dir)
+        postprocess_mdx(mdx_file, notebooks_dir, notebook_ref)
     print(f"   Updated frontmatter for {len(notebooks_to_convert)} file(s)")
 
 

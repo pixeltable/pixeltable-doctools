@@ -167,6 +167,7 @@ def generate_changelog_to_dir(output_dir: Path, repo: str = "pixeltable/pixeltab
     changelog_content = """---
 title: "Changelog"
 description: "Release history and updates for Pixeltable"
+noindex: true
 ---
 
 ## Contributors
