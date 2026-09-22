@@ -272,11 +272,17 @@ def convert_notebooks_to_dir(repo_root: Path, target_dir: Path, notebook_ref: st
     print(f"   {len(notebooks)} total notebook(s).")
 
     print(f"   Preparing notebooks ...")
+    # The Kaggle, Colab, and download links carry notebook_ref, and only reconverted notebooks are
+    # postprocessed. A ref change therefore has to reconvert every notebook, not only the stale ones.
+    ref_marker = output_dir / '.notebook_ref'
+    ref_changed = not ref_marker.exists() or ref_marker.read_text().strip() != notebook_ref
+    if ref_changed:
+        print(f"   Notebook ref is {notebook_ref!r}; reconverting every notebook so all links carry it.")
     notebooks_to_convert: list[Path] = []
     for notebook in notebooks:
         relpath = notebook.relative_to(notebooks_dir)
         output_path = output_dir / relpath.with_suffix('.mdx')
-        if not output_path.exists() or notebook.stat().st_mtime > output_path.stat().st_mtime:
+        if ref_changed or not output_path.exists() or notebook.stat().st_mtime > output_path.stat().st_mtime:
             pre_path = preprocess_dir / relpath
             pre_path.parent.mkdir(parents=True, exist_ok=True)
             preprocess_notebook(notebook, pre_path)
@@ -316,6 +322,7 @@ def convert_notebooks_to_dir(repo_root: Path, target_dir: Path, notebook_ref: st
         mdx_file = output_dir / relpath.with_suffix('.mdx')
         postprocess_mdx(mdx_file, notebooks_dir, notebook_ref)
     print(f"   Updated frontmatter for {len(notebooks_to_convert)} file(s)")
+    ref_marker.write_text(notebook_ref + '\n')
 
 
 def main():
