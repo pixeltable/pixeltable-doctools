@@ -77,7 +77,9 @@ def validate_mintlify_docs(target_dir: Path) -> list[str]:
     return errors
 
 
-def build_mintlify(pxt_repo_dir: Path, no_errors: bool = False, no_changelog: bool = False) -> None:
+def build_mintlify(
+    pxt_repo_dir: Path, no_errors: bool = False, no_changelog: bool = False, notebook_ref: str = 'release'
+) -> None:
     """
     Build Mintlify documentation site.
     """
@@ -103,7 +105,7 @@ def build_mintlify(pxt_repo_dir: Path, no_errors: bool = False, no_changelog: bo
 
     # Step 2: Generate notebooks to docs/mintlify/notebooks/
     print(f"\nGenerating notebooks ...")
-    convert_notebooks_to_dir(pxt_repo_dir, target_dir)
+    convert_notebooks_to_dir(pxt_repo_dir, target_dir, notebook_ref)
 
     # Step 3: Generate changelog to docs/mintlify/changelog/
     if no_changelog:
@@ -167,6 +169,11 @@ def main():
     parser = argparse.ArgumentParser(add_help=False)
     parser.add_argument("--no-errors", action="store_true")
     parser.add_argument("--no-changelog", action="store_true", help="Skip changelog generation")
+    parser.add_argument(
+        "--notebook-ref",
+        default="release",
+        help="Git ref (tag or branch) that notebook Kaggle, Colab, and download links point at (default: release)",
+    )
     args = parser.parse_args()
 
     try:
@@ -182,7 +189,9 @@ def main():
         print(f"Error: Please run this script from the pixeltable repository root.")
         sys.exit(1)
 
-    build_mintlify(pxt_repo_dir, no_errors=args.no_errors, no_changelog=args.no_changelog)
+    build_mintlify(
+        pxt_repo_dir, no_errors=args.no_errors, no_changelog=args.no_changelog, notebook_ref=args.notebook_ref
+    )
 
 
 if __name__ == '__main__':

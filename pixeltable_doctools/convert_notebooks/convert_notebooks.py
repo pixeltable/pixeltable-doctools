@@ -67,7 +67,7 @@ def preprocess_notebook(input_path: Path, output_path: Path) -> None:
     output_path.write_text(content, encoding='utf-8')
 
 
-def postprocess_mdx(mdx_file: Path, notebooks_dir: Path) -> None:
+def postprocess_mdx(mdx_file: Path, notebooks_dir: Path, notebook_ref: str = 'release') -> None:
     """
     Post-process MDX file to enhance frontmatter with links.
 
@@ -107,12 +107,12 @@ def postprocess_mdx(mdx_file: Path, notebooks_dir: Path) -> None:
     # Get path relative to repo root (not just docs/)
     repo_root = notebooks_dir.parent.parent  # notebooks_dir is repo/docs/notebooks, so parent.parent is repo
     notebook_rel_path = original_notebook.relative_to(repo_root)
-    notebook_github_path = f"pixeltable/pixeltable/blob/release/{notebook_rel_path}"
+    notebook_github_path = f"pixeltable/pixeltable/blob/{notebook_ref}/{notebook_rel_path}"
 
     # Generate URLs
     kaggle_url = f"https://kaggle.com/kernels/welcome?src=https://github.com/{notebook_github_path}"
     colab_url = f"https://colab.research.google.com/github/{notebook_github_path}"
-    download_url = f"https://raw.githubusercontent.com/pixeltable/pixeltable/refs/tags/release/{notebook_rel_path}"
+    download_url = f"https://raw.githubusercontent.com/pixeltable/pixeltable/{notebook_ref}/{notebook_rel_path}"
 
     links = [
         img_link("openKaggle", kaggle_url, "https://kaggle.com/static/images/open-in-kaggle.svg", "Open in Kaggle"),
@@ -238,7 +238,7 @@ def find_pixeltable_repo() -> Path:
     )
 
 
-def convert_notebooks_to_dir(repo_root: Path, target_dir: Path) -> None:
+def convert_notebooks_to_dir(repo_root: Path, target_dir: Path, notebook_ref: str = 'release') -> None:
     """
     Convert all notebooks in repo_root/docs/notebooks to MDX format.
 
@@ -272,11 +272,17 @@ def convert_notebooks_to_dir(repo_root: Path, target_dir: Path) -> None:
     print(f"   {len(notebooks)} total notebook(s).")
 
     print(f"   Preparing notebooks ...")
+    # The Kaggle, Colab, and download links carry notebook_ref, and only reconverted notebooks are
+    # postprocessed. A ref change therefore has to reconvert every notebook, not only the stale ones.
+    ref_marker = output_dir / '.notebook_ref'
+    ref_changed = not ref_marker.exists() or ref_marker.read_text().strip() != notebook_ref
+    if ref_changed:
+        print(f"   Notebook ref is {notebook_ref!r}; reconverting every notebook so all links carry it.")
     notebooks_to_convert: list[Path] = []
     for notebook in notebooks:
         relpath = notebook.relative_to(notebooks_dir)
         output_path = output_dir / relpath.with_suffix('.mdx')
-        if not output_path.exists() or notebook.stat().st_mtime > output_path.stat().st_mtime:
+        if ref_changed or not output_path.exists() or notebook.stat().st_mtime > output_path.stat().st_mtime:
             pre_path = preprocess_dir / relpath
             pre_path.parent.mkdir(parents=True, exist_ok=True)
             preprocess_notebook(notebook, pre_path)
@@ -314,8 +320,9 @@ def convert_notebooks_to_dir(repo_root: Path, target_dir: Path) -> None:
     for notebook in notebooks_to_convert:
         relpath = notebook.relative_to(preprocess_dir)
         mdx_file = output_dir / relpath.with_suffix('.mdx')
-        postprocess_mdx(mdx_file, notebooks_dir)
+        postprocess_mdx(mdx_file, notebooks_dir, notebook_ref)
     print(f"   Updated frontmatter for {len(notebooks_to_convert)} file(s)")
+    ref_marker.write_text(notebook_ref + '\n')
 
 
 def main():
